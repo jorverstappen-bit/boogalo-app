@@ -10,11 +10,11 @@
 :root{--bg0:#07080b;--bg1:#0d1117;--bg2:#141b25;--bg3:#1a2234;--bg4:#212d42;--border:rgba(255,255,255,.07);--borderl:rgba(255,255,255,.13);--t1:#dde3f0;--t2:#8892a8;--t3:#4a5568;--acc:#7c6fe0;--accg:rgba(124,111,224,.18);--accd:#3d3580;--gold:#c9a435;--goldd:rgba(201,164,53,.15);--gre:#1a9e72;--gred:rgba(26,158,114,.12);--red:#c0392b;--redd:rgba(192,57,43,.12);--ora:#c87941;--orad:rgba(200,121,65,.12);--blu:#2980b9;--blud:rgba(41,128,185,.12);--r:8px;--rl:12px;--sw:186px}
 [data-theme="light"]{--bg0:#f0f2f6;--bg1:#ffffff;--bg2:#f8f9fb;--bg3:#edf0f5;--bg4:#e2e7f0;--border:rgba(0,0,0,.08);--borderl:rgba(0,0,0,.14);--t1:#1a2234;--t2:#4a5568;--t3:#8892a8;--acc:#6357c8;--accg:rgba(99,87,200,.12);--accd:#4a3fb0;--gold:#a07c1a;--goldd:rgba(160,124,26,.12);--gre:#1a8a62;--gred:rgba(26,138,98,.1);--red:#b03020;--redd:rgba(176,48,32,.1);--ora:#b06030;--orad:rgba(176,96,48,.1);--blu:#1a6ea8;--blud:rgba(26,110,168,.1)}
 *{box-sizing:border-box;margin:0;padding:0}
-html{height:100%;overflow:hidden;zoom:1.5}body{height:100%;overflow:hidden}
+html{height:100%;overflow:hidden}body{height:100%;overflow:hidden}
 body{font-family:Inter,sans-serif;font-size:13px;color:var(--t1);background:var(--bg0)}
-.shell{display:flex;height:100vh}
+.shell{position:fixed;top:0;left:0;right:0;bottom:0;display:flex;overflow:hidden}
 /* SIDEBAR */
-.sb{width:var(--sw);min-width:var(--sw);background:var(--bg1);border-right:1px solid var(--border);display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;flex-shrink:0;height:100vh}
+.sb{width:var(--sw);min-width:var(--sw);background:var(--bg1);border-right:1px solid var(--border);display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;flex-shrink:0}
 .sb-nav{overflow-y:auto;min-height:0}
 .sb-nav::-webkit-scrollbar{width:4px}.sb-nav::-webkit-scrollbar-track{background:transparent}.sb-nav::-webkit-scrollbar-thumb{background:var(--borderl);border-radius:2px}.sb-nav::-webkit-scrollbar-thumb:hover{background:var(--t3)}
 /* Sidebar collapse */
@@ -34,9 +34,9 @@ body{font-family:Inter,sans-serif;font-size:13px;color:var(--t1);background:var(
 .sb.collapsed .sb-toggle i{transform:rotate(180deg)}
 /* Mobile overlay */
 @media(max-width:640px){
-  .sb{position:fixed;top:0;left:0;height:100vh;z-index:200;transform:translateX(0);box-shadow:4px 0 24px rgba(0,0,0,.5)}
+  .sb{position:absolute;top:0;left:0;bottom:0;z-index:200;transform:translateX(0);box-shadow:4px 0 24px rgba(0,0,0,.5)}
   .sb.collapsed{transform:translateX(calc(-100% + 48px))}
-  .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199;backdrop-filter:blur(2px)}
+  .sb-overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:199;backdrop-filter:blur(2px)}
   .sb-overlay.show{display:block}
   .main{margin-left:48px}
 }
@@ -54,7 +54,7 @@ body{font-family:Inter,sans-serif;font-size:13px;color:var(--t1);background:var(
 .ni i{font-size:15px;min-width:15px;flex-shrink:0}
 .nbadge{position:absolute;right:9px;top:50%;transform:translateY(-50%);background:var(--red);color:#fff;font-size:9px;font-weight:600;padding:1px 5px;border-radius:10px;display:none}
 /* MAIN */
-.main{flex:1;overflow-y:auto;background:var(--bg0)}
+.main{flex:1;overflow:auto;background:var(--bg0)}
 .main::-webkit-scrollbar{width:5px}
 .main::-webkit-scrollbar-thumb{background:var(--bg3);border-radius:3px}
 .content{padding:22px 26px 50px;max-width:1080px}
@@ -822,7 +822,39 @@ let playerAlts = {'Holysparkz':['Unholysparkz']};
 // Player assignment weights — RL only
 // Structure: { playerName: { Tank: 1-5, Healer: 1-5, Melee: 1-5, Ranged: 1-5 } }
 // Unique per class role pool. Used for auto-assigning MT, main healers, runners etc.
-let playerWeights = {};
+let playerWeights = {
+  "Brudersilik":{"Ranged":4,"Tank":1},
+  "Cadbaladin":{"Healer":2,"Melee":1,"Tank":5},
+  "Cakemon":{"Melee":5},
+  "Communicator":{"Healer":1,"Melee":2,"Ranged":2},
+  "Csoti":{"Melee":1},
+  "Disloyal":{"Healer":1,"Ranged":4},
+  "Enchanter":{"Healer":3,"Ranged":2},
+  "Frostor":{"Melee":2,"Tank":5},
+  "Harryshotter":{"Ranged":4},
+  "Hatthor":{"Melee":4,"Tank":1},
+  "Holsteinbeef":{"Ranged":1,"Tank":5},
+  "Holysparkz":{"Ranged":5,"Tank":1},
+  "Kalaveijo":{"Melee":1,"Ranged":4},
+  "Leundeadpres":{"Healer":4,"Ranged":1},
+  "Macknetron":{"Ranged":4,"Tank":4},
+  "Mantine":{"Ranged":5,"Tank":1},
+  "Moondoggo":{"Tank":3},
+  "Noonii":{"Ranged":5,"Tank":1},
+  "Oilsmoke":{"Healer":1,"Melee":5},
+  "Palastuff":{"Healer":4,"Melee":1,"Tank":4},
+  "Qhan":{"Healer":1,"Ranged":1},
+  "Sappheal":{"Healer":4,"Ranged":1},
+  "Swagmon":{"Healer":5,"Melee":1},
+  "Teeko":{"Healer":1,"Melee":3},
+  "Tinybm":{"Healer":2,"Melee":1,"Ranged":1,"Tank":1},
+  "Unholysparkz":{"Healer":4,"Melee":1},
+  "Vvambull":{"Healer":5,"Melee":1},
+  "Wolvke":{"Melee":5,"Tank":2},
+  "Xullue":{"Melee":4,"Tank":4},
+  "Zandalai":{"Tank":1},
+  "Zyuu":{"Healer":1,"Melee":2,"Ranged":4,"Tank":2}
+};
 function getWeight(name, role){
   return (playerWeights[name]?.[role]) ?? 3; // default 3 (neutral)
 }
@@ -1186,7 +1218,7 @@ function tryNameLogin(){
   document.getElementById('auth-name-err').style.display='none';
   document.getElementById('auth-name-dropdown').style.display='none';
   setView('participant', player);
-  try{localStorage.setItem('boogalo-lastuser', player.name);}catch(e){}
+  try{sessionStorage.setItem('boogalo-lastuser', player.name);}catch(e){}
   toast('Welcome back, '+player.name+'!','ok');
 }
 // ============================================================
@@ -1498,6 +1530,7 @@ function removeAlt(mainName, altName){
 }
 
 function logout(){
+  try{sessionStorage.removeItem('boogalo-lastuser');}catch(e){}
   VIEW=null;
   CURRENT_USER=null;
   // Reset auth form to step 1
@@ -4433,18 +4466,18 @@ function toggleSidebar(){
   if(window.innerWidth<=640){
     if(overlay) overlay.classList.toggle('show', !collapsed);
   }
-  try{localStorage.setItem('boogalo_sb_collapsed', collapsed?'1':'0');}catch(e){}
+  try{sessionStorage.setItem('boogalo_sb_collapsed', collapsed?'1':'0');}catch(e){}
 }
 function collapseSidebar(){
   const sb=document.getElementById('sidebar');
   const overlay=document.getElementById('sb-overlay');
   if(sb){sb.classList.add('collapsed');}
   if(overlay){overlay.classList.remove('show');}
-  try{localStorage.setItem('boogalo_sb_collapsed','1');}catch(e){}
+  try{sessionStorage.setItem('boogalo_sb_collapsed','1');}catch(e){}
 }
 function restoreSidebarState(){
   try{
-    const saved=localStorage.getItem('boogalo_sb_collapsed');
+    const saved=sessionStorage.getItem('boogalo_sb_collapsed');
     if(saved==='1'){
       const sb=document.getElementById('sidebar');
       if(sb) sb.classList.add('collapsed');
@@ -4459,13 +4492,9 @@ window.onload=function(){
   seedRaids();
   initTheme();
   startRaidTimer();
-  // Restore last login from localStorage — auto sign back in on refresh
   try{
-    const saved=localStorage.getItem('boogalo-lastuser');
-    if(saved){
-      const p=ROSTER.find(x=>x.name===saved);
-      if(p){setView('participant',p);}
-    }
+    const saved=sessionStorage.getItem('boogalo-lastuser');
+    if(saved){const p=ROSTER.find(x=>x.name===saved);if(p)setView('participant',p);}
   }catch(e){}
   seedReviews();
   updateSigSpecs();
