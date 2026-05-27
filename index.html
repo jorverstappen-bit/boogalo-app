@@ -330,7 +330,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
         </button>
       </div>
     </div>
-    <div class="sb-toggle" id="sb-toggle" onclick="toggleSidebar()" title="Toggle sidebar">
+    <div class="sb-toggle" id="sb-toggle" onclick="toggleSidebar()" title="Toggle sidebar" style="display:none">
       <i class="ti ti-chevrons-left"></i>
     </div>
   </div>
@@ -867,10 +867,14 @@ function setWeight(name, role, val){
   playerWeights[name][role]=Math.max(1,Math.min(5,parseInt(val)||3));
   saveWeights();
 }
-function saveRoster(){try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}}
+function saveRoster(){
+  try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}
+  const presence={};ROSTER.forEach(p=>{presence[p.name]=p.present;});fbSet('presence',presence);
+}
 function saveWeights(){try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}
 }
-function saveRaids(){try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}}
+function saveRaids(){try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}fbSet('raids',raidSchedule);}
+function saveVortex(){try{localStorage.setItem('boogalo-vortex',JSON.stringify(vortexCounts));}catch(e){}fbSet('vortex',vortexCounts);}
 // Sort players by weight (desc) then by class priority within same weight
 function sortByWeight(players, role, classPriority){
   return [...players].sort((a,b)=>{
@@ -1127,7 +1131,7 @@ function setView(v, user){
   const isRl=v==='rl';
   const hasFull=v==='rl'||v==='participant';
   document.getElementById('nav-rl').style.display=isRl?'block':'none';
-  document.getElementById('nav-par').style.display=hasFull?'block':'none';
+  document.getElementById('nav-par').style.display=(v==='participant')?'block':'none';
   document.getElementById('nav-guest').style.display=v==='guest'?'block':'none';
   // View pill
   const vp=document.getElementById('vp');
@@ -2349,12 +2353,12 @@ function renderVortex(){
 
 function changeVortex(name,delta){
   vortexCounts[name]=Math.max(0,(vortexCounts[name]||0)+delta);
-  renderVortex();
+  saveVortex();renderVortex();
 }
 function resetAllVortex(){
   if(!confirm('Reset all Nether Vortex counts to 0?')) return;
   Object.keys(vortexCounts).forEach(k=>vortexCounts[k]=0);
-  renderVortex();toast('Vortex counts reset','ok');
+  saveVortex();renderVortex();toast('Vortex counts reset','ok');
 }
 function submitVortexRequest(){
   const player=document.getElementById('vx-player')?.value.trim();
@@ -4546,12 +4550,83 @@ function restoreSidebarState(){
   }catch(e){}
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// FIREBASE REAL-TIME SYNC
+// Enables cross-device sync for raids, roster presence, and vortex.
+//
+// SETUP (one-time, 5 minutes):
+//  1. Go to https://console.firebase.google.com
+//  2. Create a new project (free tier is fine)
+//  3. Click "Realtime Database" → "Create Database" → pick Europe → Start in TEST MODE
+//  4. In the Database rules, set: { "rules": { ".read": true, ".write": true } }
+//  5. Copy your Database URL (e.g. https://boogalo-guild-default-rtdb.europe-west1.firebasedatabase.app)
+//  6. Paste it below as FIREBASE_DB and push
+// ═══════════════════════════════════════════════════════════════════
+const FIREBASE_DB = ''; // ← paste your Firebase Realtime Database URL here
+
+let _fbIgnore = false; // prevents listener → save → listener loops
+
+function fbSet(path, data){
+  if(!FIREBASE_DB || _fbIgnore) return;
+  fetch(`${FIREBASE_DB}/${path}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+    .catch(e=>console.warn('FB write failed:',e));
+}
+
+function fbGet(path){
+  if(!FIREBASE_DB) return Promise.resolve(null);
+  return fetch(`${FIREBASE_DB}/${path}.json`).then(r=>r.json()).catch(()=>null);
+}
+
+function fbListen(path, cb){
+  if(!FIREBASE_DB) return;
+  const es=new EventSource(`${FIREBASE_DB}/${path}.json`);
+  es.addEventListener('put', e=>{
+    try{ const d=JSON.parse(e.data); if(d&&d.data!==undefined) cb(d.data); }catch(err){}
+  });
+  es.onerror=()=>{ es.close(); setTimeout(()=>fbListen(path,cb), 5000); };
+}
+
+function initFirebaseSync(){
+  if(!FIREBASE_DB) return;
+  // Listen: raids
+  fbListen('raids', data=>{
+    if(!Array.isArray(data)&&data!==null) data=Object.values(data||{});
+    if(Array.isArray(data)&&data.length){
+      _fbIgnore=true; raidSchedule=data;
+      try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}
+      _fbIgnore=false;
+      renderRaids?.(); renderCalendar?.();
+    }
+  });
+  // Listen: roster presence
+  fbListen('presence', data=>{
+    if(!data||typeof data!=='object') return;
+    _fbIgnore=true;
+    Object.entries(data).forEach(([name,present])=>{
+      const p=ROSTER.find(r=>r.name===name); if(p) p.present=!!present;
+    });
+    try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}
+    _fbIgnore=false;
+    renderAttendance?.(); renderRoster?.(); renderRoles?.();
+  });
+  // Listen: vortex
+  fbListen('vortex', data=>{
+    if(!data||typeof data!=='object') return;
+    _fbIgnore=true;
+    Object.assign(vortexCounts, data);
+    try{localStorage.setItem('boogalo-vortex',JSON.stringify(vortexCounts));}catch(e){}
+    _fbIgnore=false;
+  });
+}
+
 window.onload=function(){
   try{const sr=localStorage.getItem('boogalo-roster');if(sr){const r=JSON.parse(sr);if(Array.isArray(r)&&r.length)ROSTER=r;}}catch(e){}
   try{const sw=localStorage.getItem('boogalo-weights');if(sw){const w=JSON.parse(sw);if(w&&typeof w==='object')playerWeights=w;}}catch(e){}
   try{const srd=localStorage.getItem('boogalo-raids');if(srd){const r=JSON.parse(srd);if(Array.isArray(r)&&r.length)raidSchedule=r;}}catch(e){}
+  try{const sv=localStorage.getItem('boogalo-vortex');if(sv){const v=JSON.parse(sv);if(v&&typeof v==='object')Object.assign(vortexCounts,v);}}catch(e){}
   restoreSidebarState();
   seedRaids();
+  initFirebaseSync();
   initTheme();
   startRaidTimer();
   try{
