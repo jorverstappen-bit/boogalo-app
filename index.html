@@ -4707,49 +4707,53 @@ function fbListen(path, cb){
 
 function _fbArr(data){if(!Array.isArray(data)&&data!==null)data=Object.values(data||{});return Array.isArray(data)?data.filter(Boolean):[];}
 function _fbSync(arr,data){arr.length=0;data.forEach(x=>arr.push(x));}
+
+// Applies a single Firebase key+value to local state and re-renders.
+// Used by both the initial GET load and the SSE handler.
+function applyFirebaseKey(key,data){
+  _fbIgnore=true;
+  try{
+    if(key==='raids'){const d=_fbArr(data);if(d.length){raidSchedule=d;try{localStorage.setItem('boogalo-raids',JSON.stringify(d));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();}
+    else if(key==='roster'){const d=_fbArr(data);if(d.length){_fbSync(ROSTER,d);try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}}renderRoster?.();renderAttendance?.();renderRoles?.();renderRes?.();renderProfiles?.();}
+    else if(key==='vortex'){if(data&&typeof data==='object'){Object.assign(vortexCounts,data);try{localStorage.setItem('boogalo-vortex',JSON.stringify(vortexCounts));}catch(e){}}renderVortex?.();}
+    else if(key==='weights'){if(data&&typeof data==='object'){Object.keys(playerWeights).forEach(k=>delete playerWeights[k]);Object.assign(playerWeights,data);try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}}}
+    else if(key==='alts'){if(data&&typeof data==='object'){Object.keys(playerAlts).forEach(k=>delete playerAlts[k]);Object.assign(playerAlts,data);try{localStorage.setItem('boogalo-alts',JSON.stringify(playerAlts));}catch(e){}}}
+    else if(key==='roleOverrides'){Object.keys(roleOverrides).forEach(k=>delete roleOverrides[k]);if(data&&typeof data==='object')Object.assign(roleOverrides,data);try{localStorage.setItem('boogalo-roleOverrides',JSON.stringify(roleOverrides));}catch(e){}renderRoles?.();renderAttendance?.();}
+    else if(key==='applications'){const d=_fbArr(data);_fbSync(applications,d);try{localStorage.setItem('boogalo-applications',JSON.stringify(applications));}catch(e){}renderRLReview?.();updatePendingBadge?.();renderSignup?.();}
+    else if(key==='specRequests'){const d=_fbArr(data);_fbSync(specRequests,d);try{localStorage.setItem('boogalo-specRequests',JSON.stringify(specRequests));}catch(e){}renderSRList?.();renderSpecReq?.();updateSRBadge?.();}
+    else if(key==='reviews'){if(data&&typeof data==='object'){const list=_fbArr(data.list);_fbSync(reviews,list);if(data.stars&&typeof data.stars==='object'){Object.keys(reviewStars).forEach(k=>delete reviewStars[k]);Object.assign(reviewStars,data.stars);}try{localStorage.setItem('boogalo-reviews',JSON.stringify({list:reviews,stars:reviewStars}));}catch(e){}}renderReviews?.();updateRevBadge?.();}
+    else if(key==='vortexRequests'){const d=_fbArr(data);_fbSync(vortexRequests,d);try{localStorage.setItem('boogalo-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}renderVortex?.();}
+    else if(key==='healerTanks'){const d=_fbArr(data);if(d.length){_fbSync(healerTanks,d);try{localStorage.setItem('boogalo-healerTanks',JSON.stringify(healerTanks));}catch(e){}}renderRoles?.();}
+    else if(key==='groups'){if(data){const outer=_fbArr(data);if(outer.length){groups.length=0;outer.forEach(g=>groups.push(_fbArr(g)));try{localStorage.setItem('boogalo-groups',JSON.stringify(groups));}catch(e){}}}renderRoles?.();}
+  }finally{_fbIgnore=false;}
+}
+
 function initFirebaseSync(){
   if(!FIREBASE_DB) return;
-  // Dispatch handler for a single key + its data value
-  function applyUpdate(key,data){
-    _fbIgnore=true;
-    try{
-      if(key==='raids'){const d=_fbArr(data);if(d.length){raidSchedule=d;try{localStorage.setItem('boogalo-raids',JSON.stringify(d));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();}
-      else if(key==='roster'){const d=_fbArr(data);if(d.length){_fbSync(ROSTER,d);try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}}renderRoster?.();renderAttendance?.();renderRoles?.();renderRes?.();renderProfiles?.();}
-      else if(key==='vortex'){if(data&&typeof data==='object'){Object.assign(vortexCounts,data);try{localStorage.setItem('boogalo-vortex',JSON.stringify(vortexCounts));}catch(e){}}renderVortex?.();}
-      else if(key==='weights'){if(data&&typeof data==='object'){Object.keys(playerWeights).forEach(k=>delete playerWeights[k]);Object.assign(playerWeights,data);try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}}}
-      else if(key==='alts'){if(data&&typeof data==='object'){Object.keys(playerAlts).forEach(k=>delete playerAlts[k]);Object.assign(playerAlts,data);try{localStorage.setItem('boogalo-alts',JSON.stringify(playerAlts));}catch(e){}}}
-      else if(key==='roleOverrides'){Object.keys(roleOverrides).forEach(k=>delete roleOverrides[k]);if(data&&typeof data==='object')Object.assign(roleOverrides,data);try{localStorage.setItem('boogalo-roleOverrides',JSON.stringify(roleOverrides));}catch(e){}renderRoles?.();renderAttendance?.();}
-      else if(key==='applications'){const d=_fbArr(data);_fbSync(applications,d);try{localStorage.setItem('boogalo-applications',JSON.stringify(applications));}catch(e){}renderRLReview?.();updatePendingBadge?.();renderSignup?.();}
-      else if(key==='specRequests'){const d=_fbArr(data);_fbSync(specRequests,d);try{localStorage.setItem('boogalo-specRequests',JSON.stringify(specRequests));}catch(e){}renderSRList?.();renderSpecReq?.();updateSRBadge?.();}
-      else if(key==='reviews'){if(data&&typeof data==='object'){const list=_fbArr(data.list);_fbSync(reviews,list);if(data.stars&&typeof data.stars==='object'){Object.keys(reviewStars).forEach(k=>delete reviewStars[k]);Object.assign(reviewStars,data.stars);}try{localStorage.setItem('boogalo-reviews',JSON.stringify({list:reviews,stars:reviewStars}));}catch(e){}}renderReviews?.();updateRevBadge?.();}
-      else if(key==='vortexRequests'){const d=_fbArr(data);_fbSync(vortexRequests,d);try{localStorage.setItem('boogalo-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}renderVortex?.();}
-      else if(key==='healerTanks'){const d=_fbArr(data);if(d.length){_fbSync(healerTanks,d);try{localStorage.setItem('boogalo-healerTanks',JSON.stringify(healerTanks));}catch(e){}}renderRoles?.();}
-      else if(key==='groups'){if(data){const outer=_fbArr(data);if(outer.length){groups.length=0;outer.forEach(g=>groups.push(_fbArr(g)));try{localStorage.setItem('boogalo-groups',JSON.stringify(groups));}catch(e){}}}renderRoles?.();}
-    }finally{_fbIgnore=false;}
-  }
-  // Single root SSE connection (was 12 per-path connections — saturated the connection pool)
+  // Single root SSE connection — handles incremental real-time updates after initial load
   const es=new EventSource(`${FIREBASE_DB}/.json`);
   es.addEventListener('put',e=>{
     try{
       const d=JSON.parse(e.data);
       if(!d||d.data===undefined) return;
       if(d.path==='/'){
-        // Initial full snapshot — apply every top-level key
+        // Full snapshot (fires on connect/reconnect) — apply all keys
         const root=d.data||{};
         ['raids','roster','vortex','weights','alts','roleOverrides','applications','specRequests','reviews','vortexRequests','healerTanks','groups'].forEach(k=>{
-          if(root[k]!==undefined) applyUpdate(k,root[k]);
+          if(root[k]!==undefined) applyFirebaseKey(k,root[k]);
         });
       } else {
         // Incremental update e.g. path='/roster' after a PUT to /roster.json
         const key=d.path.split('/').filter(Boolean)[0];
-        if(key) applyUpdate(key,d.data);
+        if(key) applyFirebaseKey(key,d.data);
       }
     }catch(err){}
   });
   es.onerror=()=>{};
 }
 
-window.onload=function(){
+window.onload=async function(){
+  // ── Step 1: localStorage (instant, no network) ──────────────────────────
   try{const sr=localStorage.getItem('boogalo-roster');if(sr){const r=JSON.parse(sr);if(Array.isArray(r)&&r.length)ROSTER=r;}}catch(e){}
   try{const sw=localStorage.getItem('boogalo-weights');if(sw){const w=JSON.parse(sw);if(w&&typeof w==='object')playerWeights=w;}}catch(e){}
   try{const srd=localStorage.getItem('boogalo-raids');if(srd){const r=JSON.parse(srd);if(Array.isArray(r)&&r.length)raidSchedule=r;}}catch(e){}
@@ -4762,6 +4766,35 @@ window.onload=function(){
   try{const svr=localStorage.getItem('boogalo-vortexRequests');if(svr){const v=JSON.parse(svr);if(Array.isArray(v))v.forEach(x=>vortexRequests.push(x));}}catch(e){}
   try{const sht=localStorage.getItem('boogalo-healerTanks');if(sht){const h=JSON.parse(sht);if(Array.isArray(h)&&h.length){healerTanks.length=0;h.forEach(x=>healerTanks.push(x));}}}catch(e){}
   try{const sg=localStorage.getItem('boogalo-groups');if(sg){const g=JSON.parse(sg);if(Array.isArray(g)&&g.length){groups.length=0;g.forEach(x=>groups.push(Array.isArray(x)?x:[])); }}}catch(e){}
+  // ── Step 2: Firebase GET — update state only, NO renders ─────────────────
+  // This runs before any render so the whole app renders with Firebase data.
+  // Timeout 3 s — if unreachable we fall back to localStorage/defaults above.
+  if(FIREBASE_DB){
+    try{
+      const snap=await Promise.race([
+        fetch(`${FIREBASE_DB}/.json`).then(r=>r.json()),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),3000))
+      ]);
+      if(snap&&typeof snap==='object'&&!snap.error){
+        _fbIgnore=true;
+        try{
+          if(snap.raids!=null){const d=_fbArr(snap.raids);if(d.length){raidSchedule=d;try{localStorage.setItem('boogalo-raids',JSON.stringify(d));}catch(e){}}}
+          if(snap.roster!=null){const d=_fbArr(snap.roster);if(d.length){_fbSync(ROSTER,d);try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}}}
+          if(snap.vortex!=null&&typeof snap.vortex==='object'){Object.assign(vortexCounts,snap.vortex);try{localStorage.setItem('boogalo-vortex',JSON.stringify(vortexCounts));}catch(e){}}
+          if(snap.weights!=null&&typeof snap.weights==='object'){Object.keys(playerWeights).forEach(k=>delete playerWeights[k]);Object.assign(playerWeights,snap.weights);try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}}
+          if(snap.alts!=null&&typeof snap.alts==='object'){Object.keys(playerAlts).forEach(k=>delete playerAlts[k]);Object.assign(playerAlts,snap.alts);try{localStorage.setItem('boogalo-alts',JSON.stringify(playerAlts));}catch(e){}}
+          if(snap.roleOverrides!=null&&typeof snap.roleOverrides==='object'){Object.keys(roleOverrides).forEach(k=>delete roleOverrides[k]);Object.assign(roleOverrides,snap.roleOverrides);try{localStorage.setItem('boogalo-roleOverrides',JSON.stringify(roleOverrides));}catch(e){}}
+          if(snap.applications!=null){const d=_fbArr(snap.applications);_fbSync(applications,d);try{localStorage.setItem('boogalo-applications',JSON.stringify(applications));}catch(e){}}
+          if(snap.specRequests!=null){const d=_fbArr(snap.specRequests);_fbSync(specRequests,d);try{localStorage.setItem('boogalo-specRequests',JSON.stringify(specRequests));}catch(e){}}
+          if(snap.reviews!=null&&typeof snap.reviews==='object'){const list=_fbArr(snap.reviews.list);_fbSync(reviews,list);if(snap.reviews.stars&&typeof snap.reviews.stars==='object'){Object.keys(reviewStars).forEach(k=>delete reviewStars[k]);Object.assign(reviewStars,snap.reviews.stars);}try{localStorage.setItem('boogalo-reviews',JSON.stringify({list:reviews,stars:reviewStars}));}catch(e){}}
+          if(snap.vortexRequests!=null){const d=_fbArr(snap.vortexRequests);_fbSync(vortexRequests,d);try{localStorage.setItem('boogalo-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}}
+          if(snap.healerTanks!=null){const d=_fbArr(snap.healerTanks);if(d.length){_fbSync(healerTanks,d);try{localStorage.setItem('boogalo-healerTanks',JSON.stringify(healerTanks));}catch(e){}}}
+          if(snap.groups!=null){const outer=_fbArr(snap.groups);if(outer.length){groups.length=0;outer.forEach(g=>groups.push(_fbArr(g)));try{localStorage.setItem('boogalo-groups',JSON.stringify(groups));}catch(e){}}}
+        }finally{_fbIgnore=false;}
+      }
+    }catch(e){}
+  }
+  // ── Step 3: Full init — every render now uses Firebase state ─────────────
   restoreSidebarState();
   seedRaids();
   initFirebaseSync();
@@ -4774,12 +4807,11 @@ window.onload=function(){
   seedReviews();
   updateSigSpecs();
   updateNPSpecs();
-  // populate POV datalist on load
+  // populate POV datalist
   const dl=document.getElementById('pov-datalist');
   if(dl)ROSTER.forEach(p=>{const o=document.createElement('option');o.value=p.name;dl.appendChild(o);});
   // attach POV raid filter
   const pr=document.getElementById('pov-raid');if(pr)pr.addEventListener('change',updatePOVBossFilter);
-  // init spec selects
   updateSigSpecs();updateNPSpecs();
   updatePendingBadge();updateSRBadge();updateRevBadge();
 };
