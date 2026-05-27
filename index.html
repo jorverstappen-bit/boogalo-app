@@ -4688,7 +4688,8 @@ let _fbIgnore = false; // prevents listener → save → listener loops
 function fbSet(path, data){
   if(!FIREBASE_DB || _fbIgnore) return;
   fetch(`${FIREBASE_DB}/${path}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
-    .catch(e=>console.warn('FB write failed:',e));
+    .then(r=>{ if(!r.ok) console.warn('[FB] write failed:',path,r.status,r.statusText); })
+    .catch(e=>console.warn('[FB] write error:',path,e.message));
 }
 
 function fbGet(path){
@@ -4747,9 +4748,9 @@ function initFirebaseSync(){
         const key=d.path.split('/').filter(Boolean)[0];
         if(key) applyFirebaseKey(key,d.data);
       }
-    }catch(err){}
+    }catch(err){ console.warn('[FB] SSE parse error:',err); }
   });
-  es.onerror=()=>{};
+  es.onerror=(e)=>{ console.warn('[FB] SSE connection error — will reconnect automatically.',e); };
 }
 
 window.onload=async function(){
@@ -4767,14 +4768,16 @@ window.onload=async function(){
   try{const sht=localStorage.getItem('boogalo-healerTanks');if(sht){const h=JSON.parse(sht);if(Array.isArray(h)&&h.length){healerTanks.length=0;h.forEach(x=>healerTanks.push(x));}}}catch(e){}
   try{const sg=localStorage.getItem('boogalo-groups');if(sg){const g=JSON.parse(sg);if(Array.isArray(g)&&g.length){groups.length=0;g.forEach(x=>groups.push(Array.isArray(x)?x:[])); }}}catch(e){}
   // ── Step 2: Firebase GET — update state only, NO renders ─────────────────
-  // This runs before any render so the whole app renders with Firebase data.
-  // Timeout 3 s — if unreachable we fall back to localStorage/defaults above.
+  // Fetches the full DB snapshot before any render so all views show live data.
+  // Falls back to localStorage/defaults silently if Firebase is unreachable.
   if(FIREBASE_DB){
     try{
-      const snap=await Promise.race([
-        fetch(`${FIREBASE_DB}/.json`).then(r=>r.json()),
-        new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),3000))
+      const resp=await Promise.race([
+        fetch(`${FIREBASE_DB}/.json`),
+        new Promise((_,rej)=>setTimeout(()=>rej(new Error('Firebase load timeout after 8s')),8000))
       ]);
+      if(!resp.ok) throw new Error(`Firebase returned HTTP ${resp.status} — check database rules at console.firebase.google.com`);
+      const snap=await resp.json();
       if(snap&&typeof snap==='object'&&!snap.error){
         _fbIgnore=true;
         try{
@@ -4790,9 +4793,14 @@ window.onload=async function(){
           if(snap.vortexRequests!=null){const d=_fbArr(snap.vortexRequests);_fbSync(vortexRequests,d);try{localStorage.setItem('boogalo-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}}
           if(snap.healerTanks!=null){const d=_fbArr(snap.healerTanks);if(d.length){_fbSync(healerTanks,d);try{localStorage.setItem('boogalo-healerTanks',JSON.stringify(healerTanks));}catch(e){}}}
           if(snap.groups!=null){const outer=_fbArr(snap.groups);if(outer.length){groups.length=0;outer.forEach(g=>groups.push(_fbArr(g)));try{localStorage.setItem('boogalo-groups',JSON.stringify(groups));}catch(e){}}}
+          console.log('[FB] Initial load OK — roster:',ROSTER.length,'raids:',raidSchedule.length);
         }finally{_fbIgnore=false;}
+      } else if(snap?.error){
+        console.warn('[FB] Permission denied:',snap.error,'— go to Firebase console and set rules to {".read":true,".write":true}');
       }
-    }catch(e){}
+    }catch(e){
+      console.warn('[FB] Initial load failed:',e.message);
+    }
   }
   // ── Step 3: Full init — every render now uses Firebase state ─────────────
   restoreSidebarState();
