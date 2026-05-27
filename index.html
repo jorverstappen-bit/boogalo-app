@@ -6,6 +6,9 @@
 <title>Boogalo — TBC Raid Manager</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/tabler-icons.min.css">
+<!-- Firebase JS SDK (Realtime Database) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <style>
 :root{--bg0:#07080b;--bg1:#0d1117;--bg2:#141b25;--bg3:#1a2234;--bg4:#212d42;--border:rgba(255,255,255,.07);--borderl:rgba(255,255,255,.13);--t1:#dde3f0;--t2:#8892a8;--t3:#4a5568;--acc:#7c6fe0;--accg:rgba(124,111,224,.18);--accd:#3d3580;--gold:#c9a435;--goldd:rgba(201,164,53,.15);--gre:#1a9e72;--gred:rgba(26,158,114,.12);--red:#c0392b;--redd:rgba(192,57,43,.12);--ora:#c87941;--orad:rgba(200,121,65,.12);--blu:#2980b9;--blud:rgba(41,128,185,.12);--r:8px;--rl:12px;--sw:186px}
 [data-theme="light"]{--bg0:#f0f2f6;--bg1:#ffffff;--bg2:#f8f9fb;--bg3:#edf0f5;--bg4:#e2e7f0;--border:rgba(0,0,0,.08);--borderl:rgba(0,0,0,.14);--t1:#1a2234;--t2:#4a5568;--t3:#8892a8;--acc:#6357c8;--accg:rgba(99,87,200,.12);--accd:#4a3fb0;--gold:#a07c1a;--goldd:rgba(160,124,26,.12);--gre:#1a8a62;--gred:rgba(26,138,98,.1);--red:#b03020;--redd:rgba(176,48,32,.1);--ora:#b06030;--orad:rgba(176,96,48,.1);--blu:#1a6ea8;--blud:rgba(26,110,168,.1)}
@@ -4033,6 +4036,8 @@ function renderRaids(){
       '</p></div>';
 }
 function compactRaidCard(r){
+  if(!r.confirmed) r.confirmed=[];
+  if(!r.signedUp)  r.signedUp=[];
   const confirmedPct=Math.min(100,Math.round((r.confirmed?.length||0)/r.max*100));
   const todK=todayKey();const isT=r.date===todK;const past=isPast(r.date)&&!isT;
   return`<div class="rec ${past?'pst':isT?'ton':'upc'}" style="margin-bottom:8px">
@@ -4048,6 +4053,7 @@ function compactRaidCard(r){
 }
 function fullRaidCard(r,highlight){
   if(!r.confirmed) r.confirmed=[];
+  if(!r.signedUp)  r.signedUp=[];
   const pct=Math.min(100,Math.round(((r.confirmed.length||r.signedUp.length)/r.max)*100));
   const todK=todayKey();const isT=r.date===todK;const past=isPast(r.date)&&!isT;
   const confirmedCount=r.confirmed.length;
@@ -4683,27 +4689,19 @@ function restoreSidebarState(){
 // ═══════════════════════════════════════════════════════════════════
 const FIREBASE_DB = 'https://boogalo-app-default-rtdb.europe-west1.firebasedatabase.app';
 
+let _fbDB = null;   // Firebase SDK database reference
 let _fbIgnore = false; // prevents listener → save → listener loops
 
+// Initialise Firebase SDK — single WebSocket connection, proper reconnection handling
+try{
+  firebase.initializeApp({ databaseURL: FIREBASE_DB });
+  _fbDB = firebase.database();
+  console.log('[FB] SDK ready');
+}catch(e){ console.warn('[FB] SDK init failed:',e.message); }
+
 function fbSet(path, data){
-  if(!FIREBASE_DB || _fbIgnore) return;
-  fetch(`${FIREBASE_DB}/${path}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
-    .then(r=>{ if(!r.ok) console.warn('[FB] write failed:',path,r.status,r.statusText); })
-    .catch(e=>console.warn('[FB] write error:',path,e.message));
-}
-
-function fbGet(path){
-  if(!FIREBASE_DB) return Promise.resolve(null);
-  return fetch(`${FIREBASE_DB}/${path}.json`).then(r=>r.json()).catch(()=>null);
-}
-
-function fbListen(path, cb){
-  if(!FIREBASE_DB) return;
-  const es=new EventSource(`${FIREBASE_DB}/${path}.json`);
-  es.addEventListener('put', e=>{
-    try{ const d=JSON.parse(e.data); if(d&&d.data!==undefined) cb(d.data); }catch(err){}
-  });
-  es.onerror=()=>{ es.close(); setTimeout(()=>fbListen(path,cb), 5000); };
+  if(!_fbDB || _fbIgnore) return;
+  _fbDB.ref(path).set(data).catch(e=>console.warn('[FB] write failed:',path,e.message));
 }
 
 function _fbArr(data){if(!Array.isArray(data)&&data!==null)data=Object.values(data||{});return Array.isArray(data)?data.filter(Boolean):[];}
@@ -4714,7 +4712,7 @@ function _fbSync(arr,data){arr.length=0;data.forEach(x=>arr.push(x));}
 function applyFirebaseKey(key,data){
   _fbIgnore=true;
   try{
-    if(key==='raids'){const d=_fbArr(data);if(d.length){raidSchedule=d;try{localStorage.setItem('boogalo-raids',JSON.stringify(d));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();}
+    if(key==='raids'){const d=_fbArr(data).map(r=>r?({...r,signedUp:r.signedUp?_fbArr(r.signedUp):[],confirmed:r.confirmed?_fbArr(r.confirmed):[],attended:r.attended?_fbArr(r.attended):[]}):null).filter(Boolean);if(d.length){raidSchedule=d;try{localStorage.setItem('boogalo-raids',JSON.stringify(d));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();}
     else if(key==='roster'){const d=_fbArr(data);if(d.length){_fbSync(ROSTER,d);try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}}renderRoster?.();renderAttendance?.();renderRoles?.();renderRes?.();renderProfiles?.();}
     else if(key==='vortex'){if(data&&typeof data==='object'){Object.assign(vortexCounts,data);try{localStorage.setItem('boogalo-vortex',JSON.stringify(vortexCounts));}catch(e){}}renderVortex?.();}
     else if(key==='weights'){if(data&&typeof data==='object'){Object.keys(playerWeights).forEach(k=>delete playerWeights[k]);Object.assign(playerWeights,data);try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}}}
@@ -4730,31 +4728,20 @@ function applyFirebaseKey(key,data){
 }
 
 function initFirebaseSync(){
-  if(!FIREBASE_DB) return;
-  // Single root SSE connection — handles incremental real-time updates after initial load
-  const es=new EventSource(`${FIREBASE_DB}/.json`);
-  es.addEventListener('put',e=>{
-    try{
-      const d=JSON.parse(e.data);
-      if(!d||d.data===undefined) return;
-      if(d.path==='/'){
-        // Full snapshot (fires on connect/reconnect) — apply all keys
-        const root=d.data||{};
-        ['raids','roster','vortex','weights','alts','roleOverrides','applications','specRequests','reviews','vortexRequests','healerTanks','groups'].forEach(k=>{
-          if(root[k]!==undefined) applyFirebaseKey(k,root[k]);
-        });
-      } else {
-        // Incremental update e.g. path='/roster' after a PUT to /roster.json
-        const key=d.path.split('/').filter(Boolean)[0];
-        if(key) applyFirebaseKey(key,d.data);
-      }
-    }catch(err){ console.warn('[FB] SSE parse error:',err); }
+  if(!_fbDB) return;
+  // One SDK listener per top-level key — all share a single WebSocket connection.
+  // Each fires immediately with the current value on connect, then on every change.
+  ['raids','roster','vortex','weights','alts','roleOverrides','applications',
+   'specRequests','reviews','vortexRequests','healerTanks','groups'].forEach(key=>{
+    _fbDB.ref(key).on('value', snap=>{
+      const data=snap.val();
+      if(data!==null&&data!==undefined) applyFirebaseKey(key,data);
+    }, e=>console.warn('[FB] listen error:',key,e.code||e.message));
   });
-  es.onerror=(e)=>{ console.warn('[FB] SSE connection error — will reconnect automatically.',e); };
 }
 
-window.onload=async function(){
-  // ── Step 1: localStorage (instant, no network) ──────────────────────────
+window.onload=function(){
+  // Load any cached data from localStorage (instant fallback for returning tabs)
   try{const sr=localStorage.getItem('boogalo-roster');if(sr){const r=JSON.parse(sr);if(Array.isArray(r)&&r.length)ROSTER=r;}}catch(e){}
   try{const sw=localStorage.getItem('boogalo-weights');if(sw){const w=JSON.parse(sw);if(w&&typeof w==='object')playerWeights=w;}}catch(e){}
   try{const srd=localStorage.getItem('boogalo-raids');if(srd){const r=JSON.parse(srd);if(Array.isArray(r)&&r.length)raidSchedule=r;}}catch(e){}
@@ -4767,45 +4754,10 @@ window.onload=async function(){
   try{const svr=localStorage.getItem('boogalo-vortexRequests');if(svr){const v=JSON.parse(svr);if(Array.isArray(v))v.forEach(x=>vortexRequests.push(x));}}catch(e){}
   try{const sht=localStorage.getItem('boogalo-healerTanks');if(sht){const h=JSON.parse(sht);if(Array.isArray(h)&&h.length){healerTanks.length=0;h.forEach(x=>healerTanks.push(x));}}}catch(e){}
   try{const sg=localStorage.getItem('boogalo-groups');if(sg){const g=JSON.parse(sg);if(Array.isArray(g)&&g.length){groups.length=0;g.forEach(x=>groups.push(Array.isArray(x)?x:[])); }}}catch(e){}
-  // ── Step 2: Firebase GET — update state only, NO renders ─────────────────
-  // Fetches the full DB snapshot before any render so all views show live data.
-  // Falls back to localStorage/defaults silently if Firebase is unreachable.
-  if(FIREBASE_DB){
-    try{
-      const resp=await Promise.race([
-        fetch(`${FIREBASE_DB}/.json`),
-        new Promise((_,rej)=>setTimeout(()=>rej(new Error('Firebase load timeout after 8s')),8000))
-      ]);
-      if(!resp.ok) throw new Error(`Firebase returned HTTP ${resp.status} — check database rules at console.firebase.google.com`);
-      const snap=await resp.json();
-      if(snap&&typeof snap==='object'&&!snap.error){
-        _fbIgnore=true;
-        try{
-          if(snap.raids!=null){const d=_fbArr(snap.raids);if(d.length){raidSchedule=d;try{localStorage.setItem('boogalo-raids',JSON.stringify(d));}catch(e){}}}
-          if(snap.roster!=null){const d=_fbArr(snap.roster);if(d.length){_fbSync(ROSTER,d);try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}}}
-          if(snap.vortex!=null&&typeof snap.vortex==='object'){Object.assign(vortexCounts,snap.vortex);try{localStorage.setItem('boogalo-vortex',JSON.stringify(vortexCounts));}catch(e){}}
-          if(snap.weights!=null&&typeof snap.weights==='object'){Object.keys(playerWeights).forEach(k=>delete playerWeights[k]);Object.assign(playerWeights,snap.weights);try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}}
-          if(snap.alts!=null&&typeof snap.alts==='object'){Object.keys(playerAlts).forEach(k=>delete playerAlts[k]);Object.assign(playerAlts,snap.alts);try{localStorage.setItem('boogalo-alts',JSON.stringify(playerAlts));}catch(e){}}
-          if(snap.roleOverrides!=null&&typeof snap.roleOverrides==='object'){Object.keys(roleOverrides).forEach(k=>delete roleOverrides[k]);Object.assign(roleOverrides,snap.roleOverrides);try{localStorage.setItem('boogalo-roleOverrides',JSON.stringify(roleOverrides));}catch(e){}}
-          if(snap.applications!=null){const d=_fbArr(snap.applications);_fbSync(applications,d);try{localStorage.setItem('boogalo-applications',JSON.stringify(applications));}catch(e){}}
-          if(snap.specRequests!=null){const d=_fbArr(snap.specRequests);_fbSync(specRequests,d);try{localStorage.setItem('boogalo-specRequests',JSON.stringify(specRequests));}catch(e){}}
-          if(snap.reviews!=null&&typeof snap.reviews==='object'){const list=_fbArr(snap.reviews.list);_fbSync(reviews,list);if(snap.reviews.stars&&typeof snap.reviews.stars==='object'){Object.keys(reviewStars).forEach(k=>delete reviewStars[k]);Object.assign(reviewStars,snap.reviews.stars);}try{localStorage.setItem('boogalo-reviews',JSON.stringify({list:reviews,stars:reviewStars}));}catch(e){}}
-          if(snap.vortexRequests!=null){const d=_fbArr(snap.vortexRequests);_fbSync(vortexRequests,d);try{localStorage.setItem('boogalo-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}}
-          if(snap.healerTanks!=null){const d=_fbArr(snap.healerTanks);if(d.length){_fbSync(healerTanks,d);try{localStorage.setItem('boogalo-healerTanks',JSON.stringify(healerTanks));}catch(e){}}}
-          if(snap.groups!=null){const outer=_fbArr(snap.groups);if(outer.length){groups.length=0;outer.forEach(g=>groups.push(_fbArr(g)));try{localStorage.setItem('boogalo-groups',JSON.stringify(groups));}catch(e){}}}
-          console.log('[FB] Initial load OK — roster:',ROSTER.length,'raids:',raidSchedule.length);
-        }finally{_fbIgnore=false;}
-      } else if(snap?.error){
-        console.warn('[FB] Permission denied:',snap.error,'— go to Firebase console and set rules to {".read":true,".write":true}');
-      }
-    }catch(e){
-      console.warn('[FB] Initial load failed:',e.message);
-    }
-  }
-  // ── Step 3: Full init — every render now uses Firebase state ─────────────
+  // Initialise app — Firebase SDK listeners fire within ~100ms and update all views
   restoreSidebarState();
   seedRaids();
-  initFirebaseSync();
+  initFirebaseSync(); // connects via WebSocket; each key fires on('value') with live data
   initTheme();
   startRaidTimer();
   try{
@@ -4815,10 +4767,8 @@ window.onload=async function(){
   seedReviews();
   updateSigSpecs();
   updateNPSpecs();
-  // populate POV datalist
   const dl=document.getElementById('pov-datalist');
   if(dl)ROSTER.forEach(p=>{const o=document.createElement('option');o.value=p.name;dl.appendChild(o);});
-  // attach POV raid filter
   const pr=document.getElementById('pov-raid');if(pr)pr.addEventListener('change',updatePOVBossFilter);
   updateSigSpecs();updateNPSpecs();
   updatePendingBadge();updateSRBadge();updateRevBadge();
