@@ -869,12 +869,38 @@ function setWeight(name, role, val){
 }
 function saveRoster(){
   try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}
-  const presence={};ROSTER.forEach(p=>{presence[p.name]=p.present;});fbSet('presence',presence);
+  fbSet('roster', ROSTER);
 }
-function saveWeights(){try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}
+function saveWeights(){
+  try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}
+  fbSet('weights', playerWeights);
 }
 function saveRaids(){try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}fbSet('raids',raidSchedule);}
 function saveVortex(){try{localStorage.setItem('boogalo-vortex',JSON.stringify(vortexCounts));}catch(e){}fbSet('vortex',vortexCounts);}
+function saveAlts(){
+  try{localStorage.setItem('boogalo-alts',JSON.stringify(playerAlts));}catch(e){}
+  fbSet('alts', playerAlts);
+}
+function saveRoleOverrides(){
+  try{localStorage.setItem('boogalo-roleOverrides',JSON.stringify(roleOverrides));}catch(e){}
+  fbSet('roleOverrides', roleOverrides);
+}
+function saveApplications(){
+  try{localStorage.setItem('boogalo-applications',JSON.stringify(applications));}catch(e){}
+  fbSet('applications', applications.length?applications:null);
+}
+function saveSpecRequests(){
+  try{localStorage.setItem('boogalo-specRequests',JSON.stringify(specRequests));}catch(e){}
+  fbSet('specRequests', specRequests.length?specRequests:null);
+}
+function saveReviews(){
+  try{localStorage.setItem('boogalo-reviews',JSON.stringify({list:reviews,stars:reviewStars}));}catch(e){}
+  fbSet('reviews',{list:reviews.length?reviews:null,stars:reviewStars});
+}
+function saveVortexRequests(){
+  try{localStorage.setItem('boogalo-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}
+  fbSet('vortexRequests', vortexRequests.length?vortexRequests:null);
+}
 // Sort players by weight (desc) then by class priority within same weight
 function sortByWeight(players, role, classPriority){
   return [...players].sort((a,b)=>{
@@ -1167,7 +1193,17 @@ function setView(v, user){
     if(ps) ps.value=CURRENT_USER.name;
   }
   // Navigate to first relevant page
-  if(v==='rl') document.querySelector('#nav-rl .ni')?.click();
+  if(v==='rl'){
+    document.querySelector('#nav-rl .ni')?.click();
+    // Push all local data to Firebase so every client gets seeded on RL login
+    setTimeout(()=>{
+      saveRoster(); saveRaids(); saveVortex(); saveWeights(); saveAlts(); saveRoleOverrides();
+      if(applications.length) saveApplications();
+      if(specRequests.length) saveSpecRequests();
+      if(reviews.length) saveReviews();
+      if(vortexRequests.length) saveVortexRequests();
+    }, 500);
+  }
   else if(v==='participant') document.querySelector('#nav-par .ni[onclick*="pov"]')?.click();
   else if(v==='guest') document.querySelector('#nav-guest .ni[onclick*="roster"]')?.click();
   else document.querySelector('#nav-par .ni')?.click();
@@ -1518,6 +1554,7 @@ function setAsMain(altName){
   if(isNamed()&&CURRENT_USER.name===altName||CURRENT_USER?.name===currentMain){
     CURRENT_USER=gp(altName)||CURRENT_USER;
   }
+  saveAlts();
   openProfile(altName);
   toast(altName+' is now the main character','ok');
 }
@@ -1528,6 +1565,7 @@ function addAlt(mainName){
   if(!playerAlts[mainName]) playerAlts[mainName]=[];
   if(!playerAlts[mainName].includes(alt.trim())){
     playerAlts[mainName].push(alt.trim());
+    saveAlts();
     openProfile(mainName);
     toast('Alt added: '+alt.trim(),'ok');
   } else {
@@ -1537,6 +1575,7 @@ function addAlt(mainName){
 function removeAlt(mainName, altName){
   if(!playerAlts[mainName]) return;
   playerAlts[mainName]=playerAlts[mainName].filter(a=>a!==altName);
+  saveAlts();
   openProfile(mainName);
   toast('Alt removed','ok');
 }
@@ -1881,6 +1920,7 @@ function submitGuildApp(){
   document.getElementById('gs-name').style.borderColor='';
   const app={id:genId(),name,cls,spec,role,flexSpec:flex,experience:exp,note:'[Guild signup] '+note,status:'pending',gs:null,gsNote:'Check armory manually'};
   applications.push(app);
+  saveApplications();
   updatePendingBadge();
   document.getElementById('auth-signup-success').style.display='block';
   document.getElementById('gs-name').value='';
@@ -2088,6 +2128,7 @@ function renderRoles(){
 function setRoleOverride(name,role){
   if(role) roleOverrides[name]=role;
   else delete roleOverrides[name];
+  saveRoleOverrides();
   renderRoles();
   toast(name+' → '+(role||'default role'),'ok');
 }
@@ -2368,6 +2409,7 @@ function submitVortexRequest(){
   const note=document.getElementById('vx-note')?.value.trim();
   if(!player||!item){toast('Fill in your name and the item','err');return;}
   vortexRequests.push({id:genId(),player,item,need,note,status:'pending'});
+  saveVortexRequests();
   toast('Request submitted!','ok');
   renderVortex();
 }
@@ -2376,9 +2418,10 @@ function decideVortex(id,decision){
   if(!req) return;
   req.status=decision;
   if(decision==='approved'){
-    // Add the needed count to player's tally
     vortexCounts[req.player]=(vortexCounts[req.player]||0)+req.need;
+    saveVortex();
   }
+  saveVortexRequests();
   renderVortex();
   toast('Request '+decision,'ok');
 }
@@ -3785,13 +3828,15 @@ function submitSpecReq(){
   if(!player||!mainSpec){toast('Fill in your name and new main spec','err');return;}
   if(!gp(player)){toast('Player not found in roster','err');return;}
   specRequests.push({id:genId(),player,mainSpec,offSpec,reason,status:'pending'});
+  saveSpecRequests();
   document.getElementById('sr-name').value='';document.getElementById('sr-main').value='';document.getElementById('sr-off').value='';document.getElementById('sr-reason').value='';
   updateSRBadge();toast('Spec request submitted — awaiting RL approval','ok');renderSpecReq();
 }
 function decideSR(id,decision){
   const sr=specRequests.find(r=>r.id===id);if(!sr)return;
   sr.status=decision;
-  if(decision==='approved'){const p=gp(sr.player);if(p&&sr.mainSpec){p.spec=sr.mainSpec;if(sr.offSpec)p.flexSpec=sr.offSpec;}}
+  if(decision==='approved'){const p=gp(sr.player);if(p&&sr.mainSpec){p.spec=sr.mainSpec;if(sr.offSpec)p.flexSpec=sr.offSpec;saveRoster();}}
+  saveSpecRequests();
   updateSRBadge();renderSRList();toast(`Request ${decision}!`,decision==='approved'?'ok':'err');
 }
 function updateSRBadge(){const n=specRequests.filter(r=>r.status==='pending').length;const b=document.getElementById('sr-badge');if(b){b.textContent=n;b.style.display=n>0?'inline':'none';}}
@@ -3815,6 +3860,7 @@ function submitApp(){
   if(!name){toast('Enter your character name','err');return;}
   const app={id:genId(),name,cls,spec,role,flexSpec:flex,experience:exp,note,status:'pending',gs:null,gsNote:'Check armory manually'};
   applications.push(app);
+  saveApplications();
   document.getElementById('signup-success').style.display='block';
   document.getElementById('signup-success-msg').textContent=`Application for ${name} submitted! The RL will review your gear at classic-armory.org and respond shortly.`;
   document.getElementById('sig-name').value='';document.getElementById('sig-note').value='';
@@ -3845,6 +3891,7 @@ function decideApp(id,decision){
   const a=applications.find(x=>x.id===id);if(!a)return;
   a.status=decision;
   if(decision==='approved'&&!gp(a.name)){ROSTER.push({name:a.name,cls:a.cls,spec:a.spec,flexSpec:a.flexSpec||'',type:a.role,dispel:[],interrupt:0,present:false,resFrost:false,resNature:false,resFire:false});saveRoster();}
+  saveApplications();
   updatePendingBadge();renderRLReview();toast(`Application ${decision}!`,decision==='approved'?'ok':'err');
 }
 function updatePendingBadge(){const n=applications.filter(a=>a.status==='pending').length;const b=document.getElementById('pending-badge');if(b){b.textContent=n;b.style.display=n>0?'inline':'none';}}
@@ -4514,6 +4561,7 @@ function submitReview(raidId){
   if(!stars.o){toast('Please rate the overall experience','err');return;}
   const author=document.getElementById('rv-author-'+raidId)?.value.trim()||'Anonymous';
   reviews.push({raidId,raidName:r.name,raidDate:r.date,overallRating:stars.o,coordination:stars.c||0,atmosphere:stars.a||0,notes:document.getElementById('rv-notes-'+raidId)?.value.trim()||'',mvp:document.getElementById('rv-mvp-'+raidId)?.value||'',improvements:document.getElementById('rv-improve-'+raidId)?.value.trim()||'',submittedBy:author});
+  saveReviews();
   updateRevBadge();renderReviews();toast('Review submitted!','ok');
 }
 
@@ -4587,36 +4635,98 @@ function fbListen(path, cb){
   es.onerror=()=>{ es.close(); setTimeout(()=>fbListen(path,cb), 5000); };
 }
 
+function _fbArr(data){if(!Array.isArray(data)&&data!==null)data=Object.values(data||{});return Array.isArray(data)?data.filter(Boolean):[];}
+function _fbSync(arr,data){arr.length=0;data.forEach(x=>arr.push(x));}
 function initFirebaseSync(){
   if(!FIREBASE_DB) return;
-  // Listen: raids
+  // raids
   fbListen('raids', data=>{
-    if(!Array.isArray(data)&&data!==null) data=Object.values(data||{});
-    if(Array.isArray(data)&&data.length){
-      _fbIgnore=true; raidSchedule=data;
-      try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}
-      _fbIgnore=false;
-      renderRaids?.(); renderCalendar?.();
-    }
+    const d=_fbArr(data);if(!d.length)return;
+    _fbIgnore=true; raidSchedule=d;
+    try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}
+    _fbIgnore=false;
+    renderRaids?.(); renderCalendar?.();
   });
-  // Listen: roster presence
-  fbListen('presence', data=>{
-    if(!data||typeof data!=='object') return;
-    _fbIgnore=true;
-    Object.entries(data).forEach(([name,present])=>{
-      const p=ROSTER.find(r=>r.name===name); if(p) p.present=!!present;
-    });
+  // full roster
+  fbListen('roster', data=>{
+    const d=_fbArr(data);if(!d.length)return;
+    _fbIgnore=true; _fbSync(ROSTER,d);
     try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}
     _fbIgnore=false;
-    renderAttendance?.(); renderRoster?.(); renderRoles?.();
+    renderRoster?.(); renderAttendance?.(); renderRoles?.(); renderRes?.(); renderProfiles?.();
   });
-  // Listen: vortex
+  // vortex
   fbListen('vortex', data=>{
     if(!data||typeof data!=='object') return;
-    _fbIgnore=true;
-    Object.assign(vortexCounts, data);
+    _fbIgnore=true; Object.assign(vortexCounts, data);
     try{localStorage.setItem('boogalo-vortex',JSON.stringify(vortexCounts));}catch(e){}
     _fbIgnore=false;
+    renderVortex?.();
+  });
+  // weights
+  fbListen('weights', data=>{
+    if(!data||typeof data!=='object') return;
+    _fbIgnore=true;
+    Object.keys(playerWeights).forEach(k=>delete playerWeights[k]);
+    Object.assign(playerWeights, data);
+    try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}
+    _fbIgnore=false;
+  });
+  // alts
+  fbListen('alts', data=>{
+    if(!data||typeof data!=='object') return;
+    _fbIgnore=true;
+    Object.keys(playerAlts).forEach(k=>delete playerAlts[k]);
+    Object.assign(playerAlts, data);
+    try{localStorage.setItem('boogalo-alts',JSON.stringify(playerAlts));}catch(e){}
+    _fbIgnore=false;
+  });
+  // roleOverrides
+  fbListen('roleOverrides', data=>{
+    _fbIgnore=true;
+    Object.keys(roleOverrides).forEach(k=>delete roleOverrides[k]);
+    if(data&&typeof data==='object') Object.assign(roleOverrides, data);
+    try{localStorage.setItem('boogalo-roleOverrides',JSON.stringify(roleOverrides));}catch(e){}
+    _fbIgnore=false;
+    renderRoles?.(); renderAttendance?.();
+  });
+  // applications
+  fbListen('applications', data=>{
+    const d=_fbArr(data);
+    _fbIgnore=true; _fbSync(applications,d);
+    try{localStorage.setItem('boogalo-applications',JSON.stringify(applications));}catch(e){}
+    _fbIgnore=false;
+    renderRLReview?.(); updatePendingBadge?.(); renderSignup?.();
+  });
+  // specRequests
+  fbListen('specRequests', data=>{
+    const d=_fbArr(data);
+    _fbIgnore=true; _fbSync(specRequests,d);
+    try{localStorage.setItem('boogalo-specRequests',JSON.stringify(specRequests));}catch(e){}
+    _fbIgnore=false;
+    renderSRList?.(); renderSpecReq?.(); updateSRBadge?.();
+  });
+  // reviews
+  fbListen('reviews', data=>{
+    if(!data||typeof data!=='object') return;
+    _fbIgnore=true;
+    const list=_fbArr(data.list);
+    _fbSync(reviews,list);
+    if(data.stars&&typeof data.stars==='object'){
+      Object.keys(reviewStars).forEach(k=>delete reviewStars[k]);
+      Object.assign(reviewStars, data.stars);
+    }
+    try{localStorage.setItem('boogalo-reviews',JSON.stringify({list:reviews,stars:reviewStars}));}catch(e){}
+    _fbIgnore=false;
+    renderReviews?.(); updateRevBadge?.();
+  });
+  // vortexRequests
+  fbListen('vortexRequests', data=>{
+    const d=_fbArr(data);
+    _fbIgnore=true; _fbSync(vortexRequests,d);
+    try{localStorage.setItem('boogalo-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}
+    _fbIgnore=false;
+    renderVortex?.();
   });
 }
 
@@ -4625,6 +4735,12 @@ window.onload=function(){
   try{const sw=localStorage.getItem('boogalo-weights');if(sw){const w=JSON.parse(sw);if(w&&typeof w==='object')playerWeights=w;}}catch(e){}
   try{const srd=localStorage.getItem('boogalo-raids');if(srd){const r=JSON.parse(srd);if(Array.isArray(r)&&r.length)raidSchedule=r;}}catch(e){}
   try{const sv=localStorage.getItem('boogalo-vortex');if(sv){const v=JSON.parse(sv);if(v&&typeof v==='object')Object.assign(vortexCounts,v);}}catch(e){}
+  try{const sa=localStorage.getItem('boogalo-alts');if(sa){const a=JSON.parse(sa);if(a&&typeof a==='object')Object.assign(playerAlts,a);}}catch(e){}
+  try{const sro=localStorage.getItem('boogalo-roleOverrides');if(sro){const o=JSON.parse(sro);if(o&&typeof o==='object')Object.assign(roleOverrides,o);}}catch(e){}
+  try{const sap=localStorage.getItem('boogalo-applications');if(sap){const a=JSON.parse(sap);if(Array.isArray(a))a.forEach(x=>applications.push(x));}}catch(e){}
+  try{const ssp=localStorage.getItem('boogalo-specRequests');if(ssp){const s=JSON.parse(ssp);if(Array.isArray(s))s.forEach(x=>specRequests.push(x));}}catch(e){}
+  try{const srv=localStorage.getItem('boogalo-reviews');if(srv){const d=JSON.parse(srv);if(d&&Array.isArray(d.list))d.list.forEach(x=>reviews.push(x));if(d&&d.stars&&typeof d.stars==='object')Object.assign(reviewStars,d.stars);}}catch(e){}
+  try{const svr=localStorage.getItem('boogalo-vortexRequests');if(svr){const v=JSON.parse(svr);if(Array.isArray(v))v.forEach(x=>vortexRequests.push(x));}}catch(e){}
   restoreSidebarState();
   seedRaids();
   initFirebaseSync();
