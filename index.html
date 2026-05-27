@@ -1047,6 +1047,7 @@ function setView(v, user){
   }
   // Navigate to first relevant page
   if(v==='rl') document.querySelector('#nav-rl .ni')?.click();
+  else if(v==='participant') document.querySelector('#nav-par .ni[onclick*="pov"]')?.click();
   else document.querySelector('#nav-par .ni')?.click();
   // If signed in as a named player, pre-fill POV and show their profile shortcut
   const mpLink=document.getElementById('my-profile-link');
@@ -1496,8 +1497,8 @@ function renderAttendance(){
   // present/absent lists
   document.getElementById('att-pc').textContent=`(${pr.length})`;
   document.getElementById('att-ac').textContent=`(${ab.length})`;
-  document.getElementById('att-present').innerHTML=pr.map(p=>`<div class="rrow" style="cursor:pointer" onclick="togglePresent('${p.name}')">${pill(p.name)} ${rtag(p.type)} <span style="margin-left:auto;font-size:10px;color:var(--t3)">${p.spec}</span></div>`).join('');
-  document.getElementById('att-absent').innerHTML=ab.length?ab.map(p=>`<div class="rrow" style="cursor:pointer" onclick="togglePresent('${p.name}')">${pill(p.name,true)} ${rtag(p.type)}</div>`).join(''):'<div style="font-size:11px;color:var(--t3);padding:8px 0">All players present</div>';
+  document.getElementById('att-present').innerHTML=pr.map(p=>{const canT=!isNamed()||p.name===CURRENT_USER.name;return`<div class="rrow" ${canT?`style="cursor:pointer" onclick="togglePresent('${p.name}')"`:`style="cursor:default;opacity:.5"`}>${pill(p.name)} ${rtag(p.type)} <span style="margin-left:auto;font-size:10px;color:var(--t3)">${p.spec}</span></div>`;}).join('');
+  document.getElementById('att-absent').innerHTML=ab.length?ab.map(p=>{const canT=!isNamed()||p.name===CURRENT_USER.name;return`<div class="rrow" ${canT?`style="cursor:pointer" onclick="togglePresent('${p.name}')"`:`style="cursor:default;opacity:.5"`}>${pill(p.name,true)} ${rtag(p.type)}</div>`;}).join(''):'<div style="font-size:11px;color:var(--t3);padding:8px 0">All players present</div>';
   // coverage
   const cvItems=[
     {lbl:'Tanks (need 3)',ok:tanks.length>=3,val:`${tanks.length}/3`},
@@ -1510,11 +1511,12 @@ function renderAttendance(){
   ];
   document.getElementById('att-cov').innerHTML=cvItems.map(i=>`<div class="${i.ok?'cov-ok':'cov-warn'}"><i class="ti ti-${i.ok?'check':'alert-triangle'}"></i><span style="min-width:180px;font-size:12px">${i.lbl}</span><strong>${i.val}</strong></div>`).join('');
   // quick toggle
-  document.getElementById('att-quick').innerHTML=ROSTER.map(p=>`<span class="att-pill ${p.present?'present':'absent'}" onclick="togglePresent('${p.name}')" title="${p.type} · ${p.spec}">${p.name}</span>`).join('');
+  document.getElementById('att-quick').innerHTML=ROSTER.map(p=>{const canT=!isNamed()||p.name===CURRENT_USER.name;return`<span class="att-pill ${p.present?'present':'absent'}" ${canT?`onclick="togglePresent('${p.name}')"`:`style="cursor:default;opacity:.4"`} title="${p.type} · ${p.spec}">${p.name}</span>`;}).join('');
 }
 
 function box(n,l,c){return`<div class="sbox"><div class="snum" style="color:${c}">${n}</div><div class="slbl">${l}</div></div>`;}
 function togglePresent(name){
+  if(isNamed() && name!==CURRENT_USER.name){toast('You can only update your own attendance','warn');return;}
   const p=gp(name);
   if(!p) return;
   p.present=!p.present;
@@ -1584,7 +1586,7 @@ function renderRoster(){
   document.getElementById('roster-stats').innerHTML=box(ROSTER.length,'Total','var(--acc)')+box(pr.length,'Present','#5DCAA5')+box(pr.filter(p=>p.type==='Tank').length,'Tanks','#e07060')+box(pr.filter(p=>p.type==='Healer').length,'Healers','#5DCAA5');
   // rows
   document.getElementById('roster-tbody').innerHTML=sortable.map(p=>`<tr>
-    <td><div class="tog ${p.present?'on':''}" onclick="togglePresent('${p.name}')"></div></td>
+    <td><div class="tog ${p.present?'on':''}" ${(!isNamed()||p.name===CURRENT_USER.name)?`onclick="togglePresent('${p.name}')"`:'style="opacity:.4;cursor:not-allowed"'}></div></td>
     <td>${pill(p.name,!p.present)}</td>
     <td>${ctag(p.cls)}</td>
     <td>${isRL()?`<select style="font-size:11px;padding:2px 6px;width:auto;background:var(--bg3);border-color:var(--borderl);color:var(--t1)" onchange="setPlayerSpec('${p.name}','spec',this.value)">${(CLASS_SPECS[p.cls]||[p.spec]).map(s=>`<option value="${s}" ${s===p.spec?'selected':''}>${s}</option>`).join('')}</select>`:`<span style="font-size:11px;color:var(--t2)">${p.spec}</span>`}</td>
