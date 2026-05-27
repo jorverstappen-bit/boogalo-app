@@ -10,12 +10,13 @@
 :root{--bg0:#07080b;--bg1:#0d1117;--bg2:#141b25;--bg3:#1a2234;--bg4:#212d42;--border:rgba(255,255,255,.07);--borderl:rgba(255,255,255,.13);--t1:#dde3f0;--t2:#8892a8;--t3:#4a5568;--acc:#7c6fe0;--accg:rgba(124,111,224,.18);--accd:#3d3580;--gold:#c9a435;--goldd:rgba(201,164,53,.15);--gre:#1a9e72;--gred:rgba(26,158,114,.12);--red:#c0392b;--redd:rgba(192,57,43,.12);--ora:#c87941;--orad:rgba(200,121,65,.12);--blu:#2980b9;--blud:rgba(41,128,185,.12);--r:8px;--rl:12px;--sw:186px}
 [data-theme="light"]{--bg0:#f0f2f6;--bg1:#ffffff;--bg2:#f8f9fb;--bg3:#edf0f5;--bg4:#e2e7f0;--border:rgba(0,0,0,.08);--borderl:rgba(0,0,0,.14);--t1:#1a2234;--t2:#4a5568;--t3:#8892a8;--acc:#6357c8;--accg:rgba(99,87,200,.12);--accd:#4a3fb0;--gold:#a07c1a;--goldd:rgba(160,124,26,.12);--gre:#1a8a62;--gred:rgba(26,138,98,.1);--red:#b03020;--redd:rgba(176,48,32,.1);--ora:#b06030;--orad:rgba(176,96,48,.1);--blu:#1a6ea8;--blud:rgba(26,110,168,.1)}
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overflow:hidden}
+html{height:100%;overflow:hidden;zoom:1.5}body{height:100%;overflow:hidden}
 body{font-family:Inter,sans-serif;font-size:13px;color:var(--t1);background:var(--bg0)}
 .shell{display:flex;height:100vh}
 /* SIDEBAR */
-.sb{width:var(--sw);min-width:var(--sw);background:var(--bg1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
-.sb::-webkit-scrollbar{width:0}
+.sb{width:var(--sw);min-width:var(--sw);background:var(--bg1);border-right:1px solid var(--border);display:grid;grid-template-rows:auto 1fr auto;overflow:hidden;flex-shrink:0;height:100vh}
+.sb-nav{overflow-y:auto;min-height:0}
+.sb-nav::-webkit-scrollbar{width:4px}.sb-nav::-webkit-scrollbar-track{background:transparent}.sb-nav::-webkit-scrollbar-thumb{background:var(--borderl);border-radius:2px}.sb-nav::-webkit-scrollbar-thumb:hover{background:var(--t3)}
 /* Sidebar collapse */
 .sb{transition:width .22s cubic-bezier(.4,0,.2,1),min-width .22s cubic-bezier(.4,0,.2,1)}
 .sb.collapsed{width:48px;min-width:48px}
@@ -323,12 +324,18 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="logo-n">Boogalo</div>
       <div class="logo-s">TBC Raid Manager</div>
       <div class="vpill" id="vp"></div>
+      <div id="sb-user-actions" style="display:none;margin-top:5px">
+        <button id="sb-logout-btn" onclick="logout()" style="background:none;border:none;padding:0;cursor:pointer;font-size:9px;color:var(--t3);display:flex;align-items:center;gap:3px;letter-spacing:.04em;text-transform:uppercase">
+          <i class="ti ti-logout" style="font-size:10px"></i><span>Log out</span>
+        </button>
+      </div>
     </div>
     <div class="sb-toggle" id="sb-toggle" onclick="toggleSidebar()" title="Toggle sidebar">
       <i class="ti ti-chevrons-left"></i>
     </div>
   </div>
 
+  <div class="sb-nav">
   <div id="nav-rl" style="display:none">
     <div class="sbs"><div class="sbl">Tonight</div>
       <div class="ni" onclick="nav(this,'attendance')"><i class="ti ti-calendar-check"></i><span>Attendance</span></div>
@@ -336,6 +343,11 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'roles')"><i class="ti ti-shield"></i><span>Roles &amp; Groups</span></div>
       <div class="ni" onclick="nav(this,'dispels')"><i class="ti ti-wand"></i><span>Dispels &amp; CCs</span></div>
       <div class="ni" onclick="nav(this,'res')"><i class="ti ti-sparkles"></i><span>Resistances</span></div>
+    </div>
+    <div class="sbs"><div class="sbl">Schedule</div>
+      <div class="ni" onclick="nav(this,'calendar')"><i class="ti ti-calendar"></i><span>Calendar</span></div>
+      <div class="ni" onclick="nav(this,'raids')"><i class="ti ti-list"></i><span>Upcoming Raids</span></div>
+      <div class="ni" onclick="nav(this,'create-raid')"><i class="ti ti-plus"></i><span>Create Raid</span></div>
     </div>
     <div class="sbs"><div class="sbl">Tools</div>
       <div class="ni" onclick="nav(this,'loot')"><i class="ti ti-trophy"></i><span>Loot Priority</span></div>
@@ -345,11 +357,6 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <div class="sbs"><div class="sbl">Sign-up</div>
       <div class="ni" onclick="nav(this,'signup')"><i class="ti ti-forms"></i><span>Apply for Raid</span></div>
       <div class="ni" onclick="nav(this,'rl-review')"><i class="ti ti-shield-check"></i><span>RL Review<span class="nbadge" id="pending-badge">0</span></span></div>
-    </div>
-    <div class="sbs"><div class="sbl">Schedule</div>
-      <div class="ni" onclick="nav(this,'calendar')"><i class="ti ti-calendar"></i><span>Calendar</span></div>
-      <div class="ni" onclick="nav(this,'raids')"><i class="ti ti-list"></i><span>Upcoming Raids</span></div>
-      <div class="ni" onclick="nav(this,'create-raid')"><i class="ti ti-plus"></i><span>Create Raid</span></div>
     </div>
     <div class="sbs"><div class="sbl">Raids</div>
       <div class="ni" onclick="nav(this,'gruul')"><i class="ti ti-sword"></i><span>Gruul's Lair</span></div>
@@ -365,23 +372,35 @@ tr:hover td{background:rgba(255,255,255,.013)}
     </div>
   </div>
 
+  <div id="nav-guest" style="display:none">
+    <div class="sbs"><div class="sbl">Raid Info</div>
+      <div class="ni" onclick="nav(this,'roster')"><i class="ti ti-users"></i><span>Roster (view)</span></div>
+      <div class="ni" onclick="nav(this,'loot')"><i class="ti ti-trophy"></i><span>Loot Priority</span></div>
+      <div class="ni" onclick="nav(this,'pov')"><i class="ti ti-user-circle"></i><span>Player POV</span></div>
+    </div>
+    <div class="sbs"><div class="sbl">Schedule</div>
+      <div class="ni" onclick="nav(this,'calendar')"><i class="ti ti-calendar"></i><span>Calendar</span></div>
+      <div class="ni" onclick="nav(this,'raids')"><i class="ti ti-list"></i><span>Upcoming Raids</span></div>
+    </div>
+  </div>
+
   <div id="nav-par" style="display:none">
     <div class="sbs"><div class="sbl">Schedule</div>
       <div class="ni" onclick="nav(this,'calendar')"><i class="ti ti-calendar"></i><span>Calendar</span></div>
       <div class="ni" onclick="nav(this,'raids')"><i class="ti ti-list"></i><span>Upcoming Raids</span></div>
     </div>
     <div class="sbs"><div class="sbl">Raid Info</div>
+      <div class="ni" onclick="nav(this,'pov')"><i class="ti ti-user-circle"></i><span>Player POV</span></div>
       <div class="ni" onclick="nav(this,'roster')"><i class="ti ti-users"></i><span>Roster (view)</span></div>
       <div class="ni" onclick="nav(this,'loot')"><i class="ti ti-trophy"></i><span>Loot Priority</span></div>
-      <div class="ni" onclick="nav(this,'pov')"><i class="ti ti-user-circle"></i><span>Player POV</span></div>
     </div>
     <div class="sbs"><div class="sbl">My Account</div>
       <div class="ni" onclick="nav(this,'signup')"><i class="ti ti-forms"></i><span>Apply for Raid</span></div>
       <div class="ni" onclick="nav(this,'specreq')"><i class="ti ti-refresh"></i><span>Request Spec Change</span></div>
     </div>
   </div>
-
-  <div style="flex:1"></div>
+  </div><!-- end sb-nav -->
+  <div style="background:var(--bg1)">
   <div class="sb-footer" style="padding:10px 12px;border-top:1px solid var(--border)">
     <div id="my-profile-link" style="display:none;padding:6px 8px 0">
       <button class="btn btn-sm" style="width:100%;justify-content:center;font-size:11px;background:var(--accg);border-color:rgba(124,111,224,.3);color:var(--acc)" onclick="goMyProfile()">
@@ -393,7 +412,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
     </button>
   </div>
   <!-- Raid countdown timer + theme toggle -->
-  <div style="padding:10px 12px;border-top:1px solid var(--border);margin-top:auto">
+  <div style="padding:10px 12px;border-top:1px solid var(--border)">
     <div id="raid-timer" style="display:none;margin-bottom:6px;background:var(--accg);border-radius:var(--r);padding:5px 8px;text-align:center">
       <div style="font-size:9px;font-weight:600;color:var(--acc);text-transform:uppercase;letter-spacing:.06em;margin-bottom:1px">Next Raid</div>
       <div id="timer-name" style="font-size:10px;font-weight:600;color:var(--t1);margin-bottom:2px"></div>
@@ -405,6 +424,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <button id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark theme"
         style="background:none;border:1px solid var(--borderl);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:13px;color:var(--t2);line-height:1">🌙</button>
     </div>
+  </div>
   </div>
 </nav>
 
@@ -723,6 +743,7 @@ let CURRENT_USER=null; // roster player when signed in by name
 let rosterSortCol='name';let rosterSortDir=1;
 let appTab='pending';let srTab='pending';let stTab='overview';
 let applications=[];let specRequests=[];let raidSchedule=[];let reviews=[];
+const SIGNUP_POOL_MAX=100; // sign-up queue cap; r.max is the raid roster limit (25)
 let calYear=new Date().getFullYear();let calMonth=new Date().getMonth();
 let reviewStars={};let selectedDay=null;
 
@@ -796,7 +817,7 @@ ROSTER.forEach(p=>vortexCounts[p.name]=0);
 
 // ─────────────────────────────────────────────────────────────
 // Alt tracking — { mainName: [altName, altName, ...] }
-let playerAlts = {};
+let playerAlts = {'Holysparkz':['Unholysparkz']};
 
 // Player assignment weights — RL only
 // Structure: { playerName: { Tank: 1-5, Healer: 1-5, Melee: 1-5, Ranged: 1-5 } }
@@ -808,7 +829,10 @@ function getWeight(name, role){
 function setWeight(name, role, val){
   if(!playerWeights[name]) playerWeights[name]={};
   playerWeights[name][role]=Math.max(1,Math.min(5,parseInt(val)||3));
+  saveWeights();
 }
+function saveRoster(){try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}}
+function saveWeights(){try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}}
 // Sort players by weight (desc) then by class priority within same weight
 function sortByWeight(players, role, classPriority){
   return [...players].sort((a,b)=>{
@@ -1066,25 +1090,32 @@ function setView(v, user){
   const hasFull=v==='rl'||v==='participant';
   document.getElementById('nav-rl').style.display=isRl?'block':'none';
   document.getElementById('nav-par').style.display=hasFull?'block':'none';
+  document.getElementById('nav-guest').style.display=v==='guest'?'block':'none';
   // View pill
   const vp=document.getElementById('vp');
   if(vp){
     if(v==='rl'){
       vp.className='vpill rl';
+      vp.style.cursor='';
+      vp.onclick=null;
       vp.innerHTML='<i class="ti ti-shield-check" style="font-size:9px"></i> Raid Leader';
     } else if(v==='participant'&&CURRENT_USER){
       vp.className='vpill par';
+      vp.style.cursor='pointer';
+      vp.title='View my profile';
+      vp.onclick=goMyProfile;
       vp.innerHTML='<i class="ti ti-user-check" style="font-size:9px"></i> '+CURRENT_USER.name;
     } else {
       vp.className='vpill par';
+      vp.style.cursor='';
+      vp.onclick=null;
       vp.innerHTML='<i class="ti ti-eye" style="font-size:9px"></i> Guest';
     }
   }
-  // Navigate to first relevant page
-  if(v==='rl') document.querySelector('#nav-rl .ni')?.click();
-  else if(v==='participant') document.querySelector('#nav-par .ni[onclick*="pov"]')?.click();
-  else document.querySelector('#nav-par .ni')?.click();
-  // If signed in as a named player, pre-fill POV and show their profile shortcut
+  // Show logout button below name only for named participants
+  const sua=document.getElementById('sb-user-actions');
+  if(sua) sua.style.display=(v==='participant'&&CURRENT_USER)?'block':'none';
+  // Pre-fill POV search before navigating so renderPOV() sees the name on first load
   const mpLink=document.getElementById('my-profile-link');
   const mpName=document.getElementById('my-profile-name');
   if(mpLink) mpLink.style.display=CURRENT_USER?'block':'none';
@@ -1093,6 +1124,11 @@ function setView(v, user){
     const ps=document.getElementById('pov-search');
     if(ps) ps.value=CURRENT_USER.name;
   }
+  // Navigate to first relevant page
+  if(v==='rl') document.querySelector('#nav-rl .ni')?.click();
+  else if(v==='participant') document.querySelector('#nav-par .ni[onclick*="pov"]')?.click();
+  else if(v==='guest') document.querySelector('#nav-guest .ni[onclick*="roster"]')?.click();
+  else document.querySelector('#nav-par .ni')?.click();
 }
 
 function goMyProfile(){
@@ -1341,9 +1377,14 @@ function openProfile(name){
     </div>`:'';
   }).join('');
 
+  const mainOf=getMainOf(name);
   const el=document.getElementById('profiles-content');
   el.innerHTML=`
     <button class="btn btn-sm" onclick="renderProfiles()" style="margin-bottom:12px"><i class="ti ti-arrow-left"></i> Back to list</button>
+    ${mainOf?`<div style="background:var(--accg);border:1px solid rgba(124,111,224,.25);border-radius:var(--r);padding:8px 12px;margin-bottom:10px;font-size:12px;color:var(--acc);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <i class="ti ti-git-branch"></i> Alt character of <strong style="cursor:pointer;text-decoration:underline" onclick="openProfile('${mainOf}')">${mainOf}</strong>
+      ${canManageAlts(name)?`<button class="btn btn-sm btn-p" style="margin-left:auto;font-size:11px" onclick="setAsMain('${name}')"><i class="ti ti-arrow-up"></i> Set as Main</button>`:''}
+    </div>`:''}
     <div class="card">
       <!-- Header -->
       <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap">
@@ -1385,11 +1426,12 @@ function openProfile(name){
           ${weightRows||'<div style="font-size:11px;color:var(--t3)">No eligible roles</div>'}
 
           <div class="ct" style="margin:14px 0 8px"><i class="ti ti-device-gamepad-2" style="color:var(--acc)"></i>Alt Characters
-            ${isRL()?`<button class="btn btn-sm" style="margin-left:auto;font-size:10px" onclick="addAlt('${name}')"><i class="ti ti-plus"></i> Add alt</button>`:''}
+            ${canManageAlts(name)?`<button class="btn btn-sm" style="margin-left:auto;font-size:10px" onclick="addAlt('${name}')"><i class="ti ti-plus"></i> Add alt</button>`:''}
           </div>
           ${alts.length?`<div style="display:flex;flex-wrap:wrap;gap:5px">
-            ${alts.map(a=>`<span style="background:var(--bg3);border:1px solid var(--borderl);border-radius:20px;padding:2px 10px;font-size:11px;color:var(--t2)">
-              ${a}${isRL()?` <span onclick="removeAlt('${name}','${a}')" style="cursor:pointer;color:var(--t3);margin-left:4px" title="Remove">✕</span>`:''}
+            ${alts.map(a=>`<span style="background:var(--bg3);border:1px solid var(--borderl);border-radius:var(--r);padding:4px 10px;font-size:11px;color:var(--t2);display:inline-flex;align-items:center;gap:6px">
+              <span style="cursor:pointer;text-decoration:underline" onclick="openProfile('${a}')">${a}</span>
+              ${canManageAlts(name)?`<span onclick="setAsMain('${a}')" style="cursor:pointer;color:var(--acc);font-size:10px" title="Set as main">⬆ Main</span><span onclick="removeAlt('${name}','${a}')" style="cursor:pointer;color:var(--t3);font-size:10px" title="Remove">✕</span>`:''}
             </span>`).join('')}
           </div>`:`<div style="font-size:11px;color:var(--t3)">No alts tracked.</div>`}
         </div>
@@ -1415,6 +1457,27 @@ function openProfile(name){
     </div>`;
 }
 
+function getMainOf(name){
+  return Object.keys(playerAlts).find(main=>playerAlts[main]?.includes(name))||null;
+}
+function canManageAlts(name){
+  if(isRL()) return true;
+  if(!isNamed()) return false;
+  const me=CURRENT_USER.name;
+  return me===name||getMainOf(me)===name||(playerAlts[me]||[]).includes(name)||getMainOf(name)===me;
+}
+function setAsMain(altName){
+  const currentMain=getMainOf(altName);
+  if(!currentMain) return;
+  const otherAlts=(playerAlts[currentMain]||[]).filter(a=>a!==altName);
+  playerAlts[altName]=[currentMain,...otherAlts];
+  delete playerAlts[currentMain];
+  if(isNamed()&&CURRENT_USER.name===altName||CURRENT_USER?.name===currentMain){
+    CURRENT_USER=gp(altName)||CURRENT_USER;
+  }
+  openProfile(altName);
+  toast(altName+' is now the main character','ok');
+}
 function addAlt(mainName){
   const alt=prompt('Enter alt character name:');
   if(!alt||!alt.trim()) return;
@@ -1472,44 +1535,28 @@ function nav(el,page){
 // ============================================================
 function seedRaids(){
   const now=new Date();
-  const cutoff='2026-05-20'; // raids before this date get cleared / marked as test
-  const base=new Date(now);base.setDate(base.getDate()-14);
-  for(let w=0;w<8;w++){
+  // Only seed the next 4 weeks of upcoming raids — no past raids
+  for(let w=0;w<4;w++){
     [
       {dow:3,name:"Gruul's Lair",start:'19:00',end:'20:00',extra:0,notes:'Wednesday pre-raid (60 min)'},
       {dow:3,name:'Tempest Keep',start:'20:00',end:'23:00',extra:30,notes:'Wednesday main raid'},
       {dow:4,name:"Magtheridon's Lair",start:'19:00',end:'20:00',extra:0,notes:'Thursday pre-raid (60 min)'},
       {dow:4,name:'Serpent Shrine Cavern',start:'20:00',end:'23:00',extra:30,notes:'Thursday main raid'},
     ].forEach(r=>{
-      const d=new Date(base);d.setDate(base.getDate()+w*7+(r.dow-base.getDay()+7)%7);
+      const d=new Date(now);
+      const diff=(r.dow-d.getDay()+7)%7;
+      d.setDate(d.getDate()+diff+w*7);
       const k=ikey(d);
       if(raidSchedule.find(x=>x.date===k&&x.name===r.name))return;
-      const past=isPast(k)&&k!==todayKey();
-      // Raids before the cutoff date: no sign-ups, marked as test input
-      if(k<cutoff){
-        raidSchedule.push({id:genId(),name:r.name,date:k,start:r.start,end:r.end,extra:r.extra,
-          max:25,rl:'Holsteinbeef',notes:'⚠ Test input',signedUp:[],confirmed:[],attended:[],
-          status:'completed',rosterPosted:false,pug:false,testInput:true});
-        return;
-      }
-      const signed=ROSTER.map(p=>p.name).filter(()=>past?Math.random()>.1:Math.random()>.55);
-      const conf=past?signed:signed.slice(0,Math.min(signed.length,Math.floor(Math.random()*8)+10));
       raidSchedule.push({id:genId(),name:r.name,date:k,start:r.start,end:r.end,extra:r.extra,
-        max:r.name.includes('Kara')?10:25,rl:'Holsteinbeef',notes:r.notes,signedUp:signed,
-        confirmed:conf,attended:past?signed.filter(()=>Math.random()>.08):[],
-        status:past?'completed':'upcoming',rosterPosted:true,pug:false,testInput:false});
+        max:r.name.includes('Kara')?10:25,rl:'Holsteinbeef',notes:r.notes,
+        signedUp:[],confirmed:[],attended:[],
+        status:'upcoming',rosterPosted:false,pug:false});
     });
   }
 }
 
-function seedReviews(){
-  const past=raidSchedule.filter(r=>r.status==='completed').slice(-4);
-  past.forEach(r=>{
-    if(reviews.find(x=>x.raidId===r.id))return;
-    const sample=['Cakemon','Holsteinbeef','Xullue','Mantine','Vvambull'];
-    reviews.push({raidId:r.id,raidName:r.name,raidDate:r.date,overallRating:Math.floor(Math.random()*2)+3,coordination:Math.floor(Math.random()*2)+3,atmosphere:Math.floor(Math.random()*2)+4,notes:['Solid performance overall.','Cube clicks were clean.','Good interrupt rotation.','Bloodlust timing needs work.'][Math.floor(Math.random()*4)],mvp:sample[Math.floor(Math.random()*sample.length)],improvements:['Bloodlust timing','Cube coordination','Interrupt rotation','Stack discipline'][Math.floor(Math.random()*4)],submittedBy:'Holsteinbeef'});
-  });
-}
+function seedReviews(){}
 
 // ============================================================
 // ATTENDANCE
@@ -1551,10 +1598,12 @@ function renderAttendance(){
 
 function box(n,l,c){return`<div class="sbox"><div class="snum" style="color:${c}">${n}</div><div class="slbl">${l}</div></div>`;}
 function togglePresent(name){
+  if(isGuest()){toast('Sign in to update attendance','warn');return;}
   if(isNamed() && name!==CURRENT_USER.name){toast('You can only update your own attendance','warn');return;}
   const p=gp(name);
   if(!p) return;
   p.present=!p.present;
+  saveRoster();
   // Always sync both views if they are in the DOM
   if(document.getElementById('page-roster')?.classList.contains('active')) {
     renderRoster();
@@ -1621,15 +1670,15 @@ function renderRoster(){
   document.getElementById('roster-stats').innerHTML=box(ROSTER.length,'Total','var(--acc)')+box(pr.length,'Present','#5DCAA5')+box(pr.filter(p=>p.type==='Tank').length,'Tanks','#e07060')+box(pr.filter(p=>p.type==='Healer').length,'Healers','#5DCAA5');
   // rows
   document.getElementById('roster-tbody').innerHTML=sortable.map(p=>`<tr>
-    <td><div class="tog ${p.present?'on':''}" ${(!isNamed()||p.name===CURRENT_USER.name)?`onclick="togglePresent('${p.name}')"`:'style="opacity:.4;cursor:not-allowed"'}></div></td>
+    <td><div class="tog ${p.present?'on':''}" ${(isRL()||(isNamed()&&p.name===CURRENT_USER.name))?`onclick="togglePresent('${p.name}')"`:'style="opacity:.4;cursor:not-allowed"'}></div></td>
     <td>${pill(p.name,!p.present)}</td>
     <td>${ctag(p.cls)}</td>
     <td>${isRL()?`<select style="font-size:11px;padding:2px 6px;width:auto;background:var(--bg3);border-color:var(--borderl);color:var(--t1)" onchange="setPlayerSpec('${p.name}','spec',this.value)">${(CLASS_SPECS[p.cls]||[p.spec]).map(s=>`<option value="${s}" ${s===p.spec?'selected':''}>${s}</option>`).join('')}</select>`:`<span style="font-size:11px;color:var(--t2)">${p.spec}</span>`}</td>
-    <td style="display:flex;align-items:center;gap:4px">${rtag(p.type)}${isRL()?`<select style="font-size:10px;padding:2px 4px;width:auto;background:var(--bg3);border-color:var(--borderl);color:var(--t2)" onchange="setPlayerRole('${p.name}',this.value)"><option ${p.type==='Tank'?'selected':''}>Tank</option><option ${p.type==='Mage Tank'?'selected':''}>Mage Tank</option><option ${p.type==='Healer'?'selected':''}>Healer</option><option ${p.type==='Melee'?'selected':''}>Melee</option><option ${p.type==='Ranged'?'selected':''}>Ranged</option></select>`:''}</td>
+    <td><div style="display:flex;align-items:center;gap:4px">${rtag(p.type)}${isRL()?`<select style="font-size:10px;padding:2px 4px;width:auto;background:var(--bg3);border-color:var(--borderl);color:var(--t2)" onchange="setPlayerRole('${p.name}',this.value)"><option ${p.type==='Tank'?'selected':''}>Tank</option><option ${p.type==='Mage Tank'?'selected':''}>Mage Tank</option><option ${p.type==='Healer'?'selected':''}>Healer</option><option ${p.type==='Melee'?'selected':''}>Melee</option><option ${p.type==='Ranged'?'selected':''}>Ranged</option></select>`:''}</div></td>
     <td>${isRL()?`<select style="font-size:11px;padding:2px 6px;width:auto;background:var(--bg3);border-color:var(--borderl);color:var(--t3)" onchange="setPlayerSpec('${p.name}','flexSpec',this.value)"><option value="">—</option>${(CLASS_SPECS[p.cls]||[]).map(s=>`<option value="${s}" ${s===p.flexSpec?'selected':''}>${s}</option>`).join('')}</select>`:`<span style="font-size:11px;color:var(--t3)">${p.flexSpec||'—'}</span>`}</td>
     <td><span style="font-size:11px;color:${p.interrupt>0?'#6ab4e8':'var(--t3)'}">${p.interrupt>0?`${p.interrupt} charges`:'None'}</span></td>
     <td style="font-size:10px;color:var(--t2)">${p.dispel.join(', ')||'—'}</td>
-    ${isRL()?`<td><button class="btn btn-sm" style="font-size:10px;padding:3px 7px" onclick="swapSpecs('${p.name}')" title="Swap main ↔ flex spec"><i class="ti ti-switch-horizontal"></i></button></td><td><button class="btn btn-sm" style="font-size:10px;background:var(--redd);border-color:rgba(192,57,43,.25);color:#e07b72" onclick="removePlayer('${p.name}')"><i class="ti ti-trash"></i></button></td>`:'<td></td><td></td>'}
+    ${isRL()?`<td><button class="btn btn-sm" style="font-size:10px;padding:3px 7px" onclick="swapSpecs('${p.name}')" title="Swap main ↔ flex spec"><i class="ti ti-switch-horizontal"></i></button></td><td><button class="btn btn-sm" style="font-size:10px;background:var(--redd);border-color:rgba(192,57,43,.25);color:#e07b72" onclick="removePlayer('${p.name}')"><i class="ti ti-trash"></i></button></td>`:'<td style="display:none"></td><td style="display:none"></td>'}
   </tr>`).join('');
   // RL-only weight panel
   const wp=document.getElementById('weight-panel');
@@ -1723,6 +1772,7 @@ function unhighlightStars(el, name, role, color){
 }
 function resetAllWeights(){
   playerWeights={};
+  saveWeights();
   renderWeightPanel();
   toast('All weights reset to default (3)','ok');
 }
@@ -1836,10 +1886,11 @@ function addPlayerManual(){
   if(!name){toast('Enter a name','err');return;}
   if(ROSTER.find(p=>p.name===name)){toast('Player already exists','err');return;}
   ROSTER.push({name,cls:document.getElementById('np-cls').value,spec:document.getElementById('np-spec').value,flexSpec:document.getElementById('np-flex').value,type:document.getElementById('np-role').value,dispel:[],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false});
+  saveRoster();
   document.getElementById('np-name').value='';
   renderRoster();toast(`${name} added to roster`,'ok');
 }
-function removePlayer(name){if(!isRL())return;if(!confirm(`Remove ${name} from roster?`))return;ROSTER=ROSTER.filter(p=>p.name!==name);renderRoster();toast(`${name} removed`,'ok');}
+function removePlayer(name){if(!isRL())return;if(!confirm(`Remove ${name} from roster?`))return;ROSTER=ROSTER.filter(p=>p.name!==name);saveRoster();renderRoster();toast(`${name} removed`,'ok');}
 
 function setPlayerSpec(name, field, value){
   const p=gp(name);
@@ -1852,6 +1903,7 @@ function setPlayerSpec(name, field, value){
     if(value==='Guardian'&&p.cls==='Druid') p.type='Tank';
     if(value==='Protection'&&p.cls==='Paladin') p.type='Tank';
   }
+  saveRoster();
   toast(`${name} → ${field==='spec'?'Main':'Flex'}: ${value||'—'}`,'ok');
 }
 
@@ -1859,6 +1911,7 @@ function setPlayerRole(name, role){
   const p=gp(name);
   if(!p||!isRL()) return;
   p.type=role;
+  saveRoster();
   toast(`${name} → ${role}`,'ok');
 }
 
@@ -1869,6 +1922,7 @@ function swapSpecs(name){
   const tmp=p.spec;
   p.spec=p.flexSpec;
   p.flexSpec=tmp;
+  saveRoster();
   renderRoster();
   toast(`${name}: ${p.spec} ↔ ${p.flexSpec}`,'ok');
 }
@@ -2183,13 +2237,13 @@ function renderLoot(){
   document.getElementById('loot-content').innerHTML=Object.entries(byRaid).map(([raid,items])=>`
     <div class="card" style="margin-bottom:12px">
       <div class="ct"><i class="ti ti-trophy" style="color:var(--gold)"></i>${{Gruul:"Gruul's Lair",Mag:"Magtheridon",TK:'Tempest Keep',SSC:'Serpent Shrine Cavern',Kara:'Karazhan'}[raid]}</div>
-      <table><thead><tr><th>Item</th><th>Slot</th><th>Boss</th><th>Priority</th><th>Note</th></tr></thead>
+      <table><thead><tr><th>Item</th><th>Slot</th><th>Boss</th><th>Priority</th>${isRL()?'<th>Note</th>':''}</tr></thead>
       <tbody>${items.map(l=>`<tr>
         <td><strong style="color:var(--gold)">${l.item}</strong></td>
         <td><span style="font-size:11px;color:var(--t2)">${l.slot}</span></td>
         <td><span style="font-size:11px;color:var(--t3)">${l.boss}</span></td>
         <td>${l.prio.map(r=>`<span class="badge" style="background:${RB[r]||'rgba(124,111,224,.1)'};color:${RC[r]||'var(--acc)'};">${r}</span>`).join(' ')}</td>
-        <td><span style="font-size:11px;color:var(--t2)">${l.note}</span></td>
+        ${isRL()?`<td><span style="font-size:11px;color:var(--t2)">${l.note}</span></td>`:''}
       </tr>`).join('')}</tbody></table>
     </div>`).join('')||'<div class="empty"><i class="ti ti-trophy"></i><p>No loot items match these filters.</p></div>';
 }
@@ -3745,7 +3799,7 @@ function switchAppTab(el,tab){appTab=tab;document.querySelectorAll('#page-rl-rev
 function decideApp(id,decision){
   const a=applications.find(x=>x.id===id);if(!a)return;
   a.status=decision;
-  if(decision==='approved'&&!gp(a.name)){ROSTER.push({name:a.name,cls:a.cls,spec:a.spec,flexSpec:a.flexSpec||'',type:a.role,dispel:[],interrupt:0,present:false,resFrost:false,resNature:false,resFire:false});}
+  if(decision==='approved'&&!gp(a.name)){ROSTER.push({name:a.name,cls:a.cls,spec:a.spec,flexSpec:a.flexSpec||'',type:a.role,dispel:[],interrupt:0,present:false,resFrost:false,resNature:false,resFire:false});saveRoster();}
   updatePendingBadge();renderRLReview();toast(`Application ${decision}!`,decision==='approved'?'ok':'err');
 }
 function updatePendingBadge(){const n=applications.filter(a=>a.status==='pending').length;const b=document.getElementById('pending-badge');if(b){b.textContent=n;b.style.display=n>0?'inline':'none';}}
@@ -3800,11 +3854,9 @@ function switchRaidsTab(tab){
 }
 function renderRaids(){
   const todK=todayKey();
-  const twoWeeksOut=new Date();twoWeeksOut.setDate(twoWeeksOut.getDate()+14);
-  const twoWeeksKey=ikey(twoWeeksOut);
   let raids=[...raidSchedule].sort((a,b)=>a.date.localeCompare(b.date));
   if(raidsTab==='upcoming'){
-    raids=raids.filter(r=>(!isPast(r.date)||r.date===todK)&&r.date<=twoWeeksKey);
+    raids=raids.filter(r=>!isPast(r.date)||r.date===todK);
   } else {
     // Archived = past raids, newest first
     raids=raids.filter(r=>isPast(r.date)&&r.date!==todK).sort((a,b)=>b.date.localeCompare(a.date));
@@ -3815,18 +3867,19 @@ function renderRaids(){
   document.getElementById('raids-list').innerHTML=raids.length
     ?raids.map((r,i)=>fullRaidCard(r,highlightIds.has(r.id))).join('')
     :'<div class="empty"><i class="ti ti-calendar-off"></i><p>'+
-      (raidsTab==='upcoming'?'No raids in the next 2 weeks.':'No archived raids.')+
+      (raidsTab==='upcoming'?'No upcoming raids.':'No archived raids.')+
       '</p></div>';
 }
 function compactRaidCard(r){
-  const pct=Math.min(100,Math.round((r.signedUp.length/r.max)*100));
+  const confirmedPct=Math.min(100,Math.round((r.confirmed?.length||0)/r.max*100));
   const todK=todayKey();const isT=r.date===todK;const past=isPast(r.date)&&!isT;
   return`<div class="rec ${past?'pst':isT?'ton':'upc'}" style="margin-bottom:8px">
     <div class="rec-name">${r.name}${r.pug?'<span class="badge" style="background:rgba(192,57,43,.12);color:#e07b72;border:0.5px solid rgba(192,57,43,.3)">PUG</span>':''}</div>
-    <div class="rec-meta"><span><i class="ti ti-clock"></i>${r.start}–${r.end}${r.extra>0?' (+'+r.extra+'m)':''}</span><span><i class="ti ti-users"></i>${r.signedUp.length}/${r.max}</span></div>
-    <div class="pb"><div class="pf" style="width:${pct}%;background:${pct>=100?'var(--red)':'var(--gre)'}"></div></div>
+    <div class="rec-meta"><span><i class="ti ti-clock"></i>${r.start}–${r.end}${r.extra>0?' (+'+r.extra+'m)':''}</span><span><i class="ti ti-forms"></i>${r.signedUp.length} signed up</span><span><i class="ti ti-users"></i>${r.confirmed?.length||0}/${r.max} confirmed</span></div>
+    <div class="pb"><div class="pf" style="width:${confirmedPct}%;background:${confirmedPct>=100?'var(--red)':'var(--gre)'}"></div></div>
     <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-      ${!past&&canInteract()?`<button class="btn btn-s btn-sm" onclick="signUp('${r.id}')"><i class="ti ti-user-plus"></i>Sign up</button>`:''}
+      ${!past&&canInteract()&&!(isNamed()&&r.signedUp.includes(CURRENT_USER.name))?`<button class="btn btn-s btn-sm" onclick="signUp('${r.id}')"><i class="ti ti-user-plus"></i>Sign up</button>`:''}
+      ${!past&&isNamed()&&r.signedUp.includes(CURRENT_USER.name)?`<button class="btn btn-w btn-sm" onclick="unSignUp('${r.id}')"><i class="ti ti-user-minus"></i>Unsign</button>`:''}
       <button class="btn btn-sm" onclick="addToICal('${r.id}')"><i class="ti ti-calendar-plus"></i>Add to calendar</button>
     </div>
   </div>`;
@@ -4014,7 +4067,8 @@ function fullRaidCard(r,highlight){
     ${absentSection}
     <hr class="rec-divider">
     <div style="display:flex;gap:6px;flex-wrap:wrap">
-      ${!past?`<button class="btn btn-s btn-sm" onclick="signUp('${r.id}')"><i class="ti ti-user-plus"></i>Sign up</button>`:''}
+      ${!past&&!(isNamed()&&r.signedUp.includes(CURRENT_USER.name))?`<button class="btn btn-s btn-sm" onclick="signUp('${r.id}')"><i class="ti ti-user-plus"></i>Sign up</button>`:''}
+      ${!past&&isNamed()&&r.signedUp.includes(CURRENT_USER.name)?`<button class="btn btn-w btn-sm" onclick="unSignUp('${r.id}')"><i class="ti ti-user-minus"></i>Unsign</button>`:''}
       <button class="btn btn-sm" onclick="addToICal('${r.id}')"><i class="ti ti-calendar-plus"></i>Add to calendar</button>
       ${isRL()&&!past?`<button class="btn btn-w btn-sm" onclick="postRoster('${r.id}')"><i class="ti ti-list"></i>${r.rosterPosted?'Update roster':'Post roster'}</button>`:''}
       ${isRL()&&!past?`<button class="btn btn-sm" onclick="togglePUG('${r.id}')"><i class="ti ti-users"></i>${r.pug?'Remove PUG':'Mark PUG'}</button>`:''}
@@ -4031,21 +4085,33 @@ function buildRosterPost(r){
   const sugMT=tanks[0]||'—';
   return`=== ${r.name.toUpperCase()} ===\n${fmtKey(r.date)} · ${r.start}–${r.end}\nRL: ${r.rl}\nSuggested MT: ${sugMT}\nTANKS(${tanks.length}): ${tanks.join(', ')||'—'}\nHEALERS(${healers.length}): ${healers.join(', ')||'—'}\nDPS(${dps.length}): ${dps.join(', ')||'—'}\nActive: ${active.length}/${r.max}`;
 }
+function unSignUp(raidId){
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r||!isNamed())return;
+  const name=CURRENT_USER.name;
+  if(!r.signedUp.includes(name)){toast('You are not signed up for this raid','err');return;}
+  r.signedUp=r.signedUp.filter(n=>n!==name);
+  if(r.confirmed)r.confirmed=r.confirmed.filter(n=>n!==name);
+  renderRaids();renderCalendar();
+  toast('Removed from '+r.name,'ok');
+}
 function quickSignUp(raidId, name){
+  if(isNamed()&&name!==CURRENT_USER.name){toast('You can only sign up yourself','warn');return;}
   const r=raidSchedule.find(x=>x.id===raidId);
   if(!r) return;
   if(r.signedUp.includes(name)){toast(name+' is already signed up!','err');return;}
-  if(r.signedUp.length>=r.max){toast('Raid is full!','err');return;}
+  if(r.signedUp.length>=SIGNUP_POOL_MAX){toast('Sign-up queue is full ('+SIGNUP_POOL_MAX+' max)','err');return;}
   r.signedUp.push(name);
   renderRaids();renderCalendar();
   toast(name+' signed up for '+r.name+'!','ok');
 }
 
 function signUp(raidId){
-  const name=prompt('Your in-game name to sign up:');if(!name||!name.trim())return;
+  let n;
+  if(isNamed()){n=CURRENT_USER.name;}
+  else{const name=prompt('Your in-game name to sign up:');if(!name||!name.trim())return;n=name.trim();}
   const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
-  const n=name.trim();
   if(r.signedUp.includes(n)){toast('Already signed up!','err');return;}
+  if(r.signedUp.length>=SIGNUP_POOL_MAX){toast('Sign-up queue is full ('+SIGNUP_POOL_MAX+' max)','err');return;}
   r.signedUp.push(n);
   if(!r.confirmed) r.confirmed=[];
   // Roster members get auto-queued (RL still confirms); external players need manual review
@@ -4387,18 +4453,18 @@ function restoreSidebarState(){
 }
 
 window.onload=function(){
+  try{const sr=localStorage.getItem('boogalo-roster');if(sr){const r=JSON.parse(sr);if(Array.isArray(r)&&r.length)ROSTER=r;}}catch(e){}
+  try{const sw=localStorage.getItem('boogalo-weights');if(sw){const w=JSON.parse(sw);if(w&&typeof w==='object')playerWeights=w;}}catch(e){}
   restoreSidebarState();
   seedRaids();
   initTheme();
   startRaidTimer();
-  // Restore last login from localStorage
+  // Restore last login from localStorage — auto sign back in on refresh
   try{
     const saved=localStorage.getItem('boogalo-lastuser');
     if(saved){
       const p=ROSTER.find(x=>x.name===saved);
-      if(p){
-        document.getElementById('auth-name').value=p.name;
-      }
+      if(p){setView('participant',p);}
     }
   }catch(e){}
   seedReviews();
