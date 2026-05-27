@@ -491,7 +491,8 @@ tr:hover td{background:rgba(255,255,255,.013)}
   <div class="card">
     <div class="ct"><i class="ti ti-layout-columns" style="color:var(--acc)"></i>Raid Groups</div>
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:4px" id="group-grid"></div>
-    <div style="margin-top:8px;font-size:10px;color:var(--t3)">Greyed out = absent tonight</div>
+    <div id="group-unassigned" style="display:none;margin-top:8px"></div>
+    <div style="margin-top:6px;font-size:10px;color:var(--t3)">Greyed out = absent tonight</div>
   </div>
   <div class="card" id="roles-overridden-card">
     <div class="ct"><i class="ti ti-switch-horizontal" style="color:var(--ora)"></i>Tonight's Role Overrides</div>
@@ -901,6 +902,34 @@ function saveVortexRequests(){
   try{localStorage.setItem('boogalo-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}
   fbSet('vortexRequests', vortexRequests.length?vortexRequests:null);
 }
+function saveHealerTanks(){
+  try{localStorage.setItem('boogalo-healerTanks',JSON.stringify(healerTanks));}catch(e){}
+  fbSet('healerTanks', healerTanks);
+}
+function saveGroups(){
+  try{localStorage.setItem('boogalo-groups',JSON.stringify(groups));}catch(e){}
+  fbSet('groups', groups);
+}
+// ---- Group & healer-tank edit functions (RL only) ----
+function addToGroup(gi,name){
+  if(!name||!isRL()) return;
+  // Remove from any current group first
+  groups.forEach(g=>{const i=g.indexOf(name);if(i!==-1)g.splice(i,1);});
+  groups[gi].push(name);
+  saveGroups(); renderRoles();
+}
+function removeFromGroup(gi,name){
+  if(!isRL()) return;
+  groups[gi]=groups[gi].filter(n=>n!==name);
+  saveGroups(); renderRoles();
+}
+function setHealerTankAssignment(healer,tank){
+  if(!isRL()) return;
+  let h=healerTanks.find(x=>x.healer===healer);
+  if(h) h.tank=tank;
+  else healerTanks.push({healer,tank});
+  saveHealerTanks(); renderRoles();
+}
 // Sort players by weight (desc) then by class priority within same weight
 function sortByWeight(players, role, classPriority){
   return [...players].sort((a,b)=>{
@@ -925,23 +954,23 @@ let roleOverrides={}; // {playerName: 'Melee'|'Ranged'|null}
 function effectiveRole(p){return roleOverrides[p.name]||p.type;}
 function effectiveType(name){const p=gp(name);return p?effectiveRole(p):'';}
 
-const HEALER_TANKS=[
-  {healer:'Vvambull',tank:'Xullue',note:'MT healer — Earth Shield on MT'},
-  {healer:'Leundeadpres',tank:'Holsteinbeef',note:'Guardian Druid tank'},
-  {healer:'Sappheal',tank:'Frostor',note:'Warrior OT'},
-  {healer:'Unholysparkz',tank:'Cadbaladin',note:'Paladin tank — Beacon chain'},
-  {healer:'Enchanter',tank:'General raid',note:'Circle of Healing — raid wide'},
-  {healer:'Swagmon',tank:'General raid',note:'Chain Heal + OT coverage'},
-  {healer:'Palastuff',tank:'General raid',note:'Holy Light spam + Beacon'},
-  {healer:'Kalaveijo',tank:'General raid',note:'Backup + flex tank coverage'},
-  {healer:'Tinybm',tank:'General raid',note:'Wild Growth + HoTs'},
+let healerTanks=[
+  {healer:'Vvambull',tank:'Xullue'},
+  {healer:'Leundeadpres',tank:'Holsteinbeef'},
+  {healer:'Sappheal',tank:'Frostor'},
+  {healer:'Unholysparkz',tank:'Cadbaladin'},
+  {healer:'Enchanter',tank:'General raid'},
+  {healer:'Swagmon',tank:'General raid'},
+  {healer:'Palastuff',tank:'General raid'},
+  {healer:'Kalaveijo',tank:'General raid'},
+  {healer:'Tinybm',tank:'General raid'},
 ];
 
-const GROUPS=[
+let groups=[
   ['Xullue','Holsteinbeef','Cadbaladin','Frostor','Wolvke'],
   ['Cakemon','Csoti','Teeko','Oilsmoke','Communicator'],
   ['Hatthor','Zandalai','Qhan','Dethclok','Macknetron'],
-  ['Brudersilik','Mantine','Noonii','Moondoggo',],
+  ['Brudersilik','Mantine','Noonii','Moondoggo'],
   ['Vvambull','Leundeadpres','Enchanter','Sappheal','Swagmon'],
 ];
 
@@ -953,7 +982,7 @@ const GROUPS=[
 function getMagHealerForTank(role){
   if(role.includes('OT')||role.includes('Off')){
     const ots=ROSTER.filter(p=>p.type==='Tank'&&p.name!==getMT()&&p.present);
-    return ots.map(t=>HEALER_TANKS.find(h=>h.tank===t.name)?.healer||'').filter(Boolean)[0]||'';
+    return ots.map(t=>healerTanks.find(h=>h.tank===t.name)?.healer||'').filter(Boolean)[0]||'';
   }
   return '';
 }
@@ -1197,7 +1226,7 @@ function setView(v, user){
     document.querySelector('#nav-rl .ni')?.click();
     // Push all local data to Firebase so every client gets seeded on RL login
     setTimeout(()=>{
-      saveRoster(); saveRaids(); saveVortex(); saveWeights(); saveAlts(); saveRoleOverrides();
+      saveRoster(); saveRaids(); saveVortex(); saveWeights(); saveAlts(); saveRoleOverrides(); saveHealerTanks(); saveGroups();
       if(applications.length) saveApplications();
       if(specRequests.length) saveSpecRequests();
       if(reviews.length) saveReviews();
@@ -2116,13 +2145,45 @@ function renderRoles(){
   }
   // groups
   const gg=document.getElementById('group-grid');
-  gg.innerHTML=GROUPS.map((g,i)=>`<div style="background:var(--bg3);border-radius:var(--r);padding:8px"><div style="font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Group ${i+1}</div>${g.map(n=>{const p=gp(n);return`<div style="padding:2px 0">${pill(n,!(p?.present??true))}</div>`;}).join('')}</div>`).join('');
-  // healer-tank
-  // Auto-assign healers to tanks with class priority: Priests > Paladins > Druids > Shamans
-  const htAssignments = autoAssignHealers(pr);
-  document.getElementById('ht-assign').innerHTML=htAssignments.map(a=>
-    `<div class="rrow">${pill(a.healer)}<i class="ti ti-arrow-right" style="color:var(--t3);font-size:11px"></i><strong style="font-size:12px;color:var(--t2)">${a.tank}</strong><span style="font-size:10px;color:var(--t3);margin-left:auto">${a.note}</span></div>`
-  ).join('') || '<div style="font-size:11px;color:var(--t3)">No healers present</div>';
+  const rosterNames=ROSTER.map(p=>p.name);
+  const groupedNames=new Set(groups.flat());
+  const unassigned=rosterNames.filter(n=>!groupedNames.has(n));
+  gg.innerHTML=groups.map((g,i)=>`
+    <div style="background:var(--bg3);border-radius:var(--r);padding:8px">
+      <div style="font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Group ${i+1}</div>
+      ${g.map(n=>{const p=gp(n);return`<div style="display:flex;align-items:center;gap:2px;padding:1px 0">
+        ${pill(n,!(p?.present??true))}
+        ${isRL()?`<button onclick="removeFromGroup(${i},'${n}')" title="Remove from group" style="background:none;border:none;color:var(--t3);cursor:pointer;padding:0 3px;font-size:13px;line-height:1;flex-shrink:0;opacity:.6" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.6">×</button>`:''}
+      </div>`;}).join('')}
+      ${isRL()?`<select onchange="addToGroup(${i},this.value);this.value=''" style="margin-top:5px;font-size:10px;width:100%;background:var(--bg2);border:1px solid var(--borderl);border-radius:4px;padding:2px 4px;color:var(--t2)">
+        <option value="">＋ Add player</option>
+        ${ROSTER.map(p=>`<option value="${p.name}">${p.name}${g.includes(p.name)?' ✓':''}</option>`).join('')}
+      </select>`:''}
+    </div>`).join('');
+  if(isRL()&&unassigned.length){
+    const ua=document.getElementById('group-unassigned');
+    if(ua){ua.style.display='block';ua.innerHTML=`<span style="font-size:10px;color:var(--ora)"><i class="ti ti-alert-triangle"></i> Not in any group: ${unassigned.map(n=>pill(n)).join(' ')}</span>`;}
+  } else {
+    const ua=document.getElementById('group-unassigned');if(ua)ua.style.display='none';
+  }
+  // healer→tank assignments (editable in RL view, read-only otherwise)
+  const presentHealers=pr.filter(p=>effectiveRole(p)==='Healer');
+  // Auto-add any present healer missing from healerTanks
+  presentHealers.forEach(h=>{if(!healerTanks.find(x=>x.healer===h.name))healerTanks.push({healer:h.name,tank:'General raid'});});
+  const allTanks=ROSTER.filter(p=>p.type==='Tank');
+  document.getElementById('ht-assign').innerHTML=presentHealers.length?
+    presentHealers.map(h=>{
+      const ht=healerTanks.find(x=>x.healer===h.name)||{healer:h.name,tank:'General raid'};
+      if(isRL()){
+        return `<div class="rrow">${pill(h.healer)}<i class="ti ti-arrow-right" style="color:var(--t3);font-size:11px"></i>
+          <select onchange="setHealerTankAssignment('${h.healer}',this.value)" style="font-size:10px;width:auto;background:var(--bg3);border:1px solid var(--borderl);border-radius:4px;padding:2px 5px;color:var(--t2)">
+            ${allTanks.map(t=>`<option${ht.tank===t.name?' selected':''}>${t.name}</option>`).join('')}
+            <option${ht.tank==='General raid'?' selected':''}>General raid</option>
+          </select></div>`;
+      }
+      return `<div class="rrow">${pill(h.healer)}<i class="ti ti-arrow-right" style="color:var(--t3);font-size:11px"></i><strong style="font-size:12px;color:var(--t2)">${ht.tank}</strong></div>`;
+    }).join('')
+    :'<div style="font-size:11px;color:var(--t3)">No healers present</div>';
 }
 
 function setRoleOverride(name,role){
@@ -4728,6 +4789,25 @@ function initFirebaseSync(){
     _fbIgnore=false;
     renderVortex?.();
   });
+  // healerTanks
+  fbListen('healerTanks', data=>{
+    const d=_fbArr(data);if(!d.length)return;
+    _fbIgnore=true; _fbSync(healerTanks,d);
+    try{localStorage.setItem('boogalo-healerTanks',JSON.stringify(healerTanks));}catch(e){}
+    _fbIgnore=false;
+    renderRoles?.();
+  });
+  // groups (array of arrays — inner arrays may come back as objects)
+  fbListen('groups', data=>{
+    if(!data) return;
+    const outer=_fbArr(data);if(!outer.length)return;
+    _fbIgnore=true;
+    groups.length=0;
+    outer.forEach(g=>groups.push(_fbArr(g)));
+    try{localStorage.setItem('boogalo-groups',JSON.stringify(groups));}catch(e){}
+    _fbIgnore=false;
+    renderRoles?.();
+  });
 }
 
 window.onload=function(){
@@ -4741,6 +4821,8 @@ window.onload=function(){
   try{const ssp=localStorage.getItem('boogalo-specRequests');if(ssp){const s=JSON.parse(ssp);if(Array.isArray(s))s.forEach(x=>specRequests.push(x));}}catch(e){}
   try{const srv=localStorage.getItem('boogalo-reviews');if(srv){const d=JSON.parse(srv);if(d&&Array.isArray(d.list))d.list.forEach(x=>reviews.push(x));if(d&&d.stars&&typeof d.stars==='object')Object.assign(reviewStars,d.stars);}}catch(e){}
   try{const svr=localStorage.getItem('boogalo-vortexRequests');if(svr){const v=JSON.parse(svr);if(Array.isArray(v))v.forEach(x=>vortexRequests.push(x));}}catch(e){}
+  try{const sht=localStorage.getItem('boogalo-healerTanks');if(sht){const h=JSON.parse(sht);if(Array.isArray(h)&&h.length){healerTanks.length=0;h.forEach(x=>healerTanks.push(x));}}}catch(e){}
+  try{const sg=localStorage.getItem('boogalo-groups');if(sg){const g=JSON.parse(sg);if(Array.isArray(g)&&g.length){groups.length=0;g.forEach(x=>groups.push(Array.isArray(x)?x:[])); }}}catch(e){}
   restoreSidebarState();
   seedRaids();
   initFirebaseSync();
