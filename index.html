@@ -1267,18 +1267,19 @@ function startRaidTimer(){
       .sort((a,b)=>a.date.localeCompare(b.date)||a.start.localeCompare(b.start));
     const el=document.getElementById('raid-timer');
     if(!upcoming.length||!el){if(el)el.style.display='none';return;}
-    const next=upcoming[0];
-    const [hh,mm]=next.start.split(':').map(Number);
-    const target=new Date(next.date+'T'+next.start+':00');
+    // All raids on the earliest upcoming date
+    const nextDate=upcoming[0].date;
+    const dayRaids=upcoming.filter(r=>r.date===nextDate);
+    const first=dayRaids[0]; // earliest start time on that day (for countdown)
+    const target=new Date(first.date+'T'+first.start+':00');
     const diff=target-now;
     if(diff<0&&diff>-3600000){
       // Raid is live
       document.getElementById('timer-label').textContent='LIVE NOW';
-      document.getElementById('timer-name').textContent=next.name;
+      document.getElementById('timer-name').textContent=dayRaids.map(r=>r.name).join(' · ');
       document.getElementById('timer-date').textContent='';
       el.style.display='block';
       el.style.background='rgba(26,158,114,.18)';
-      el.querySelector('.ti-clock')?.remove();
       return;
     }
     if(diff<0){el.style.display='none';return;}
@@ -1294,8 +1295,8 @@ function startRaidTimer(){
     else if(mins>0) label=mins+'m '+secs+'s';
     else label=secs+'s';
     document.getElementById('timer-label').textContent=label;
-    document.getElementById('timer-name').textContent=next.name;
-    document.getElementById('timer-date').textContent=fmtKey(next.date)+' · '+next.start;
+    document.getElementById('timer-name').textContent=dayRaids.map(r=>r.name).join(' · ');
+    document.getElementById('timer-date').textContent=fmtKey(nextDate)+(dayRaids.length===1?' · '+first.start:'');
   }
   tick();
   timerInterval=setInterval(tick,1000);
@@ -2243,25 +2244,25 @@ function toggleResWarlock(name,val){const p=gp(name);if(p)p.resFire=val;renderRe
 // LOOT
 // ============================================================
 const LOOT=[
-  {item:'Dragonspine Trophy',slot:'Trinket',boss:'Maulgar',raid:'Gruul',prio:['Melee','Ranged'],note:"BiS melee/physical trinket — Wolvke, Zandalai, Cakemon, Harryshotter first"},
-  {item:'Pauldrons of the Fallen Hero (T4)',slot:'Shoulders',boss:'Maulgar',raid:'Gruul',prio:['Rogue','Shaman','Druid'],note:'T4 token — Rogues first, then Enh Shaman'},
-  {item:'Pauldrons of the Fallen Champion (T4)',slot:'Shoulders',boss:'Maulgar',raid:'Gruul',prio:['Hunter','Mage'],note:'T4 — Mage 2pc first, Hunter after'},
-  {item:"Netherwing Essence Shard",slot:'Trinket',boss:'Magtheridon',raid:'Mag',prio:['Tank'],note:'Tank survivability trinket — Xullue, Frostor, Cadbaladin'},
-  {item:"Magtheridon's Head",slot:'Quest',boss:'Magtheridon',raid:'Mag',prio:['All'],note:'Stat buff quest — turn in weekly without fail'},
-  {item:"Helm of the Fallen Champion (T5)",slot:'Head',boss:'Void Reaver',raid:'TK',prio:['Mage','Hunter'],note:'Mage 2pc BiS. Hunter: complete 4pc Rift Stalker.'},
-  {item:"Helm of the Fallen Defender (T5)",slot:'Head',boss:'Void Reaver',raid:'TK',prio:['Priest','Warlock'],note:'Holy Priests first, then Shadow/Warlock'},
-  {item:"Thalassian Wildercloak",slot:'Cloak',boss:"Kael'thas",raid:'TK',prio:['Hunter','Rogue'],note:'Premier hunter cloak — Harryshotter'},
-  {item:"The Sun King's Talisman",slot:'Trinket',boss:"Kael'thas",raid:'TK',prio:['Mage','Shaman'],note:'Spellpower trinket — Mantine, Moondoggo'},
-  {item:"Gloves of the Fallen Hero (T5)",slot:'Hands',boss:'Hydross',raid:'SSC',prio:['Rogue','Shaman','Druid'],note:'Rogue 4pc Deathmantle priority — Cakemon, Csoti'},
-  {item:"Tsunami Talisman",slot:'Trinket',boss:'Lurker',raid:'SSC',prio:['Melee','Hunter'],note:'Top physical DPS trinket — Wolvke, Zandalai, Cakemon first'},
-  {item:"Vestments of the Sea-Witch",slot:'Chest',boss:'Leotheras',raid:'SSC',prio:['Warlock'],note:'Warlock BiS chest — Dethclok first'},
-  {item:"Fathomstone",slot:'Trinket',boss:'Karathress',raid:'SSC',prio:['Ranged','Healer'],note:'Spell crit trinket — Mage/Ele Shaman/Warlock'},
-  {item:"Coilfang Hammer of Renewal",slot:'Mace',boss:'Morogrim',raid:'SSC',prio:['Healer'],note:'Healer weapon — Vvambull, Kalaveijo, Swagmon'},
-  {item:"Vashj's Vial Remnant",slot:'Quest',boss:'Lady Vashj',raid:'SSC',prio:['All'],note:'Required for MH/BT attunement — guild-wide priority'},
-  {item:"The Curator's Leash",slot:'Trinket',boss:'Curator',raid:'Kara',prio:['Tank'],note:'Tank threat trinket — all tanks need this for progression'},
-  {item:"Jade Ring of the Everliving",slot:'Ring',boss:'Moroes',raid:'Kara',prio:['Healer'],note:'Strong healing ring — all healers'},
-  {item:"Ribbon of Sacrifice",slot:'Ring',boss:'Opera',raid:'Kara',prio:['Healer'],note:'Holy Paladin BiS ring — Palastuff, Unholysparkz'},
-  {item:"Nightbane Staff",slot:'Staff',boss:'Nightbane',raid:'Kara',prio:['Healer','Caster'],note:'Strong caster staff — healers or caster DPS'},
+  {item:'Dragonspine Trophy',slot:'Trinket',boss:'Maulgar',raid:'Gruul',prio:['Melee','Ranged'],note:"BiS melee/physical trinket — Wolvke, Zandalai, Cakemon, Harryshotter first",wowheadId:28830},
+  {item:'Pauldrons of the Fallen Hero (T4)',slot:'Shoulders',boss:'Maulgar',raid:'Gruul',prio:['Rogue','Shaman','Druid'],note:'T4 token — Rogues first, then Enh Shaman',wowheadId:29762},
+  {item:'Pauldrons of the Fallen Champion (T4)',slot:'Shoulders',boss:'Maulgar',raid:'Gruul',prio:['Hunter','Mage'],note:'T4 — Mage 2pc first, Hunter after',wowheadId:29763},
+  {item:"Netherwing Essence Shard",slot:'Trinket',boss:'Magtheridon',raid:'Mag',prio:['Tank'],note:'Tank survivability trinket — Xullue, Frostor, Cadbaladin',wowheadId:28789},
+  {item:"Magtheridon's Head",slot:'Quest',boss:'Magtheridon',raid:'Mag',prio:['All'],note:'Stat buff quest — turn in weekly without fail',wowheadId:32385},
+  {item:"Helm of the Fallen Champion (T5)",slot:'Head',boss:'Void Reaver',raid:'TK',prio:['Mage','Hunter'],note:'Mage 2pc BiS. Hunter: complete 4pc Rift Stalker.',wowheadId:30242},
+  {item:"Helm of the Fallen Defender (T5)",slot:'Head',boss:'Void Reaver',raid:'TK',prio:['Priest','Warlock'],note:'Holy Priests first, then Shadow/Warlock',wowheadId:30243},
+  {item:"Thalassian Wildercloak",slot:'Cloak',boss:"Kael'thas",raid:'TK',prio:['Hunter','Rogue'],note:'Premier hunter cloak — Harryshotter',wowheadId:29994},
+  {item:"The Sun King's Talisman",slot:'Trinket',boss:"Kael'thas",raid:'TK',prio:['Mage','Shaman'],note:'Spellpower trinket — Mantine, Moondoggo',wowheadId:30015},
+  {item:"Gloves of the Fallen Hero (T5)",slot:'Hands',boss:'Hydross',raid:'SSC',prio:['Rogue','Shaman','Druid'],note:'Rogue 4pc Deathmantle priority — Cakemon, Csoti',wowheadId:30241},
+  {item:"Tsunami Talisman",slot:'Trinket',boss:'Lurker',raid:'SSC',prio:['Melee','Hunter'],note:'Top physical DPS trinket — Wolvke, Zandalai, Cakemon first',wowheadId:30627},
+  {item:"Vestments of the Sea-Witch",slot:'Chest',boss:'Leotheras',raid:'SSC',prio:['Warlock'],note:'Warlock BiS chest — Dethclok first',wowheadId:30107},
+  {item:"Fathomstone",slot:'Trinket',boss:'Karathress',raid:'SSC',prio:['Ranged','Healer'],note:'Spell crit trinket — Mage/Ele Shaman/Warlock',wowheadId:30049},
+  {item:"Coilfang Hammer of Renewal",slot:'Mace',boss:'Morogrim',raid:'SSC',prio:['Healer'],note:'Healer weapon — Vvambull, Kalaveijo, Swagmon',wowheadId:24378},
+  {item:"Vashj's Vial Remnant",slot:'Quest',boss:'Lady Vashj',raid:'SSC',prio:['All'],note:'Required for MH/BT attunement — guild-wide priority',wowheadId:29906},
+  {item:"The Curator's Leash",slot:'Trinket',boss:'Curator',raid:'Kara',prio:['Tank'],note:'Tank threat trinket — all tanks need this for progression',wowheadId:0},
+  {item:"Jade Ring of the Everliving",slot:'Ring',boss:'Moroes',raid:'Kara',prio:['Healer'],note:'Strong healing ring — all healers',wowheadId:28763},
+  {item:"Ribbon of Sacrifice",slot:'Ring',boss:'Opera',raid:'Kara',prio:['Healer'],note:'Holy Paladin BiS ring — Palastuff, Unholysparkz',wowheadId:28590},
+  {item:"Nightbane Staff",slot:'Staff',boss:'Nightbane',raid:'Kara',prio:['Healer','Caster'],note:'Strong caster staff — healers or caster DPS',wowheadId:28604},
 ];
 
 let lootTab='prio';
@@ -2283,7 +2284,7 @@ function renderLoot(){
       <div class="ct"><i class="ti ti-trophy" style="color:var(--gold)"></i>${{Gruul:"Gruul's Lair",Mag:"Magtheridon",TK:'Tempest Keep',SSC:'Serpent Shrine Cavern',Kara:'Karazhan'}[raid]}</div>
       <table><thead><tr><th>Item</th><th>Slot</th><th>Boss</th><th>Priority</th>${isRL()?'<th>Note</th>':''}</tr></thead>
       <tbody>${items.map(l=>`<tr>
-        <td><strong style="color:var(--gold)">${l.item}</strong></td>
+        <td>${l.wowheadId?`<a href="https://www.wowhead.com/tbc/item=${l.wowheadId}" target="_blank" rel="noopener" style="color:var(--gold);font-weight:600;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${l.item}</a>`:`<strong style="color:var(--gold)">${l.item}</strong>`}</td>
         <td><span style="font-size:11px;color:var(--t2)">${l.slot}</span></td>
         <td><span style="font-size:11px;color:var(--t3)">${l.boss}</span></td>
         <td>${l.prio.map(r=>`<span class="badge" style="background:${RB[r]||'rgba(124,111,224,.1)'};color:${RC[r]||'var(--acc)'};">${r}</span>`).join(' ')}</td>
