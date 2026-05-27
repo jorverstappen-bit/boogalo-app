@@ -808,6 +808,9 @@ let ROSTER=[
   {name:'Disloyal',cls:'Priest',spec:'Shadow',flexSpec:'',type:'Ranged',dispel:['Magic','Disease'],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
   {name:'Noonii',cls:'Mage',spec:'Arcane',flexSpec:'Frost',type:'Ranged',dispel:['Curse'],interrupt:3,present:true,resFrost:false,resNature:false,resFire:false},
   {name:'Unholysparkz',cls:'Paladin',spec:'Holy',flexSpec:'Protection',type:'Healer',dispel:['Magic','Disease','Poison'],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
+  {name:'Sygrdrifa',cls:'Shaman',spec:'Enhancement',flexSpec:'',type:'Melee',dispel:[],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
+  {name:'Jodazugzug',cls:'Warrior',spec:'Arms',flexSpec:'',type:'Melee',dispel:[],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
+  {name:'kdawg',cls:'Shaman',spec:'Restoration',flexSpec:'Enhancement',type:'Healer',dispel:[],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
 ];
 
 // Nether Vortex tally
@@ -823,35 +826,36 @@ let playerAlts = {'Holysparkz':['Unholysparkz']};
 // Structure: { playerName: { Tank: 1-5, Healer: 1-5, Melee: 1-5, Ranged: 1-5 } }
 // Unique per class role pool. Used for auto-assigning MT, main healers, runners etc.
 let playerWeights = {
-  "Brudersilik":{"Ranged":4,"Tank":1},
+  "Brudersilik":{"Tank":1},
   "Cadbaladin":{"Healer":2,"Melee":1,"Tank":5},
-  "Cakemon":{"Melee":5},
-  "Communicator":{"Healer":1,"Melee":2,"Ranged":2},
+  "Cakemon":{"Melee":4},
+  "Communicator":{"Healer":1,"Melee":1,"Ranged":1},
   "Csoti":{"Melee":1},
-  "Disloyal":{"Healer":1,"Ranged":4},
-  "Enchanter":{"Healer":3,"Ranged":2},
+  "Dethclok":{"Ranged":2},
+  "Disloyal":{"Healer":1,"Ranged":5},
+  "Enchanter":{"Ranged":2},
   "Frostor":{"Melee":2,"Tank":5},
   "Harryshotter":{"Ranged":4},
   "Hatthor":{"Melee":4,"Tank":1},
-  "Holsteinbeef":{"Ranged":1,"Tank":5},
-  "Holysparkz":{"Ranged":5,"Tank":1},
-  "Kalaveijo":{"Melee":1,"Ranged":4},
+  "Holsteinbeef":{"Melee":2,"Ranged":1,"Tank":5},
+  "Holysparkz":{"Ranged":4,"Tank":1},
+  "Kalaveijo":{"Healer":4,"Melee":1,"Ranged":3},
   "Leundeadpres":{"Healer":4,"Ranged":1},
-  "Macknetron":{"Ranged":4,"Tank":4},
+  "Macknetron":{"Tank":4},
   "Mantine":{"Ranged":5,"Tank":1},
   "Moondoggo":{"Tank":3},
   "Noonii":{"Ranged":5,"Tank":1},
-  "Oilsmoke":{"Healer":1,"Melee":5},
+  "Oilsmoke":{"Healer":1,"Melee":5,"Ranged":1},
   "Palastuff":{"Healer":4,"Melee":1,"Tank":4},
-  "Qhan":{"Healer":1,"Ranged":1},
-  "Sappheal":{"Healer":4,"Ranged":1},
-  "Swagmon":{"Healer":5,"Melee":1},
-  "Teeko":{"Healer":1,"Melee":3},
+  "Qhan":{"Healer":1,"Melee":4,"Ranged":1},
+  "Sappheal":{"Healer":5,"Ranged":1},
+  "Swagmon":{"Healer":5,"Melee":1,"Ranged":2},
+  "Teeko":{"Healer":1,"Ranged":1},
   "Tinybm":{"Healer":2,"Melee":1,"Ranged":1,"Tank":1},
-  "Unholysparkz":{"Healer":4,"Melee":1},
-  "Vvambull":{"Healer":5,"Melee":1},
+  "Unholysparkz":{"Healer":5,"Melee":1,"Tank":3},
+  "Vvambull":{"Healer":5,"Melee":1,"Ranged":1},
   "Wolvke":{"Melee":5,"Tank":2},
-  "Xullue":{"Melee":4,"Tank":4},
+  "Xullue":{"Tank":4},
   "Zandalai":{"Tank":1},
   "Zyuu":{"Healer":1,"Melee":2,"Ranged":4,"Tank":2}
 };
@@ -864,7 +868,9 @@ function setWeight(name, role, val){
   saveWeights();
 }
 function saveRoster(){try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}}
-function saveWeights(){try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}}
+function saveWeights(){try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}
+}
+function saveRaids(){try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}}
 // Sort players by weight (desc) then by class priority within same weight
 function sortByWeight(players, role, classPriority){
   return [...players].sort((a,b)=>{
@@ -1191,12 +1197,12 @@ function filterAuthNames(val){
     'Priest':'#e8e8e8','Shaman':'#5ab4f8','Mage':'#69CCF0','Warlock':'#9482C9','Druid':'#FF7D0A'};
   dd.innerHTML=matches.map(p=>`
     <div onclick="selectAuthName('${p.name}')"
-      style="padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)"
+      style="padding:7px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);min-height:44px"
       onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
-      <span style="width:28px;height:28px;border-radius:50%;background:${clsCols[p.cls]||'#aaa'}22;border:1.5px solid ${clsCols[p.cls]||'#aaa'}88;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:${clsCols[p.cls]||'#aaa'};flex-shrink:0">${p.name[0]}</span>
-      <div>
-        <div style="font-size:12px;font-weight:600;color:var(--t1)">${p.name}</div>
-        <div style="font-size:10px;color:var(--t3)">${p.cls} · ${p.spec} · ${p.type}</div>
+      <span style="width:30px;height:30px;border-radius:50%;background:${clsCols[p.cls]||'#aaa'}22;border:1.5px solid ${clsCols[p.cls]||'#aaa'}88;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:${clsCols[p.cls]||'#aaa'};flex-shrink:0">${p.name[0]}</span>
+      <div style="min-width:0;flex:1">
+        <div style="font-size:12px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
+        <div style="font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.cls} · ${p.spec} · ${p.type}</div>
       </div>
     </div>`).join('');
 }
@@ -1511,6 +1517,7 @@ function setAsMain(altName){
   toast(altName+' is now the main character','ok');
 }
 function addAlt(mainName){
+  if(getMainOf(mainName)){toast('Alts can only be added to a main character. Open the main first.','err');return;}
   const alt=prompt('Enter alt character name:');
   if(!alt||!alt.trim()) return;
   if(!playerAlts[mainName]) playerAlts[mainName]=[];
@@ -3937,28 +3944,69 @@ function fullRaidCard(r,highlight){
   const notSignedUp=rosterNames.filter(n=>!r.signedUp.includes(n)&&!r.confirmed.includes(n));
   const notConfirmed=r.signedUp.filter(n=>!r.confirmed.includes(n)&&r.confirmed.length>0);
 
+  // Assignments
+  const asgn=r.assignments||{MT:'',OT1:'',OT2:'',healerTargets:{}};
+  const confirmedTanks=r.confirmed.filter(n=>{const p=gp(n);return p?.type==='Tank'||p?.type==='Mage Tank';});
+  const confirmedHealers=r.confirmed.filter(n=>{const p=gp(n);return p?.type==='Healer';});
+  const assignPanel=isRL()&&!past&&r.confirmed.length?`
+    <hr class="rec-divider">
+    <div style="margin-bottom:10px">
+      <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px"><i class="ti ti-shield-check" style="margin-right:4px"></i>Role Assignments</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        ${['MT','OT1','OT2'].map((role,i)=>`
+        <div class="fg" style="min-width:120px;flex:1;margin-bottom:0">
+          <span class="fl">${['Main Tank','Off-Tank 1','Off-Tank 2'][i]}</span>
+          <select onchange="setRaidRole('${r.id}','${role}',this.value)" style="width:100%">
+            <option value="">— None —</option>
+            ${confirmedTanks.map(n=>`<option value="${n}" ${asgn[role]===n?'selected':''}>${n}</option>`).join('')}
+          </select>
+        </div>`).join('')}
+      </div>
+      ${confirmedHealers.length?`
+      <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px"><i class="ti ti-heart" style="margin-right:4px"></i>Healer Assignments</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        ${confirmedHealers.map(n=>`
+        <div style="display:flex;align-items:center;gap:8px">
+          ${pill(n,false)}
+          <span style="font-size:11px;color:var(--t3)">→</span>
+          <select onchange="setHealerTarget('${r.id}','${n}',this.value)" style="font-size:11px;flex:1;max-width:160px">
+            <option value="Raid" ${(!asgn.healerTargets?.[n]||asgn.healerTargets?.[n]==='Raid')?'selected':''}>Raid heal</option>
+            ${confirmedTanks.map(t=>`<option value="${t}" ${asgn.healerTargets?.[n]===t?'selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>`).join('')}
+      </div>`:''}
+    </div>`:'';
+
+  // Assignments read-only display for non-RL (shown when assignments exist)
+  const assignDisplay=!isRL()&&r.confirmed.length&&(asgn.MT||asgn.OT1||Object.keys(asgn.healerTargets||{}).length)?`
+    <hr class="rec-divider">
+    <div style="margin-bottom:8px">
+      <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px"><i class="ti ti-shield-check"></i> Assignments</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">
+        ${asgn.MT?`<span class="badge" style="background:rgba(200,80,60,.12);color:#e07060;border:0.5px solid rgba(200,80,60,.3)"><i class="ti ti-shield"></i> MT: ${asgn.MT}</span>`:''}
+        ${asgn.OT1?`<span class="badge" style="background:rgba(200,80,60,.08);color:#e07060;border:0.5px solid rgba(200,80,60,.2)"><i class="ti ti-shield-half"></i> OT1: ${asgn.OT1}</span>`:''}
+        ${asgn.OT2?`<span class="badge" style="background:rgba(200,80,60,.08);color:#e07060;border:0.5px solid rgba(200,80,60,.2)"><i class="ti ti-shield-half"></i> OT2: ${asgn.OT2}</span>`:''}
+      </div>
+      ${Object.entries(asgn.healerTargets||{}).length?`
+      <div style="display:flex;flex-wrap:wrap;gap:4px">
+        ${Object.entries(asgn.healerTargets||{}).map(([h,t])=>`
+          <span class="badge" style="background:rgba(26,158,114,.1);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.25)"><i class="ti ti-heart"></i> ${h} → ${t}</span>
+        `).join('')}
+      </div>`:''}
+    </div>`:'';
+
   const rosterSection=r.confirmed.length?`
     <hr class="rec-divider">
     <div style="margin-bottom:10px">
       <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
         <span>Confirmed Roster (${confirmedCount}/${r.max})</span>
-        ${(()=>{
-          const ct=r.confirmed.filter(n=>{const p=gp(n);return p?.type==='Tank';});
-          const ch=r.confirmed.filter(n=>{const p=gp(n);return p?.type==='Healer';});
-          const sugMT=sortByWeight(ct.map(n=>gp(n)).filter(Boolean),'Tank',null)[0];
-          const sugH=sortByWeight(ch.map(n=>gp(n)).filter(Boolean),'Healer',HEALER_CLASS_PRIORITY)[0];
-          let badges='';
-          if(sugMT) badges+='<span class="badge" style="background:rgba(200,80,60,.12);color:#e07060;font-size:10px"><i class="ti ti-shield"></i> MT: '+sugMT.name+'</span> ';
-          if(sugH)  badges+='<span class="badge" style="background:rgba(26,158,114,.1);color:#5DCAA5;font-size:10px"><i class="ti ti-heart"></i> Main Heal: '+sugH.name+'</span>';
-          return badges;
-        })()}
       </div>
       ${['Tank','Mage Tank','Healer','Melee','Ranged'].filter(role=>confByRole[role]&&confByRole[role].length>0).map(role=>`
         <div style="margin-bottom:6px">
           <span class="badge" style="background:${RB[role]};color:${RC[role]};border:0.5px solid ${RC[role]}30;margin-bottom:4px">${role}s (${confByRole[role].length})</span>
           <div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:3px">${confByRole[role].map(n=>pill(n,false)+(isRL()&&!past?`<button onclick="removeFromRaid('${r.id}','`+n+`')" title="Unassign" style="background:none;border:none;cursor:pointer;color:var(--t3);padding:0 2px;font-size:11px" onmouseover="this.style.color='#e07b72'" onmouseout="this.style.color='var(--t3)'">✕</button>`:'') ).join('')}</div>
         </div>`).join('')}
-    </div>`:
+    </div>${assignPanel}${assignDisplay}`:
     `<hr class="rec-divider"><div style="font-size:11px;color:var(--t3);padding:4px 0 10px">No confirmed roster yet.${!past&&isRL()?' Accept sign-ups below.':''}</div>`;
 
   // Sign-up management (RL only, upcoming raids)
@@ -4124,7 +4172,7 @@ function unSignUp(raidId){
   if(!r.signedUp.includes(name)){toast('You are not signed up for this raid','err');return;}
   r.signedUp=r.signedUp.filter(n=>n!==name);
   if(r.confirmed)r.confirmed=r.confirmed.filter(n=>n!==name);
-  renderRaids();renderCalendar();
+  saveRaids();renderRaids();renderCalendar();
   toast('Removed from '+r.name,'ok');
 }
 function quickSignUp(raidId, name){
@@ -4134,7 +4182,7 @@ function quickSignUp(raidId, name){
   if(r.signedUp.includes(name)){toast(name+' is already signed up!','err');return;}
   if(r.signedUp.length>=SIGNUP_POOL_MAX){toast('Sign-up queue is full ('+SIGNUP_POOL_MAX+' max)','err');return;}
   r.signedUp.push(name);
-  renderRaids();renderCalendar();
+  saveRaids();renderRaids();renderCalendar();
   toast(name+' signed up for '+r.name+'!','ok');
 }
 
@@ -4148,7 +4196,7 @@ function signUp(raidId){
   r.signedUp.push(n);
   if(!r.confirmed) r.confirmed=[];
   // Roster members get auto-queued (RL still confirms); external players need manual review
-  renderRaids();renderCalendar();
+  saveRaids();renderRaids();renderCalendar();
   toast(n+' signed up for '+r.name+' — awaiting RL confirmation','ok');
 }
 function toggleRaidEdit(raidId){
@@ -4182,7 +4230,7 @@ function saveRaidEdit(raidId){
   r.rl    = rl;
   r.notes = notes;
   r.status= isPast(date)&&date!==todayKey()?'completed':'upcoming';
-  renderRaids(); renderCalendar();
+  saveRaids();renderRaids();renderCalendar();
   toast('Raid updated','ok');
 }
 
@@ -4192,12 +4240,12 @@ function deleteRaid(raidId){
   if(!r) return;
   if(!confirm('Delete "'+r.name+'" on '+fmtKey(r.date)+'? This cannot be undone.')) return;
   raidSchedule=raidSchedule.filter(x=>x.id!==raidId);
-  renderRaids(); renderCalendar();
+  saveRaids();renderRaids();renderCalendar();
   toast('Raid deleted','ok');
 }
 
-function togglePUG(raidId){const r=raidSchedule.find(x=>x.id===raidId);if(r){r.pug=!r.pug;renderRaids();}}
-function postRoster(raidId){const r=raidSchedule.find(x=>x.id===raidId);if(r){r.rosterPosted=true;renderRaids();toast('Roster posted!','ok');}}
+function togglePUG(raidId){const r=raidSchedule.find(x=>x.id===raidId);if(r){r.pug=!r.pug;saveRaids();renderRaids();}}
+function postRoster(raidId){const r=raidSchedule.find(x=>x.id===raidId);if(r){r.rosterPosted=true;saveRaids();renderRaids();toast('Roster posted!','ok');}}
 
 function acceptSignup(raidId, name){
   const r=raidSchedule.find(x=>x.id===raidId);
@@ -4206,7 +4254,7 @@ function acceptSignup(raidId, name){
   if(r.confirmed.includes(name)){toast(name+' already confirmed','err');return;}
   if(r.confirmed.length>=r.max){toast('Raid is full ('+r.max+'/'+r.max+')','err');return;}
   r.confirmed.push(name);
-  renderRaids();
+  saveRaids();renderRaids();
   toast(name+' confirmed for '+r.name,'ok');
 }
 
@@ -4215,7 +4263,7 @@ function declineSignup(raidId, name){
   if(!r||!isRL()) return;
   r.signedUp=r.signedUp.filter(n=>n!==name);
   if(r.confirmed) r.confirmed=r.confirmed.filter(n=>n!==name);
-  renderRaids();
+  saveRaids();renderRaids();
   toast(name+' removed from sign-up list','ok');
 }
 
@@ -4227,7 +4275,7 @@ function acceptAllSignups(raidId){
   const slots=r.max-r.confirmed.length;
   const toAdd=pending.slice(0,slots);
   r.confirmed=[...r.confirmed,...toAdd];
-  renderRaids();
+  saveRaids();renderRaids();
   toast('Accepted '+toAdd.length+' players'+(toAdd.length<pending.length?' (raid full, '+( pending.length-toAdd.length)+' skipped)':''),'ok');
 }
 
@@ -4270,7 +4318,7 @@ function autoFillByWeight(raidId){
 
   const toAdd=ordered.slice(0,slots).map(p=>p.name);
   r.confirmed=[...r.confirmed,...toAdd];
-  renderRaids();
+  saveRaids();renderRaids();
   toast('Auto-filled '+toAdd.length+' players by weight (Tanks → Healers → DPS)','ok');
 }
 
@@ -4279,7 +4327,7 @@ function declineAllSignups(raidId){
   if(!r||!isRL()) return;
   const pending=r.signedUp.filter(n=>!r.confirmed.includes(n));
   r.signedUp=r.signedUp.filter(n=>r.confirmed.includes(n));
-  renderRaids();
+  saveRaids();renderRaids();
   toast('Cleared '+pending.length+' pending sign-ups','ok');
 }
 
@@ -4287,8 +4335,21 @@ function removeFromRaid(raidId, name){
   const r=raidSchedule.find(x=>x.id===raidId);
   if(!r||!isRL()) return;
   r.confirmed=(r.confirmed||[]).filter(n=>n!==name);
-  renderRaids();
+  saveRaids();renderRaids();
   toast(name+' removed from confirmed roster','ok');
+}
+function setRaidRole(raidId, role, name){
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r||!isRL())return;
+  if(!r.assignments)r.assignments={MT:'',OT1:'',OT2:'',healerTargets:{}};
+  r.assignments[role]=name;
+  saveRaids();renderRaids();
+}
+function setHealerTarget(raidId, healer, target){
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r||!isRL())return;
+  if(!r.assignments)r.assignments={MT:'',OT1:'',OT2:'',healerTargets:{}};
+  if(!r.assignments.healerTargets)r.assignments.healerTargets={};
+  r.assignments.healerTargets[healer]=target;
+  saveRaids();renderRaids();
 }
 function addToICal(raidId){
   const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
@@ -4488,6 +4549,7 @@ function restoreSidebarState(){
 window.onload=function(){
   try{const sr=localStorage.getItem('boogalo-roster');if(sr){const r=JSON.parse(sr);if(Array.isArray(r)&&r.length)ROSTER=r;}}catch(e){}
   try{const sw=localStorage.getItem('boogalo-weights');if(sw){const w=JSON.parse(sw);if(w&&typeof w==='object')playerWeights=w;}}catch(e){}
+  try{const srd=localStorage.getItem('boogalo-raids');if(srd){const r=JSON.parse(srd);if(Array.isArray(r)&&r.length)raidSchedule=r;}}catch(e){}
   restoreSidebarState();
   seedRaids();
   initTheme();
