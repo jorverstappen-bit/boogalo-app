@@ -4728,7 +4728,7 @@ function initFirebaseSync(){
     }finally{_fbIgnore=false;}
   }
   // Single root SSE connection (was 12 per-path connections — saturated the connection pool)
-  const es=new EventSource(`${FIREBASE_DB}.json`);
+  const es=new EventSource(`${FIREBASE_DB}/.json`);
   es.addEventListener('put',e=>{
     try{
       const d=JSON.parse(e.data);
