@@ -1010,6 +1010,7 @@ function addToRaidGroup(raidId,gi,name){
   if(!name||!isRL()) return;
   const r=raidSchedule.find(x=>x.id===raidId); if(!r) return;
   if(!r.raidGroups) r.raidGroups=[[],[],[],[],[]];
+  if(r.raidGroups[gi]?.length>=5){toast('Group '+(gi+1)+' is full (max 5)','err');return;}
   r.raidGroups.forEach(g=>{const i=g.indexOf(name);if(i!==-1)g.splice(i,1);});
   r.raidGroups[gi].push(name);
   saveRaids(); renderRaids();
@@ -1027,9 +1028,12 @@ function autoAssignRaidGroups(raidId){
   const conf=r.confirmed.map(n=>gp(n)).filter(Boolean);
   const g=[[],[],[],[],[]];
   const placed=new Set();
-  const place=(p,gi)=>{if(p&&!placed.has(p.name)){g[gi].push(p.name);placed.add(p.name);}};
+  // Returns true if placed, false if group full or already placed
+  const place=(p,gi)=>{if(!p||placed.has(p.name)||g[gi].length>=5)return false;g[gi].push(p.name);placed.add(p.name);return true;};
+  // Try groups in priority order until one accepts
+  const tryIn=(p,...gis)=>{for(const gi of gis)if(place(p,gi))return;};
 
-  // Categorise confirmed players
+  // Categorise
   const tanks=conf.filter(p=>p.type==='Tank');
   const healers=conf.filter(p=>p.type==='Healer');
   const melee=conf.filter(p=>p.type==='Melee');
@@ -1044,42 +1048,45 @@ function autoAssignRaidGroups(raidId){
   const hunters=ranged.filter(p=>p.cls==='Hunter');
   const casters=ranged.filter(p=>p.cls!=='Hunter');
 
-  // G4 casters: Balance Druid, Shadow Priest, Mages
+  // G4: Balance Druid, Shadow Priest, Mages
   const g4Casters=casters.filter(p=>(p.cls==='Druid'&&p.spec==='Balance')||(p.cls==='Priest'&&p.spec==='Shadow')||p.cls==='Mage');
-  // G3 casters: Warlocks + everything else
+  // G3: Warlocks + other ranged
   const g3Casters=casters.filter(p=>!g4Casters.includes(p));
 
-  // G5 — Healers
-  healers.forEach(p=>place(p,4));
+  // G5 — Healers (max 5)
+  healers.forEach(p=>tryIn(p,4,3,2,1,0));
 
-  // G1 — Warrior/Druid tanks + other tanks + Enh Shaman #1
+  // G1 — Warrior/Druid tanks + non-pala other tanks
   warDruidTanks.forEach(p=>place(p,0));
   otherTanks.forEach(p=>place(p,0));
-  if(enhShamans.length>=1) place(enhShamans[0],0);
 
-  // G2 — Enh Shaman #2+
-  for(let i=1;i<enhShamans.length;i++) place(enhShamans[i],1);
+  // Enh Shamans: #1→G1, #2→G2, #3→G3, #4→G4, #5→G5 (one per group)
+  // If preferred group is full, waterfall to the next available
+  enhShamans.forEach((p,i)=>{
+    const preferred=Math.min(i,4);
+    if(!place(p,preferred)) tryIn(p,...[0,1,2,3,4].filter(x=>x!==preferred));
+  });
 
-  // Fill melee: G1 first (up to 5), overflow to G2
-  otherMelee.forEach(p=>{ if(g[0].length<5) place(p,0); else place(p,1); });
+  // Fill melee into G1 (up to 5) then G2
+  otherMelee.forEach(p=>tryIn(p,0,1,2,3,4));
 
-  // Hunters → G2 (melee synergy), overflow to G1
-  hunters.forEach(p=>{ if(g[1].length<5) place(p,1); else place(p,0); });
+  // Hunters → G2 first (shaman/melee synergy), overflow to G1
+  hunters.forEach(p=>tryIn(p,1,0,2,3,4));
 
-  // G4 — Balance Druid + Shadow Priest + Mages
-  g4Casters.forEach(p=>place(p,3));
+  // G4: Balance Druid + Shadow Priest + Mages
+  g4Casters.forEach(p=>tryIn(p,3,2,4,1,0));
 
-  // Paladin tanks → G3 (prefer) or G4
-  palTanks.forEach(p=>{ if(g[2].length<5) place(p,2); else place(p,3); });
+  // Paladin tanks → G3 prefer, G4 fallback
+  palTanks.forEach(p=>tryIn(p,2,3,1,0,4));
 
-  // G3 — Warlocks + other ranged
-  g3Casters.forEach(p=>{ if(g[2].length<5) place(p,2); else place(p,3); });
+  // G3: Warlocks + other ranged
+  g3Casters.forEach(p=>tryIn(p,2,3,4,1,0));
 
-  // Safety: any unplaced goes to smallest group
+  // Safety: any unplaced → smallest group (overflow beyond 25)
   conf.forEach(p=>{
     if(!placed.has(p.name)){
       const minGi=g.reduce((m,gr,i)=>gr.length<g[m].length?i:m,0);
-      g[minGi].push(p.name); placed.add(p.name);
+      if(g[minGi].length<5){g[minGi].push(p.name);placed.add(p.name);}
     }
   });
 
@@ -4656,10 +4663,10 @@ function fullRaidCard(r,highlight){
             ${pill(n,!gp(n)?.present)}
             ${isRL()&&!past?`<button onclick="removeFromRaidGroup('${r.id}',${gi},'${n}')" style="background:none;border:none;color:var(--t3);cursor:pointer;padding:0 2px;font-size:12px;line-height:1;opacity:.6" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.6">×</button>`:''}
           </div>`).join('')}
-          ${isRL()&&!past?`<select onchange="addToRaidGroup('${r.id}',${gi},this.value);this.value=''" style="margin-top:3px;font-size:10px;width:100%;background:var(--bg3);border:1px solid var(--borderl);border-radius:4px;padding:2px 4px;color:var(--t2)">
+          ${isRL()&&!past&&g.length<5?`<select onchange="addToRaidGroup('${r.id}',${gi},this.value);this.value=''" style="margin-top:3px;font-size:10px;width:100%;background:var(--bg3);border:1px solid var(--borderl);border-radius:4px;padding:2px 4px;color:var(--t2)">
             <option value="">＋ Add</option>
             ${rgUnassigned.map(n=>`<option value="${n}">${n}</option>`).join('')}
-          </select>`:''}
+          </select>`:isRL()&&!past&&g.length>=5?`<div style="font-size:9px;color:var(--t3);text-align:center;padding:3px 0;opacity:.6">Full</div>`:''}
         </div>`).join('')}
       </div>
       ${rgUnassigned.length?`<div style="font-size:10px;color:var(--ora);display:flex;align-items:center;gap:5px;flex-wrap:wrap"><i class="ti ti-alert-triangle"></i> Not in any group: ${rgUnassigned.map(n=>pill(n,!gp(n)?.present)+(isRL()&&!past?`<button onclick="removeFromRaid('${r.id}','${n}')" title="Remove from raid" style="background:none;border:none;cursor:pointer;color:var(--t3);padding:0 2px;font-size:11px;margin-left:-3px" onmouseover="this.style.color='#e07b72'" onmouseout="this.style.color='var(--t3)'">✕</button>`:'') ).join(' ')}</div>`:'<div style="font-size:10px;color:#5DCAA5"><i class="ti ti-check"></i> All players assigned to groups</div>'}
