@@ -967,6 +967,14 @@ function saveKillLog(){
 function saveChecklist(){
   try{localStorage.setItem('boogalo-checklist',JSON.stringify(checklistState));}catch(e){}
 }
+// Return the effective attendance list for a raid.
+// r.attended is authoritative when set; otherwise fall back to r.confirmed,
+// then r.signedUp — because nothing auto-writes r.attended yet.
+function effAttended(r){
+  if(r.attended?.length) return r.attended;
+  if(r.confirmed?.length) return r.confirmed;
+  return r.signedUp||[];
+}
 // ---- Group & healer-tank edit functions (RL only) ----
 function addToGroup(gi,name){
   if(!name||!isRL()) return;
@@ -1606,8 +1614,8 @@ function renderProfileList(){
   if(!el) return;
   if(!players.length){el.innerHTML='<div class="empty"><i class="ti ti-user-off"></i><p>No players found.</p></div>';return;}
   el.innerHTML=players.map(p=>{
-    const attended=raidSchedule.filter(r=>r.attended?.includes(p.name)).length;
     const total=raidSchedule.filter(r=>r.status==='completed').length;
+    const attended=raidSchedule.filter(r=>r.status==='completed'&&effAttended(r).includes(p.name)).length;
     const attPct=total?Math.round((attended/total)*100):0;
     const alts=(playerAlts[p.name]||[]);
     const w={Tank:getWeight(p.name,'Tank'),Healer:getWeight(p.name,'Healer'),Melee:getWeight(p.name,'Melee'),Ranged:getWeight(p.name,'Ranged')};
@@ -1651,14 +1659,14 @@ function openProfile(name){
   const cc=CC[p.cls]||'#aaa';
   const alts=playerAlts[name]||[];
   const completed=raidSchedule.filter(r=>r.status==='completed');
-  const attended=raidSchedule.filter(r=>r.attended?.includes(name));
+  const attended=completed.filter(r=>effAttended(r).includes(name));
   const signedUp=raidSchedule.filter(r=>r.signedUp?.includes(name));
   const attPct=completed.length?Math.round((attended.length/completed.length)*100):0;
   const revMentions=reviews.filter(rv=>rv.mvp===name||rv.notes?.toLowerCase().includes(name.toLowerCase()));
 
   // Build raid history table
   const historyRows=completed.slice(-8).reverse().map(r=>{
-    const wasPresent=r.attended?.includes(name);
+    const wasPresent=effAttended(r).includes(name);
     const signed=r.signedUp?.includes(name);
     return`<tr style="border-bottom:1px solid var(--border)">
       <td style="padding:5px 8px;font-size:11px">${fmtKey(r.date)}</td>
@@ -4878,9 +4886,9 @@ function switchStTab(el,tab){stTab=tab;document.querySelectorAll('#page-stats .t
 function renderStatsOverview(){
   const completed=raidSchedule.filter(r=>r.status==='completed');
   const total=completed.length||1;
-  const avg=Math.round(completed.reduce((s,r)=>s+(r.attended?.length||r.signedUp.length*.9),0)/Math.max(completed.length,1));
-  const unique=new Set(raidSchedule.flatMap(r=>r.signedUp)).size;
-  const counts={};completed.forEach(r=>r.signedUp.forEach(n=>counts[n]=(counts[n]||0)+1));
+  const avg=Math.round(completed.reduce((s,r)=>s+effAttended(r).length,0)/Math.max(completed.length,1));
+  const unique=new Set(completed.flatMap(r=>effAttended(r))).size;
+  const counts={};completed.forEach(r=>effAttended(r).forEach(n=>counts[n]=(counts[n]||0)+1));
   const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,7);
   const byType={};completed.forEach(r=>{byType[r.name]=(byType[r.name]||0)+1;});
   const avgRev=reviews.length?{o:reviews.reduce((s,r)=>s+r.overallRating,0)/reviews.length,c:reviews.reduce((s,r)=>s+r.coordination,0)/reviews.length,a:reviews.reduce((s,r)=>s+r.atmosphere,0)/reviews.length}:null;
@@ -4894,13 +4902,13 @@ function renderStatsOverview(){
 }
 function renderStatsPlayers(){
   const completed=raidSchedule.filter(r=>r.status==='completed');const total=completed.length||1;
-  const counts={};completed.forEach(r=>r.signedUp.forEach(n=>counts[n]=(counts[n]||0)+1));
+  const counts={};completed.forEach(r=>effAttended(r).forEach(n=>counts[n]=(counts[n]||0)+1));
   const sorted=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
   document.getElementById('stats-content').innerHTML=`<div class="card"><div class="ct"><i class="ti ti-users" style="color:var(--acc)"></i>Player Attendance Rate</div>${sorted.map(([name,count])=>{const pct=Math.round((count/total)*100);return`<div class="sbar"><div class="sbar-l">${pill(name)}</div><div class="sbar-t"><div class="sbar-f" style="width:${pct}%;background:${pct>=80?'var(--gre)':pct>=50?'var(--gold)':'var(--red)'}"></div></div><div class="sbar-v" style="color:${pct>=80?'#5DCAA5':pct>=50?'var(--gold)':'#e07b72'}">${pct}%</div></div>`;}).join('')}</div>`;
 }
 function renderStatsRaids(){
   const completed=[...raidSchedule].filter(r=>r.status==='completed').sort((a,b)=>b.date.localeCompare(a.date));
-  document.getElementById('stats-content').innerHTML=completed.length?completed.map(r=>{const pct=Math.min(100,Math.round((r.signedUp.length/r.max)*100));const rv=reviews.find(x=>x.raidId===r.id);return`<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:5px"><strong style="font-size:13px">${r.name}</strong><span style="font-size:11px;color:var(--t3)">${fmtKey(r.date)}</span></div><div class="pb" style="margin-bottom:4px"><div class="pf" style="width:${pct}%;background:var(--gre)"></div></div><div style="font-size:11px;color:var(--t3);margin-bottom:6px">${r.signedUp.length}/${r.max} attended · RL: ${r.rl}</div>${rv?`<div style="font-size:11px;color:var(--gold)"><i class="ti ti-star"></i> ${rv.overallRating}/5 · MVP: ${rv.mvp}</div>`:'<span style="font-size:10px;color:var(--t3)">No review</span>'}</div>`;}).join(''):'<div class="empty"><i class="ti ti-chart-bar"></i><p>No completed raids yet.</p></div>';
+  document.getElementById('stats-content').innerHTML=completed.length?completed.map(r=>{const att=effAttended(r);const pct=Math.min(100,Math.round((att.length/r.max)*100));const rv=reviews.find(x=>x.raidId===r.id);return`<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:5px"><strong style="font-size:13px">${r.name}</strong><span style="font-size:11px;color:var(--t3)">${fmtKey(r.date)}</span></div><div class="pb" style="margin-bottom:4px"><div class="pf" style="width:${pct}%;background:var(--gre)"></div></div><div style="font-size:11px;color:var(--t3);margin-bottom:6px">${att.length}/${r.max} attended · RL: ${r.rl}</div>${rv?`<div style="font-size:11px;color:var(--gold)"><i class="ti ti-star"></i> ${rv.overallRating}/5 · MVP: ${rv.mvp}</div>`:'<span style="font-size:10px;color:var(--t3)">No review</span>'}</div>`;}).join(''):'<div class="empty"><i class="ti ti-chart-bar"></i><p>No completed raids yet.</p></div>';
 }
 
 // ============================================================
