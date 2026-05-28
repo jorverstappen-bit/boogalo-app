@@ -4181,7 +4181,9 @@ function renderBossCard(boss,raidKey){
     :tanks.map(t=>`<div class="rrow">${t.name?pill(t.name,!gp(t.name)?.present):'<span style="font-size:11px;color:var(--t3)">—</span>'}<span style="font-size:10px;color:var(--t3);margin-left:4px">${t.role}</span></div>`).join('');
 
   const healerTargets=asgn.healerTargets||{};
-  const targetOpts=['MT','OT','OT2','Group 1','Group 2','Group 3','Raid'].map(t=>`<option value="${t}">${t}</option>`).join('');
+  const baseTargets=['MT','OT','OT2','Group 1','Group 2','Group 3','Raid'];
+  const bossRoles=tanks.map(t=>t.role).filter(r=>r&&!baseTargets.includes(r));
+  const targetOpts=[...baseTargets,...bossRoles].map(t=>`<option value="${t}">${t}</option>`).join('');
   const healersHTML=rl
     ?`${healers.map((h,i)=>`<div class="rrow" style="gap:4px"><select style="${selStyle}" onchange="setBossAssign('${boss.id}','${raidKey}','healer',${i},this.value)"><option value="">— None —</option>${ROSTER.filter(p=>p.type==='Healer').map(p=>`<option value="${p.name}" ${p.name===h?'selected':''}>${p.name}${p.present?'':' ·'}</option>`).join('')}</select><select style="${selStyle};width:80px;color:${healerTargets[h]?'var(--t1)':'var(--t3)'}" onchange="setBossHealerTarget('${boss.id}','${raidKey}','${h}',this.value)"><option value="">→ target</option>${targetOpts.replace(`value="${healerTargets[h]||''}"`,`value="${healerTargets[h]||''}" selected`)}</select><button class="btn btn-sm" style="padding:2px 5px;color:var(--red);font-size:11px" onclick="removeBossAssignItem('${boss.id}','${raidKey}','healer',${i})">×</button></div>`).join('')}<select style="${addSelStyle}" onchange="addBossAssignItem('${boss.id}','${raidKey}','healer',this.value);this.value=''"><option value="">+ Add healer</option>${healerOpts}</select>`
     :healers.map(h=>`<div class="rrow">${h?pill(h,!gp(h)?.present):'<span style="font-size:11px;color:var(--t3)">—</span>'}${healerTargets[h]?`<span style="font-size:10px;color:var(--t3);margin-left:4px">→ ${healerTargets[h]}</span>`:''}</div>`).join('');
