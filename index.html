@@ -4086,9 +4086,27 @@ function getActiveBossAssignment(boss){
   return{...def,healerTargets:{}};
 }
 function ensureBossAssignment(bossId){
+  const boss=Object.values(BOSSES).flat().find(b=>b.id===bossId);
   if(!bossAssignments[bossId]){
-    const boss=Object.values(BOSSES).flat().find(b=>b.id===bossId);
     if(boss) bossAssignments[bossId]=getDefaultBossAssignment(boss);
+  } else if(boss){
+    // Patch missing or non-array special field (can happen when Firebase
+    // loads data saved before the special schema existed, or when array
+    // serialisation round-trips as a plain object)
+    const ba=bossAssignments[bossId];
+    const defSpecial=getDefaultBossAssignment(boss).special;
+    if(!ba.special||!Array.isArray(ba.special)){
+      ba.special=defSpecial;
+    } else if(ba.special.length<defSpecial.length){
+      // Append any default categories that were added later
+      for(let i=ba.special.length;i<defSpecial.length;i++){
+        ba.special.push({label:defSpecial[i].label,players:[...defSpecial[i].players]});
+      }
+    }
+    // Ensure every players list is a real array (Firebase can return objects)
+    ba.special.forEach(s=>{
+      if(s&&!Array.isArray(s.players)) s.players=s.players?Object.values(s.players):[];
+    });
   }
 }
 function setBossAssign(bossId,raidKey,field,idx,value){
@@ -4097,7 +4115,11 @@ function setBossAssign(bossId,raidKey,field,idx,value){
   const ba=bossAssignments[bossId]; if(!ba) return;
   if(field==='tank') ba.tanks[idx].name=value;
   else if(field==='healer') ba.healers[idx]=value;
-  else if(field==='special-remove') ba.special[idx].players=ba.special[idx].players.filter(n=>n!==value);
+  else if(field==='special-remove'){
+    const sp=ba.special?.[idx]; if(!sp) return;
+    if(!Array.isArray(sp.players)) sp.players=sp.players?Object.values(sp.players):[];
+    sp.players=sp.players.filter(n=>n!==value);
+  }
   saveBossAssignments();
   renderBossPage(raidKey);
 }
@@ -4116,7 +4138,11 @@ function addBossAssignItem(bossId,raidKey,field,value,idx){
   ensureBossAssignment(bossId);
   const ba=bossAssignments[bossId]; if(!ba) return;
   if(field==='healer'){if(!ba.healers.includes(value)) ba.healers.push(value);}
-  else if(field==='special'){const sp=ba.special[idx];if(sp&&!sp.players.includes(value)) sp.players.push(value);}
+  else if(field==='special'){
+    const sp=ba.special?.[idx]; if(!sp) return;
+    if(!Array.isArray(sp.players)) sp.players=sp.players?Object.values(sp.players):[];
+    if(!sp.players.includes(value)) sp.players.push(value);
+  }
   saveBossAssignments();
   renderBossPage(raidKey);
 }
