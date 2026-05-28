@@ -1865,26 +1865,17 @@ function openProfile(name){
             ${(()=>{
               const profs=p.professions||[];const sprofs=p.secProfessions||[];
               if(!profs.length&&!sprofs.length) return '<div style="font-size:11px;color:var(--t3)">No professions set.</div>';
-              return[...profs.map(pr=>{
-                const pct=Math.round((pr.level/375)*100);
-                const col=pr.level>=375?'var(--gold)':pr.level>=300?'#5DCAA5':'var(--t3)';
-                return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px">
-                  <span style="font-size:12px;color:var(--t1);width:110px">${pr.name}</span>
-                  <div style="flex:1;height:4px;background:var(--bg3);border-radius:2px"><div style="height:4px;border-radius:2px;background:${col};width:${pct}%"></div></div>
-                  <span style="font-size:10px;color:${col};min-width:30px;text-align:right">${pr.level}/375</span>
-                </div>`;
-              }),...(sprofs.length?[`<div style="font-size:10px;color:var(--t3);margin-top:4px;margin-bottom:3px">Secondary</div>`,...sprofs.map(s=>`<div style="font-size:11px;color:var(--t2);margin-bottom:3px"><i class="ti ti-point" style="color:var(--t3)"></i> ${s}</div>`)]:[])].join('');
+              return[...profs.map(pr=>`<span class="badge" style="background:var(--bg3);border:1px solid var(--borderl);color:var(--t1);margin-right:4px;margin-bottom:4px">${pr.name}</span>`),...(sprofs.length?[...sprofs.map(s=>`<span class="badge" style="background:var(--bg3);border:1px solid var(--borderl);color:var(--t2);margin-right:4px;margin-bottom:4px">${s}</span>`)]:[])].join('');
             })()}
           </div>
           <!-- Professions edit form -->
           <div id="prof-edit-${name}" style="display:none">
             <div style="font-size:10px;color:var(--t3);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em">Primary (max 2)</div>
-            ${[0,1].map(i=>`<div style="display:flex;gap:5px;align-items:center;margin-bottom:6px">
-              <select id="prof-psel-${name}-${i}" style="font-size:11px;flex:1">
+            ${[0,1].map(i=>`<div style="margin-bottom:6px">
+              <select id="prof-psel-${name}-${i}" style="font-size:11px;width:100%">
                 <option value="">— None —</option>
                 ${PROFESSIONS_PRIMARY.map(pr=>`<option value="${pr}" ${(p.professions||[])[i]?.name===pr?'selected':''}>${pr}</option>`).join('')}
               </select>
-              <input id="prof-plvl-${name}-${i}" type="number" min="1" max="375" value="${(p.professions||[])[i]?.level||''}" placeholder="Level" style="width:62px;font-size:11px">
             </div>`).join('')}
             <div style="font-size:10px;color:var(--t3);margin:8px 0 5px;text-transform:uppercase;letter-spacing:.05em">Secondary</div>
             ${[0,1,2].map(i=>`<div style="margin-bottom:5px">
@@ -1948,8 +1939,7 @@ function saveProfessions(name){
   const profs=[];
   for(let i=0;i<2;i++){
     const sel=document.getElementById('prof-psel-'+name+'-'+i);
-    const lvl=document.getElementById('prof-plvl-'+name+'-'+i);
-    if(sel?.value) profs.push({name:sel.value,level:Math.min(375,Math.max(1,parseInt(lvl?.value)||1))});
+    if(sel?.value) profs.push({name:sel.value});
   }
   const sprofs=[];
   for(let i=0;i<3;i++){
