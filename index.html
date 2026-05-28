@@ -302,6 +302,9 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <button onclick="document.getElementById('auth-signup').style.display='none';document.getElementById('auth-step1').style.display='block'" style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:11px;margin-bottom:10px;display:flex;align-items:center;gap:4px"><i class="ti ti-arrow-left"></i> Back</button>
       <div style="font-size:14px;font-weight:700;font-family:Cinzel,serif;color:var(--t1);margin-bottom:3px">Join Boogalo</div>
       <p style="font-size:10px;color:var(--t3);margin-bottom:14px">Fill in your character details — the Raid Leader will review your application.</p>
+      <div id="auth-signup-warn" style="display:none;background:rgba(200,80,60,.1);border:1px solid rgba(200,80,60,.3);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;font-size:12px;color:#e07b72">
+        <i class="ti ti-alert-triangle"></i> <span id="auth-signup-warn-msg">You are already on the roster!</span>
+      </div>
       <div id="auth-signup-success" style="display:none;background:var(--gred);border:1px solid rgba(26,158,114,.3);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;font-size:12px;color:#5DCAA5">
         <i class="ti ti-circle-check"></i> Application submitted! The RL will check your gear and get back to you.
       </div>
@@ -652,6 +655,10 @@ tr:hover td{background:rgba(255,255,255,.013)}
 
 <div class="page" id="page-signup">
   <div class="ph"><div class="pt">Apply for Raid</div><div class="ps">Submit your application — the Raid Leader will review and add you to tonight's roster or the full roster</div></div>
+  <div id="signup-warn" style="display:none;background:rgba(200,80,60,.1);border:1px solid rgba(200,80,60,.3);border-radius:var(--r);padding:12px 14px;margin-bottom:10px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><i class="ti ti-alert-triangle" style="font-size:18px;color:#e07b72"></i><span style="font-size:13px;font-weight:600;color:#e07b72">Already a member!</span></div>
+    <div style="font-size:12px;color:#e8a09a" id="signup-warn-msg"></div>
+  </div>
   <div class="card ab" id="signup-success" style="display:none">
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><i class="ti ti-circle-check" style="font-size:18px;color:#5DCAA5"></i><span style="font-size:13px;font-weight:600;color:#5DCAA5">Application submitted!</span></div>
     <div style="font-size:12px;color:#9FE1CB" id="signup-success-msg"></div>
@@ -2319,6 +2326,13 @@ function submitGuildApp(){
   const note=document.getElementById('gs-note').value.trim();
   if(!name){document.getElementById('gs-name').style.borderColor='var(--red)';document.getElementById('gs-name').placeholder='Name required!';return;}
   document.getElementById('gs-name').style.borderColor='';
+  const alreadyInGs=ROSTER.find(p=>p.name.toLowerCase()===name.toLowerCase());
+  if(alreadyInGs){
+    document.getElementById('auth-signup-warn-msg').textContent=`${alreadyInGs.name} is already a Boogalo member. No application needed — use the login screen to sign in, or contact the Raid Leader.`;
+    document.getElementById('auth-signup-warn').style.display='block';
+    document.getElementById('auth-signup-success').style.display='none';
+    return;
+  }
   const app={id:genId(),name,cls,spec,role,flexSpec:flex,experience:exp,note:'[Guild signup] '+note,status:'pending',gs:null,gsNote:'Check armory manually'};
   applications.push(app);
   saveApplications();
@@ -4448,8 +4462,9 @@ function submitApp(){
   if(!name){toast('Enter your character name','err');return;}
   const alreadyIn=ROSTER.find(p=>p.name.toLowerCase()===name.toLowerCase());
   if(alreadyIn){
-    document.getElementById('signup-success').style.display='block';
-    document.getElementById('signup-success-msg').textContent=`${name} is already a member of Boogalo! No application needed — ask the Raid Leader if you have trouble signing in.`;
+    document.getElementById('signup-warn').style.display='block';
+    document.getElementById('signup-warn-msg').textContent=`${alreadyIn.name} is already a member of Boogalo. No application needed — use the login above to sign in, or contact the Raid Leader if you're having trouble.`;
+    document.getElementById('signup-success').style.display='none';
     return;
   }
   const app={id:genId(),name,cls,spec,role,flexSpec:flex,experience:exp,note,status:'pending',gs:null,gsNote:'Check armory manually'};
