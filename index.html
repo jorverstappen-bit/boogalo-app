@@ -747,6 +747,7 @@ let CURRENT_USER=null; // roster player when signed in by name
 let rosterSortCol='name';let rosterSortDir=1;
 let appTab='pending';let srTab='pending';let stTab='overview';
 let applications=[];let specRequests=[];let raidSchedule=[];let reviews=[];
+let bossAssignments={}; // {bossId:{tanks:[{role,name}],healers:[],special:[{label,players:[]}]}}
 const SIGNUP_POOL_MAX=100; // sign-up queue cap; r.max is the raid roster limit (25)
 let calYear=new Date().getFullYear();let calMonth=new Date().getMonth();
 let reviewStars={};let selectedDay=null;
@@ -912,6 +913,10 @@ function saveHealerTanks(){
 function saveGroups(){
   try{localStorage.setItem('boogalo-groups',JSON.stringify(groups));}catch(e){}
   fbSet('groups', groups);
+}
+function saveBossAssignments(){
+  try{localStorage.setItem('boogalo-bossAssignments',JSON.stringify(bossAssignments));}catch(e){}
+  fbSet('bossAssignments', bossAssignments);
 }
 // ---- Group & healer-tank edit functions (RL only) ----
 function addToGroup(gi,name){
@@ -3648,10 +3653,11 @@ function renderPOV(){
     if(!bossesToShow.length)return;
 
     let raidHtml=bossesToShow.map(boss=>{
-      // find player's specific assignments
-      const tankAssign=boss.tanks?.find(t=>t.name===playerName);
-      const healerAssign=(boss.healers||[]).includes(playerName);
-      const specialAssign=boss.special?.find(s=>s.players?.includes(playerName));
+      // find player's specific assignments (use live Firebase data, not hardcoded)
+      const liveAsgn=getActiveBossAssignment(boss);
+      const tankAssign=liveAsgn.tanks?.find(t=>t.name===playerName);
+      const healerAssign=liveAsgn.healers?.includes(playerName);
+      const specialAssign=liveAsgn.special?.find(s=>s.players?.includes(playerName));
       // mag cube assign
       let cubeAssign='';
       if(rk==='mag'&&boss.autoAssign){
@@ -3779,6 +3785,61 @@ function getVRRunners(){
 // ============================================================
 // BOSS PAGE RENDER
 // ============================================================
+// ── Boss assignment helpers ─────────────────────────────────────────
+function getDefaultBossAssignment(boss){
+  const pr=ROSTER.filter(p=>p.present);
+  const tks=sortByWeight(pr.filter(p=>p.type==='Tank'||p.type==='Mage Tank'),'Tank')
+    .concat(sortByWeight(pr.filter(p=>p.type==='Melee'),'Melee'));
+  const hls=sortByWeight(pr.filter(p=>p.type==='Healer'),'Healer');
+  return{
+    tanks:(boss.tanks||[]).map((t,i)=>({role:t.role,name:tks[i]?.name||''})),
+    healers:(boss.healers||[]).map((_,i)=>hls[i]?.name||''),
+    special:(boss.special||[]).map(s=>({label:s.label,players:[...(s.players||[])]}))
+  };
+}
+function getActiveBossAssignment(boss){
+  return bossAssignments[boss.id]||getDefaultBossAssignment(boss);
+}
+function ensureBossAssignment(bossId){
+  if(!bossAssignments[bossId]){
+    const boss=Object.values(BOSSES).flat().find(b=>b.id===bossId);
+    if(boss) bossAssignments[bossId]=getDefaultBossAssignment(boss);
+  }
+}
+function setBossAssign(bossId,raidKey,field,idx,value){
+  if(!isRL()) return;
+  ensureBossAssignment(bossId);
+  const ba=bossAssignments[bossId]; if(!ba) return;
+  if(field==='tank') ba.tanks[idx].name=value;
+  else if(field==='healer') ba.healers[idx]=value;
+  else if(field==='special-remove') ba.special[idx].players=ba.special[idx].players.filter(n=>n!==value);
+  saveBossAssignments();
+  renderBossPage(raidKey);
+}
+function addBossAssignItem(bossId,raidKey,field,value,idx){
+  if(!isRL()||!value) return;
+  ensureBossAssignment(bossId);
+  const ba=bossAssignments[bossId]; if(!ba) return;
+  if(field==='healer'){if(!ba.healers.includes(value)) ba.healers.push(value);}
+  else if(field==='special'){const sp=ba.special[idx];if(sp&&!sp.players.includes(value)) sp.players.push(value);}
+  saveBossAssignments();
+  renderBossPage(raidKey);
+}
+function removeBossAssignItem(bossId,raidKey,field,idx){
+  if(!isRL()) return;
+  ensureBossAssignment(bossId);
+  const ba=bossAssignments[bossId]; if(!ba) return;
+  if(field==='healer') ba.healers.splice(idx,1);
+  saveBossAssignments();
+  renderBossPage(raidKey);
+}
+function resetBossAssignment(bossId,raidKey){
+  if(!isRL()) return;
+  delete bossAssignments[bossId];
+  saveBossAssignments();
+  renderBossPage(raidKey);
+}
+
 function renderBossPage(raidKey){
   const el=document.getElementById(`${raidKey}-content`);if(!el)return;
   const bossList=BOSSES[raidKey]||[];
@@ -3786,7 +3847,25 @@ function renderBossPage(raidKey){
 }
 
 function renderBossCard(boss,raidKey){
-  const tanks=boss.tanks||[];const healers=boss.healers||[];const special=boss.special||[];
+  const asgn=getActiveBossAssignment(boss);
+  const tanks=asgn.tanks;const healers=asgn.healers;const special=asgn.special;
+  const rl=isRL();
+  const selStyle='font-size:11px;padding:2px 5px;background:var(--bg3);border:1px solid var(--borderl);color:var(--t1);border-radius:4px';
+  const addSelStyle='font-size:11px;padding:2px 5px;background:var(--bg3);border:1px dashed var(--borderl);color:var(--t3);border-radius:4px;margin-top:4px';
+  const allOpts=ROSTER.map(p=>`<option value="${p.name}">${p.name}${p.present?'':' ·'}</option>`).join('');
+  const healerOpts=ROSTER.filter(p=>p.type==='Healer').map(p=>`<option value="${p.name}">${p.name}${p.present?'':' ·'}</option>`).join('');
+
+  const tanksHTML=rl
+    ?tanks.map((t,i)=>`<div class="rrow" style="gap:6px"><span style="font-size:10px;color:var(--t3);min-width:130px">${t.role}</span><select style="${selStyle}" onchange="setBossAssign('${boss.id}','${raidKey}','tank',${i},this.value)"><option value="">— None —</option>${ROSTER.map(p=>`<option value="${p.name}" ${p.name===t.name?'selected':''}>${p.name}${p.present?'':' ·'}</option>`).join('')}</select></div>`).join('')
+    :tanks.map(t=>`<div class="rrow">${t.name?pill(t.name,!gp(t.name)?.present):'<span style="font-size:11px;color:var(--t3)">—</span>'}<span style="font-size:10px;color:var(--t3);margin-left:4px">${t.role}</span></div>`).join('');
+
+  const healersHTML=rl
+    ?`${healers.map((h,i)=>`<div class="rrow" style="gap:6px"><select style="${selStyle}" onchange="setBossAssign('${boss.id}','${raidKey}','healer',${i},this.value)"><option value="">— None —</option>${ROSTER.filter(p=>p.type==='Healer').map(p=>`<option value="${p.name}" ${p.name===h?'selected':''}>${p.name}${p.present?'':' ·'}</option>`).join('')}</select><button class="btn btn-sm" style="padding:2px 5px;color:var(--red);font-size:11px" onclick="removeBossAssignItem('${boss.id}','${raidKey}','healer',${i})">×</button></div>`).join('')}<select style="${addSelStyle}" onchange="addBossAssignItem('${boss.id}','${raidKey}','healer',this.value);this.value=''"><option value="">+ Add healer</option>${healerOpts}</select>`
+    :healers.map(h=>`<div class="rrow">${h?pill(h,!gp(h)?.present):'<span style="font-size:11px;color:var(--t3)">—</span>'}</div>`).join('');
+
+  const specialHTML=special.length?`<div style="margin-top:10px"><div class="sht" style="margin-bottom:6px">Special Assignments</div>${special.map((s,si)=>`<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:4px">${s.label}</div><div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">${(s.players||[]).map(n=>`${pill(n,!gp(n)?.present)}${rl?`<button class="btn btn-sm" style="padding:1px 5px;color:var(--red);font-size:10px;margin-left:-2px" onclick="setBossAssign('${boss.id}','${raidKey}','special-remove',${si},'${n}')">×</button>`:''}`.trim()).join('')}${rl?`<select style="${addSelStyle}" onchange="addBossAssignItem('${boss.id}','${raidKey}','special',this.value,${si});this.value=''"><option value="">+ Add</option>${allOpts}</select>`:''}</div></div>`).join('')}</div>`:'';
+
+  const resetBtn=rl?`<div style="margin-top:6px">${bossAssignments[boss.id]?`<button class="btn btn-sm" style="font-size:10px;color:var(--t3)" onclick="resetBossAssignment('${boss.id}','${raidKey}')"><i class="ti ti-refresh"></i> Reset to auto-fill</button>`:'<span style="font-size:10px;color:var(--t3);font-style:italic">Auto-filled from roster</span>'}</div>`:'';
   const isMag=raidKey==='mag'&&boss.autoAssign;
   let cubeHTML='';
   if(isMag){
@@ -3833,7 +3912,7 @@ function renderBossCard(boss,raidKey){
     </div>
   </div>`:'';
 
-  const mrt=buildMRT(boss,raidKey);
+  const mrt=buildMRT(boss,raidKey,asgn);
 
   return`<div class="card" style="margin-bottom:14px">
     <div class="ct" style="font-family:Cinzel,serif;font-size:14px"><i class="ti ti-sword-off"></i>${boss.name}
@@ -3843,14 +3922,15 @@ function renderBossCard(boss,raidKey){
     <div class="g2">
       <div>
         <div class="sht" style="margin-bottom:6px">Tanks</div>
-        ${tanks.length?tanks.map(t=>`<div class="rrow">${pill(t.name,!gp(t.name)?.present)}<span style="font-size:10px;color:var(--t3);margin-left:4px">${t.role}</span></div>`).join(''):'<div style="font-size:11px;color:var(--t3)">See auto-assignment above</div>'}
+        ${tanksHTML||'<div style="font-size:11px;color:var(--t3)">No tanks assigned</div>'}
       </div>
       <div>
         <div class="sht" style="margin-bottom:6px">Healers</div>
-        ${healers.length?healers.map(h=>`<div class="rrow">${pill(h,!gp(h)?.present)}</div>`).join(''):'<div style="font-size:11px;color:var(--t3)">Standard healer team</div>'}
+        ${healersHTML||'<div style="font-size:11px;color:var(--t3)">No healers assigned</div>'}
       </div>
     </div>
-    ${special.length?`<div style="margin-top:10px"><div class="sht" style="margin-bottom:6px">Special Assignments</div>${special.map(s=>`<div class="rrow"><span class="sht" style="min-width:160px;text-transform:none;letter-spacing:0;color:var(--t1);font-size:11px">${s.label}:</span>${(s.players||[]).map(n=>pill(n,!gp(n)?.present)).join('')}</div>`).join('')}</div>`:''}
+    ${resetBtn}
+    ${specialHTML}
     ${cubeHTML}
     ${tacHTML}
     <div style="margin-top:10px">
@@ -3861,10 +3941,11 @@ function renderBossCard(boss,raidKey){
   </div>`;
 }
 
-function buildMRT(boss,rk){
-  const tanks=(boss.tanks||[]).map(t=>`${t.role}: ${t.name}`).join('\n');
-  const healers=(boss.healers||[]).join(', ');
-  const special=(boss.special||[]).map(s=>`${s.label}: ${(s.players||[]).join(', ')}`).join('\n');
+function buildMRT(boss,rk,asgn){
+  asgn=asgn||getActiveBossAssignment(boss);
+  const tanks=asgn.tanks.map(t=>`${t.role}: ${t.name||'—'}`).join('\n');
+  const healers=asgn.healers.filter(Boolean).join(', ');
+  const special=asgn.special.map(s=>`${s.label}: ${(s.players||[]).join(', ')}`).join('\n');
   let cubeNote='';
   if(rk==='mag'&&boss.autoAssign){const c=getMagCubeAssignments();cubeNote=`\nCUBES:\n💀 Skull (entrance): ${c.skull}\n✗ X (far left): ${c.xmark}\n☽ Moon (far right): ${c.moon}\n${c.nearCubes.map(x=>x.marker+' '+x.role+': '+x.name).join('\n')}\nBlast Nova Clickers: ${c.kickers.map(k=>k.name).join(', ')}\nDark Mending Interrupt: ${c.darkMend.map(k=>k.name).join(', ')}\nBanish: ${c.banishes.map(b=>b.name).join(', ')}\nBackups: ${c.backups.map(b=>b.name).join(', ')}`;}
   return `=== ${boss.name.toUpperCase()} ===\nTANKS:\n${tanks}\nHEALERS: ${healers}\n${special?'SPECIAL:\n'+special:''}${cubeNote}`;
@@ -4723,6 +4804,7 @@ function applyFirebaseKey(key,data){
     else if(key==='vortexRequests'){const d=_fbArr(data);_fbSync(vortexRequests,d);try{localStorage.setItem('boogalo-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}renderVortex?.();}
     else if(key==='healerTanks'){const d=_fbArr(data);if(d.length){_fbSync(healerTanks,d);try{localStorage.setItem('boogalo-healerTanks',JSON.stringify(healerTanks));}catch(e){}}renderRoles?.();}
     else if(key==='groups'){if(data){const outer=_fbArr(data);if(outer.length){groups.length=0;outer.forEach(g=>groups.push(_fbArr(g)));try{localStorage.setItem('boogalo-groups',JSON.stringify(groups));}catch(e){}}}renderRoles?.();}
+    else if(key==='bossAssignments'){if(data&&typeof data==='object'){Object.keys(bossAssignments).forEach(k=>delete bossAssignments[k]);Object.assign(bossAssignments,data);try{localStorage.setItem('boogalo-bossAssignments',JSON.stringify(bossAssignments));}catch(e){}}['gruul','mag','tk','ssc','kara'].forEach(rk=>{const el=document.getElementById(rk+'-content');if(el&&el.children.length)renderBossPage(rk);});}
   }finally{_fbIgnore=false;}
 }
 
@@ -4731,7 +4813,7 @@ function initFirebaseSync(){
   // One SDK listener per top-level key — all share a single WebSocket connection.
   // Each fires immediately with the current value on connect, then on every change.
   ['raids','roster','vortex','weights','alts','roleOverrides','applications',
-   'specRequests','reviews','vortexRequests','healerTanks','groups'].forEach(key=>{
+   'specRequests','reviews','vortexRequests','healerTanks','groups','bossAssignments'].forEach(key=>{
     _fbDB.ref(key).on('value', snap=>{
       const data=snap.val();
       if(data!==null&&data!==undefined) applyFirebaseKey(key,data);
@@ -4753,6 +4835,7 @@ window.onload=function(){
   try{const svr=localStorage.getItem('boogalo-vortexRequests');if(svr){const v=JSON.parse(svr);if(Array.isArray(v))v.forEach(x=>vortexRequests.push(x));}}catch(e){}
   try{const sht=localStorage.getItem('boogalo-healerTanks');if(sht){const h=JSON.parse(sht);if(Array.isArray(h)&&h.length){healerTanks.length=0;h.forEach(x=>healerTanks.push(x));}}}catch(e){}
   try{const sg=localStorage.getItem('boogalo-groups');if(sg){const g=JSON.parse(sg);if(Array.isArray(g)&&g.length){groups.length=0;g.forEach(x=>groups.push(Array.isArray(x)?x:[])); }}}catch(e){}
+  try{const sba=localStorage.getItem('boogalo-bossAssignments');if(sba){const b=JSON.parse(sba);if(b&&typeof b==='object')Object.assign(bossAssignments,b);}}catch(e){}
   // Initialise app — Firebase SDK listeners fire within ~100ms and update all views
   restoreSidebarState();
   seedRaids();
