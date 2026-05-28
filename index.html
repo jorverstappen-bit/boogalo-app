@@ -5132,13 +5132,13 @@ function renderStatsOverview(){
   const avg=Math.round(completed.reduce((s,r)=>s+effAttended(r).length,0)/Math.max(completed.length,1));
   const unique=new Set(completed.flatMap(r=>effAttended(r))).size;
   const counts={};completed.forEach(r=>effAttended(r).forEach(n=>counts[n]=(counts[n]||0)+1));
-  const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
   const byType={};completed.forEach(r=>{byType[r.name]=(byType[r.name]||0)+1;});
   const avgRev=reviews.length?{o:reviews.reduce((s,r)=>s+r.overallRating,0)/reviews.length,c:reviews.reduce((s,r)=>s+r.coordination,0)/reviews.length,a:reviews.reduce((s,r)=>s+r.atmosphere,0)/reviews.length}:null;
   document.getElementById('stats-content').innerHTML=`
     <div class="srow">${[['Raids Done','var(--acc)',completed.length],['Avg Attendance','#5DCAA5',avg],['Unique Raiders','var(--gold)',unique],['Reviews Written','#6ab4e8',reviews.length]].map(([l,c,n])=>`<div class="sbox"><div class="snum" style="color:${c}">${n}</div><div class="slbl">${l}</div></div>`).join('')}</div>
     <div class="g2">
-      <div class="card"><div class="ct"><i class="ti ti-trophy" style="color:var(--gold)"></i>Most Active Raiders</div>${top.map(([name,count])=>`<div class="sbar"><div class="sbar-l">${pill(name)}</div><div class="sbar-t"><div class="sbar-f" style="width:${Math.round((count/total)*100)}%;background:var(--acc)"></div></div><div class="sbar-v" style="color:var(--acc)">${count}</div></div>`).join('')}</div>
+      <div class="card"><div class="ct"><i class="ti ti-trophy" style="color:var(--gold)"></i>Most Active Raiders</div><div style="max-height:260px;overflow-y:auto;padding-right:4px">${top.map(([name,count])=>`<div class="sbar"><div class="sbar-l">${pill(name)}</div><div class="sbar-t"><div class="sbar-f" style="width:${Math.round((count/total)*100)}%;background:var(--acc)"></div></div><div class="sbar-v" style="color:var(--acc)">${count}</div></div>`).join('')}</div></div>
       <div class="card"><div class="ct"><i class="ti ti-sword" style="color:#6ab4e8"></i>Raids by Instance</div>${Object.entries(byType).map(([name,count])=>`<div class="sbar"><div class="sbar-l" style="font-size:11px;color:var(--t2)">${name.split(' ')[0]}</div><div class="sbar-t"><div class="sbar-f" style="width:${Math.round((count/total)*100)}%;background:#6ab4e8"></div></div><div class="sbar-v" style="color:#6ab4e8">${count}</div></div>`).join('')}</div>
     </div>
     ${avgRev?`<div class="card"><div class="ct"><i class="ti ti-star" style="color:var(--gold)"></i>Average Review Scores</div>${[['Overall',avgRev.o],['Coordination',avgRev.c],['Atmosphere',avgRev.a]].map(([l,v])=>`<div class="sbar"><div class="sbar-l" style="font-size:11px;color:var(--t2)">${l}</div><div class="sbar-t"><div class="sbar-f" style="width:${Math.round((v/5)*100)}%;background:var(--gold)"></div></div><div class="sbar-v" style="color:var(--gold)">${v.toFixed(1)}/5</div></div>`).join('')}</div>`:''}`;
