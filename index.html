@@ -4520,8 +4520,10 @@ function fullRaidCard(r,highlight){
       ${isT?'<span class="badge" style="background:var(--accg);color:var(--acc);border:0.5px solid rgba(124,111,224,.3)"><i class="ti ti-bolt"></i>Tonight</span>':''}
       ${past?'<span class="badge" style="background:rgba(100,100,100,.08);color:var(--t3)">Completed</span>':''}
       ${confirmedCount>0&&!past?`<span class="badge" style="background:var(--gred);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.3)"><i class="ti ti-check"></i>${confirmedCount}/${r.max} confirmed</span>`:''}
+      ${r.srLink?`<a href="${r.srLink}" target="_blank" rel="noopener" class="badge" style="background:rgba(26,158,114,.12);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.3);text-decoration:none;cursor:pointer" title="Open Soft Reserves"><i class="ti ti-external-link"></i> Soft Reserves</a>`:isRL()&&!past?`<span class="badge" style="background:rgba(100,100,100,.06);color:var(--t3);border:0.5px dashed rgba(100,100,100,.25);cursor:pointer" onclick="if(document.getElementById('raid-edit-${r.id}').style.display==='none')toggleRaidEdit('${r.id}');setTimeout(()=>{const el=document.getElementById('re-srlink-${r.id}');if(el){el.focus();el.select();}},50)" title="Add Soft Reserves link"><i class="ti ti-link"></i> + SR link</span>`:''}
       ${isRL()?`<button class="btn btn-sm" onclick="toggleRaidEdit('${r.id}')" id="edit-btn-${r.id}" title="Edit raid details" style="margin-left:auto;font-size:11px;padding:3px 8px"><i class="ti ti-pencil"></i> Edit</button>`:''}
     </div>
+    ${isRL()&&r.srToken?`<div style="padding:2px 0 6px"><span class="badge" style="background:rgba(255,162,0,.1);color:#f5a623;border:0.5px solid rgba(255,162,0,.28);font-family:monospace;font-size:10px;letter-spacing:.03em"><i class="ti ti-lock" style="margin-right:3px"></i>SR Token: ${r.srToken}</span></div>`:''}
     <!-- Inline edit form (RL only) -->
     <div id="raid-edit-${r.id}" style="display:none;background:var(--bg3);border-radius:var(--r);padding:12px;margin-bottom:10px;border:1px solid var(--borderl)">
       <div style="font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Edit Raid Details</div>
@@ -4564,6 +4566,16 @@ function fullRaidCard(r,highlight){
       <div class="fg" style="margin-bottom:8px">
         <span class="fl">Notes</span>
         <textarea id="re-notes-${r.id}" style="width:100%;min-height:50px;resize:vertical">${r.notes||''}</textarea>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+        <div class="fg" style="flex:2;min-width:200px;margin-bottom:0">
+          <span class="fl"><i class="ti ti-external-link"></i> Soft Reserves Link</span>
+          <input type="url" id="re-srlink-${r.id}" value="${r.srLink||''}" placeholder="https://softres.it/raid/..." style="width:100%">
+        </div>
+        <div class="fg" style="flex:1;min-width:140px;margin-bottom:0">
+          <span class="fl"><i class="ti ti-lock"></i> SR Token <span style="font-size:9px;color:var(--t3)">(RL only)</span></span>
+          <input type="text" id="re-srtoken-${r.id}" value="${r.srToken||''}" placeholder="Token…" style="width:100%">
+        </div>
       </div>
       <div style="display:flex;gap:6px">
         <button class="btn btn-p btn-sm" onclick="saveRaidEdit('${r.id}')"><i class="ti ti-check"></i> Save</button>
@@ -4657,16 +4669,20 @@ function saveRaidEdit(raidId){
   const extra  = parseInt(document.getElementById('re-extra-'+raidId)?.value)||0;
   const max    = parseInt(document.getElementById('re-max-'+raidId)?.value)||25;
   const rl     = document.getElementById('re-rl-'+raidId)?.value?.trim()||'TBD';
-  const notes  = document.getElementById('re-notes-'+raidId)?.value?.trim()||'';
+  const notes   = document.getElementById('re-notes-'+raidId)?.value?.trim()||'';
+  const srLink  = document.getElementById('re-srlink-'+raidId)?.value?.trim()||'';
+  const srToken = document.getElementById('re-srtoken-'+raidId)?.value?.trim()||'';
   if(!date){ toast('Date is required','err'); return; }
-  r.name  = name||r.name;
-  r.date  = date;
-  r.start = start||r.start;
-  r.end   = end||r.end;
-  r.extra = extra;
-  r.max   = max;
-  r.rl    = rl;
-  r.notes = notes;
+  r.name    = name||r.name;
+  r.date    = date;
+  r.start   = start||r.start;
+  r.end     = end||r.end;
+  r.extra   = extra;
+  r.max     = max;
+  r.rl      = rl;
+  r.notes   = notes;
+  r.srLink  = srLink;
+  r.srToken = srToken;
   r.status= isPast(date)&&date!==todayKey()?'completed':'upcoming';
   saveRaids();renderRaids();renderCalendar();
   toast('Raid updated','ok');
