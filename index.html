@@ -1061,10 +1061,10 @@ mag:[
    position:{Tank:"MT holds Mag in center. OT1 and OT2 each hold a channeler on opposite sides of the room.",Healer:"Assigned healer per cube section. Move to your cube quadrant — one healer covers each side.",Melee:"Spread between channelers. Position near your cube clicker backup.",Ranged:"Spread in outer ring. Each ranged player near their assigned cube. Do NOT cluster.",autoAssign:true}}
 ],
 tk:[
-  {id:'alar',name:"Al'ar",bl:'Phase 2 start',note:"P1: tanks swap every 30s at platform nests. When Al'ar flies center, move down one level. P2: OT picks up at Melt Armor. Paladin tank handles egg adds — do NOT kill them.",
+  {id:'alar',name:"Al'ar",bl:'Phase 2 start',note:"P1: tanks swap every 30s at platform nests. When Al'ar flies center, move down one level. P2: OT picks up at Melt Armor. Paladin tank picks up phoenix adds — kill phoenix, then burn the egg hatchling immediately before it evolves.",
    tanks:[{role:'MT (P1 left)',name:'Holsteinbeef'},{role:'OT (P1 right)',name:'Frostor'},{role:'Adds tank',name:'Unholysparkz'}],
    healers:['Sappheal','Palastuff','Kalaveijo','Vvambull'],special:[],
-   tactics:{Tank:"P1: tank nest, swap every 30s. P2: MT holds boss. OT at Melt Armor. Paladin runs ramp for egg adds.",Healer:"P1: heavy nest tank damage. P2: major healing check. Cover Rebirth of Fire AoE.",Melee:"P1: kill nest adds. When Al'ar goes center — move down. P2: spread for Rebirth of Fire.",Ranged:"P2: spread wide — Rebirth hits random. Focus boss. When airborne: everyone spreads."},
+   tactics:{Tank:"P1: tank nest, swap every 30s. P2: MT holds boss. OT at Melt Armor. Paladin picks up phoenix adds — kill phoenix → kill hatchling immediately before it evolves.",Healer:"P1: heavy nest tank damage. P2: major healing check. Cover Rebirth of Fire AoE.",Melee:"P1: kill nest adds. When Al'ar goes center — move down. P2: assist Paladin on phoenix adds — kill phoenix then hatchling fast. Spread for Rebirth of Fire.",Ranged:"P2: spread wide — Rebirth hits random. Focus boss. When airborne: everyone spreads."},
    position:{Tank:"P1: tanks on opposite platforms (left/right). Swap when the adds spawn. P2: MT center, OT flanking.",Healer:"P1: one healer per nest tank. P2: spread wide across room for Rebirth of Fire coverage.",Melee:"P1: on your nest platform killing adds. P2: melee boss in center, step from fire.",Ranged:"P1: ranged on inner ring shooting adds. P2: outer ring maximum spread."}},
   {id:'vr',name:'Void Reaver',bl:'When stable',note:"Everyone runs into melee at pull — knockback resets threat. All 3 tanks maintain top threat at all times. Hunters preferred as Arcane Orb runners (use Disengage). Assigned runners move from Pounding orbs.",
    tanks:[{role:'MT',name:'Holsteinbeef'},{role:'OT',name:'Frostor'},{role:'OT',name:'Unholysparkz'}],
@@ -1106,7 +1106,7 @@ ssc:[
    tanks:[{role:'T1 (Tidalvess)',name:'Xullue'},{role:'T2 (Caribdis)',name:'Holsteinbeef'},{role:'T3 (Sharkkis)',name:'Palastuff'},{role:'T4 (Karathress)',name:'Frostor'}],
    healers:['Unholysparkz','Sappheal','Swagmon','Leundeadpres','Vvambull'],
    special:[{label:'Totem destroyers',players:['Cakemon','Csoti']},{label:'Tranq shot P4',players:['Harryshotter']},{label:'Interrupt Caribdis heals',players:['Teeko','Oilsmoke','Communicator']}],
-   tactics:{Tank:"4 tanks on 4 targets simultaneously. Face adds away from raid. When advisor dies Karathress absorbs their abilities.",Healer:"One healer per tank group. Bogstrok explosions = heavy AoE — raid CDs ready.",Melee:"Destroy totems immediately — Firebolt Totem kills. Step back when Bogstrok dies (explosion). Follow kill order.",Ranged:"Totem first. Interrupt Caribdis heals. Kite Coilfang Shatterers. Tranq Karathress in P4."},
+   tactics:{Tank:"4 tanks on 4 targets simultaneously. Face adds away from raid. When advisor dies Karathress absorbs their abilities.",Healer:"One healer per tank group. Bogstrok explosions = heavy AoE — raid CDs ready.",Melee:"Destroy totems immediately — Firebolt Totem kills. Step back when Bogstrok dies (explosion). Follow kill order. If assigned: kick Caribdis heals non-stop — she will heal to full if uninterrupted.",Ranged:"Totem first. Interrupt Caribdis heals non-stop — highest priority. Kite Coilfang Shatterers. Tranq Karathress in P4."},
    position:{Tank:"Each tank holds their advisor in their own corner of the room.",Healer:"Positioned between tank groups — one healer per tank with AoE range overlap.",Melee:"Spread between the first two advisors. Move to next target on kill.",Ranged:"Outer ring. Focus fire on priority target. Interrupt team stays near Caribdis."}},
   {id:'morogrim',name:'Morogrim Tidewalker',bl:'When threat stable',note:"Tank facing away. Water Tomb TP — Shamans heal those players immediately. Earthquake: OTs split to N/S walls to catch Murlocs. At 25% all healers move to entrance.",
    tanks:[{role:'MT',name:'Holsteinbeef'},{role:'OT (N Murlocs)',name:'Frostor'},{role:'OT (S Murlocs)',name:'Palastuff'}],
@@ -1133,7 +1133,7 @@ kara:[
    special:[{label:'Sheep adds',players:['Mantine','Noonii']},{label:'Shackle add',players:['Leundeadpres']},{label:'Gouge rotation',players:['Cakemon','Csoti']}],
    tactics:{Tank:"MT on Moroes — position away from CCed adds. OT picks up any add that breaks CC.",Healer:"Dispel Garrote bleeds immediately — they stack. Tank healing priority. Mana pots early.",Melee:"Gouge rotation on Moroes to give healers breathing room. Don't break CC.",Ranged:"CC adds assigned pre-pull. Re-CC immediately on break. Focus fire single target."},
    position:{Tank:"MT holds Moroes in doorway arch. OT patrols near CC'd adds.",Healer:"One on each side — range to cover both tanks.",Melee:"Behind Moroes. Gouge rotation: 2 rogues alternate.",Ranged:"Spread in banquet hall. CC your assigned add."}},
-  {id:'opera',name:'Opera Event',bl:'Varies by event',note:"Wizard of Oz: tank Roar first, then Strawman, then Tinhead, then Dorothy. Romulo/Julianne: tank both, kill same time. Big Bad Wolf: run from wolf, don't get trapped in corner.",
+  {id:'opera',name:'Opera Event',bl:'Varies by event',note:"Wizard of Oz: tank Roar first, then Strawman, then Tinhead, then Dorothy. Romulo/Julianne: tank both, kill same time — interrupt Julianne's heals or she resurrects Romulo. Big Bad Wolf: run from wolf, don't get trapped in corner.",
    tanks:[{role:'MT',name:'Holsteinbeef'},{role:'OT',name:'Xullue'}],
    healers:['Sappheal','Kalaveijo'],special:[],
    tactics:{Tank:"Wizard of Oz: tank assigned add. Romulo/Julianne: both tanks hold one each — kill simultaneously.",Healer:"Movement heavy fight — heal while moving. Pot on Julianne resurrection.",Melee:"Wizard of Oz: assist MT on kill order. Wolf: be ready to kite.",Ranged:"Wolf event: run in circles from Wolf. Julianne: interrupt heals."},
@@ -1157,9 +1157,47 @@ kara:[
    tanks:[{role:'MT (ground)',name:'Holsteinbeef'},{role:'Add tank',name:'Xullue'}],
    healers:['Sappheal','Kalaveijo'],
    special:[{label:'Skeleton killers',players:['Cakemon','Csoti','Mantine']},{label:'Tremor Totem',players:['Vvambull','Swagmon']}],
-   tactics:{Tank:"P1: tank facing away. P2: adds tank picks up skeletons immediately. MT retaunts on landing.",Healer:"P2: raid heals for Charred Earth AoE. Fear ward on MT before P2 transitions.",Melee:"P2: kill skeletons fast — priority above boss. P1: DPS boss.",Ranged:"P2: AoE skeletons. Spread for Charred Earth zones."},
+   tactics:{Tank:"P1: tank facing away. P2: adds tank picks up skeletons immediately. MT retaunts on landing.",Healer:"P2: raid heals for Charred Earth AoE. Fear Ward on MT before EVERY air phase (~90s CD) — reapply on landing.",Melee:"P2: kill skeletons fast — priority above boss. P1: DPS boss.",Ranged:"P2: AoE skeletons. Spread for Charred Earth zones."},
    position:{Tank:"MT holds Nightbane in corner of platform. Add tank near spawn point for skeletons.",Healer:"One on MT, one on raid group.",Melee:"Behind Nightbane. Move to skeleton spawns in P2.",Ranged:"Outer platform. Move from Charred Earth circles."}}
 ]
+};
+
+// Interruptible abilities per boss encounter
+// Used in Player POV to show interrupt duties for players with interrupt charges
+const BOSS_INTERRUPTS={
+  maulgar:[
+    {ability:'Prayer of Mending',caster:'Blindeye the Seer',priority:'critical',note:'Top priority — kick before it bounces between tanks/healers. Never let this land.'},
+    {ability:'Heal',caster:'Blindeye the Seer',priority:'high',note:'Kick if Prayer of Mending is on CD.'}
+  ],
+  mag:[
+    {ability:'Dark Mending',caster:'Hellfire Channelers',priority:'critical',note:'Every channeler must be interrupted. Assign 2 interrupters per side. Use Earth Shock / Kick / Counterspell.'}
+  ],
+  solarian:[
+    {ability:'Arcane Missiles',caster:'Solarian',priority:'high',note:'Interrupt to reduce sustained raid damage. High-priority when cooldown is up.'}
+  ],
+  kaelthas:[
+    {ability:'Fireball',caster:'Grand Astromancer Capernian (P1)',priority:'high',note:'P1 — interrupt Capernian\'s Fireballs. Assigned melee/interrupters on Capernian.'},
+    {ability:'Pyroblast',caster:"Kael'thas (P4)",priority:'critical',note:'P4 — fireball kicker rotation. Never let Pyroblast land — it kills the target.'}
+  ],
+  leo:[
+    {ability:'Chaos Blast',caster:'Leotheras Demon phase',priority:'medium',note:'P2 demon phase — interrupt Chaos Blast if you are nearby. Reduces chaos damage spread on raid.'}
+  ],
+  karathress:[
+    {ability:'Tidal Surge / Healing Wave',caster:'Fathom-Witch Caribdis',priority:'critical',note:'Must interrupt ALL heals from Caribdis — she will heal to full if uninterrupted. Assigned interrupters stay on Caribdis at all times.'},
+    {ability:'Cataclysmic Bolt',caster:'Karathress (P4)',priority:'high',note:'P4 — kick when possible. Massive raid damage if it lands.'}
+  ],
+  vashj:[
+    {ability:'Mana Drain',caster:'Coilfang Striders (P2)',priority:'medium',note:'P2 — interrupt Strider Mana Drain to preserve healer mana during the chaotic phase.'}
+  ],
+  moroes:[
+    {ability:'Flash Heal / Holy Light',caster:'Priest/Paladin guest adds',priority:'critical',note:'Interrupt ALL heals from caster adds immediately. Uninterrupted heals can reset an add to full HP and wipe the attempt.'}
+  ],
+  opera:[
+    {ability:"Eternal Affection (Resurrect/Heal)",caster:'Julianne',priority:'critical',note:'Romulo & Julianne event — interrupt Julianne\'s heals and resurrection cast. She will resurrect Romulo if allowed to cast.'}
+  ],
+  nightbane:[
+    {ability:'Fireball Volley',caster:'Charred Bone Skeleton adds',priority:'medium',note:'Air phases — interrupt Fireball Volleys from skeleton adds to reduce incoming raid damage.'}
+  ]
 };
 </script>
 <script>
@@ -3688,7 +3726,14 @@ function renderPOV(){
         </div>`;
       }).join('');
 
-      const hasSomething=tankAssign||healerAssign||specialAssign||cubeAssign||trashForRaid.length>0;
+      // Interrupt duties for this boss
+      const bossInts=BOSS_INTERRUPTS[boss.id]||[];
+      const intHtml=(player.interrupt>0&&bossInts.length>0)?bossInts.map(i=>{
+        const col=i.priority==='critical'?'#e07060':i.priority==='high'?'#e09a65':'#d4b84a';
+        const icon=i.priority==='critical'?'ti-player-stop-filled':'ti-player-stop';
+        return`<div class="pov-task"><i class="ti ${icon}" style="color:${col}"></i><span><strong style="color:${col}">Interrupt: ${i.ability}</strong> <span style="color:var(--t3);font-size:10px">[${i.caster}]</span><br><span style="font-size:11px;color:var(--t2)">${i.note}</span></span></div>`;
+      }).join(''):'';
+      const hasSomething=tankAssign||healerAssign||specialAssign||cubeAssign||intHtml||trashForRaid.length>0;
       const tactic=boss.tactics?.[player.type]||'';
       const posNote=boss.position?.[player.type]||'';
       // Multi-phase bosses get phase tabs
@@ -3729,6 +3774,7 @@ const svg=svgHtml;
         ${healerAssign?`<div class="pov-task"><i class="ti ti-heart" style="color:#5DCAA5"></i><span><strong>Healer:</strong> Assigned healer for this encounter</span></div>`:''}
         ${specialAssign?`<div class="pov-task"><i class="ti ti-star" style="color:var(--gold)"></i><span><strong>${specialAssign.label}</strong></span></div>`:''}
         ${cubeAssign}
+        ${intHtml}
         ${tactic?`<div class="pov-task"><i class="ti ti-bulb" style="color:var(--gold)"></i><span style="line-height:1.5"><strong>Your tactic (${player.type}):</strong> ${tactic}</span></div>`:''}
         ${posNote?`<div class="pov-task"><i class="ti ti-map-pin" style="color:var(--acc)"></i><span style="line-height:1.5"><strong>Your position:</strong> ${posNote}</span></div>`:''}
         ${svg||''}
