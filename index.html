@@ -4351,6 +4351,12 @@ function submitApp(){
   const exp=document.getElementById('sig-exp').value;
   const note=document.getElementById('sig-note').value.trim();
   if(!name){toast('Enter your character name','err');return;}
+  const alreadyIn=ROSTER.find(p=>p.name.toLowerCase()===name.toLowerCase());
+  if(alreadyIn){
+    document.getElementById('signup-success').style.display='block';
+    document.getElementById('signup-success-msg').textContent=`${name} is already a member of Boogalo! No application needed — ask the Raid Leader if you have trouble signing in.`;
+    return;
+  }
   const app={id:genId(),name,cls,spec,role,flexSpec:flex,experience:exp,note,status:'pending',gs:null,gsNote:'Check armory manually'};
   applications.push(app);
   saveApplications();
