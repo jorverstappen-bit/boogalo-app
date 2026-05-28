@@ -225,6 +225,22 @@ tr:hover td{background:rgba(255,255,255,.013)}
 /* ARMORY */
 .armory-a{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--acc);text-decoration:none;padding:3px 8px;border:1px solid rgba(124,111,224,.25);border-radius:var(--r);background:var(--accg);transition:all .13s}
 .armory-a:hover{background:rgba(124,111,224,.25)}
+/* PROGRESSION */
+.prog-boss{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.prog-boss:last-child{border-bottom:none}
+.prog-kill{font-size:10px;color:#5DCAA5;background:rgba(26,158,114,.1);border:0.5px solid rgba(26,158,114,.25);border-radius:4px;padding:1px 8px;white-space:nowrap}
+.prog-nokill{font-size:10px;color:var(--t3);background:var(--bg3);border:0.5px solid var(--borderl);border-radius:4px;padding:1px 8px}
+/* BUFF MATRIX */
+.bm-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.bm-row:last-child{border-bottom:none}
+.bm-prov{font-size:10px;color:var(--t3);margin-left:auto;text-align:right;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* PRE-RAID CHECKLIST */
+.cl-wrap{background:var(--bg3);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;border:1px solid var(--border)}
+.cl-item{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;color:var(--t2);cursor:pointer;user-select:none;line-height:1.4}
+.cl-item.done{color:var(--t3)}
+.cl-item input[type=checkbox]{width:15px;height:15px;flex-shrink:0;cursor:pointer;accent-color:var(--gre)}
+/* DISCORD EXPORT */
+.discord-export{background:var(--bg3);border:1px solid var(--borderl);border-radius:var(--r);padding:9px 11px;font-family:monospace;font-size:11px;line-height:1.7;white-space:pre-wrap;color:var(--t2);margin-top:8px;max-height:200px;overflow-y:auto}
 </style>
 </head>
 <body>
@@ -355,6 +371,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <div class="sbs"><div class="sbl">Tools</div>
       <div class="ni" onclick="nav(this,'loot')"><i class="ti ti-trophy"></i><span>Loot Priority</span></div>
       <div class="ni" onclick="nav(this,'pov')"><i class="ti ti-user-circle"></i><span>Player POV</span></div>
+      <div class="ni" onclick="nav(this,'buffs')"><i class="ti ti-checklist"></i><span>Buff Coverage</span></div>
       <div class="ni" onclick="nav(this,'specreq')"><i class="ti ti-refresh"></i><span>Spec Requests<span class="nbadge" id="sr-badge">0</span></span></div>
     </div>
     <div class="sbs"><div class="sbl">Sign-up</div>
@@ -362,6 +379,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'rl-review')"><i class="ti ti-shield-check"></i><span>RL Review<span class="nbadge" id="pending-badge">0</span></span></div>
     </div>
     <div class="sbs"><div class="sbl">Raids</div>
+      <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
       <div class="ni" onclick="nav(this,'gruul')"><i class="ti ti-sword"></i><span>Gruul's Lair</span></div>
       <div class="ni" onclick="nav(this,'mag')"><i class="ti ti-flame"></i><span>Magtheridon</span></div>
       <div class="ni" onclick="nav(this,'tk')"><i class="ti ti-bolt"></i><span>Tempest Keep</span></div>
@@ -380,6 +398,8 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'roster')"><i class="ti ti-users"></i><span>Roster (view)</span></div>
       <div class="ni" onclick="nav(this,'loot')"><i class="ti ti-trophy"></i><span>Loot Priority</span></div>
       <div class="ni" onclick="nav(this,'pov')"><i class="ti ti-user-circle"></i><span>Player POV</span></div>
+      <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
+      <div class="ni" onclick="nav(this,'buffs')"><i class="ti ti-checklist"></i><span>Buff Coverage</span></div>
     </div>
     <div class="sbs"><div class="sbl">Schedule</div>
       <div class="ni" onclick="nav(this,'calendar')"><i class="ti ti-calendar"></i><span>Calendar</span></div>
@@ -396,6 +416,8 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'pov')"><i class="ti ti-user-circle"></i><span>Player POV</span></div>
       <div class="ni" onclick="nav(this,'roster')"><i class="ti ti-users"></i><span>Roster (view)</span></div>
       <div class="ni" onclick="nav(this,'loot')"><i class="ti ti-trophy"></i><span>Loot Priority</span></div>
+      <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
+      <div class="ni" onclick="nav(this,'buffs')"><i class="ti ti-checklist"></i><span>Buff Coverage</span></div>
     </div>
     <div class="sbs"><div class="sbl">My Account</div>
       <div class="ni" onclick="nav(this,'signup')"><i class="ti ti-forms"></i><span>Apply for Raid</span></div>
@@ -435,7 +457,17 @@ tr:hover td{background:rgba(255,255,255,.013)}
 
 <!-- ===== PAGES ===== -->
 <div class="page" id="page-attendance">
-  <div class="ph"><div class="pt">Tonight's Raid</div><div class="ps">Toggle presence — absent players are greyed across all views</div></div>
+  <div class="ph" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px">
+    <div><div class="pt">Tonight's Raid</div><div class="ps">Toggle presence — absent players are greyed across all views</div></div>
+    <button class="btn btn-sm" style="background:rgba(88,101,242,.15);border-color:rgba(88,101,242,.35);color:#7289da;flex-shrink:0" onclick="toggleDiscordPanel()"><i class="ti ti-brand-discord"></i> Discord Export</button>
+  </div>
+  <div id="discord-panel" style="display:none;margin-bottom:10px">
+    <div class="card" style="border-color:rgba(88,101,242,.3)">
+      <div class="ct"><i class="ti ti-brand-discord" style="color:#7289da"></i>Discord Raid Comp</div>
+      <div class="discord-export" id="discord-text"></div>
+      <button class="btn btn-sm" style="margin-top:8px;background:rgba(88,101,242,.15);border-color:rgba(88,101,242,.35);color:#7289da" onclick="copyDiscordExport(this)"><i class="ti ti-copy"></i> Copy to clipboard</button>
+    </div>
+  </div>
   <div id="miss-banner"></div>
   <div class="card" style="margin-bottom:10px"><div class="ct"><i class="ti ti-shield-check" style="color:var(--ora)"></i>Role Coverage</div><div id="att-cov"></div></div>
   <div class="srow" id="att-stats"></div>
@@ -735,6 +767,16 @@ tr:hover td{background:rgba(255,255,255,.013)}
   <div id="reviews-content"></div>
 </div>
 
+<div class="page" id="page-progression">
+  <div class="ph"><div class="pt">Progression</div><div class="ps">Boss kill log · First kills · Instance progress</div></div>
+  <div id="progression-content"></div>
+</div>
+
+<div class="page" id="page-buffs">
+  <div class="ph"><div class="pt">Buff Coverage</div><div class="ps">Based on present players — red = not covered tonight</div></div>
+  <div id="buffs-content"></div>
+</div>
+
 </div></div><!-- end content/main -->
 </div><!-- end shell -->
 <script>
@@ -917,6 +959,13 @@ function saveGroups(){
 function saveBossAssignments(){
   try{localStorage.setItem('boogalo-bossAssignments',JSON.stringify(bossAssignments));}catch(e){}
   fbSet('bossAssignments', bossAssignments);
+}
+function saveKillLog(){
+  try{localStorage.setItem('boogalo-killLog',JSON.stringify(killLog));}catch(e){}
+  fbSet('killLog',killLog);
+}
+function saveChecklist(){
+  try{localStorage.setItem('boogalo-checklist',JSON.stringify(checklistState));}catch(e){}
 }
 // ---- Group & healer-tank edit functions (RL only) ----
 function addToGroup(gi,name){
@@ -1199,6 +1248,101 @@ const BOSS_INTERRUPTS={
     {ability:'Fireball Volley',caster:'Charred Bone Skeleton adds',priority:'medium',note:'Air phases — interrupt Fireball Volleys from skeleton adds to reduce incoming raid damage.'}
   ]
 };
+
+// ============================================================
+// PROGRESSION — KILL LOG
+// ============================================================
+let killLog={}; // {bossId:{firstKill:'yyyy-mm-dd',kills:0}}
+
+const INSTANCE_DEFS=[
+  {key:'gruul',name:"Gruul's Lair",color:'#e07060',
+    bosses:[{id:'maulgar',name:'High King Maulgar'},{id:'gruul',name:'Gruul the Dragonkiller'}]},
+  {key:'mag',name:"Magtheridon's Lair",color:'#e09a65',
+    bosses:[{id:'mag',name:'Magtheridon'}]},
+  {key:'tk',name:'Tempest Keep',color:'#6ab4e8',
+    bosses:[{id:'alar',name:"Al'ar"},{id:'vr',name:'Void Reaver'},{id:'solarian',name:'Solarian'},{id:'kaelthas',name:"Kael'thas"}]},
+  {key:'ssc',name:'Serpent Shrine Cavern',color:'#5DCAA5',
+    bosses:[{id:'hydross',name:'Hydross'},{id:'lurker',name:'The Lurker Below'},{id:'leo',name:'Leotheras'},{id:'karathress',name:'Karathress'},{id:'morogrim',name:'Morogrim'},{id:'vashj',name:'Lady Vashj'}]},
+  {key:'kara',name:'Karazhan',color:'#9482C9',
+    bosses:[{id:'attumen',name:'Attumen'},{id:'moroes',name:'Moroes'},{id:'opera',name:'Opera Event'},{id:'curator',name:'The Curator'},{id:'chess',name:'Chess Event'},{id:'prince',name:'Prince Malchezaar'},{id:'nightbane',name:'Nightbane'}]},
+];
+
+// ============================================================
+// BUFF COVERAGE
+// ============================================================
+const RAID_BUFFS=[
+  // Raid-wide
+  {id:'kings',    label:'Blessing of Kings',    icon:'ti-crown',       cat:'Raid',
+    check:p=>p.cls==='Paladin',note:'All stats +10%'},
+  {id:'might',    label:'Blessing of Might',    icon:'ti-sword',       cat:'Raid',
+    check:p=>p.cls==='Paladin',note:'+AP — Warriors, Rogues, Hunters'},
+  {id:'wisdom',   label:'Blessing of Wisdom',   icon:'ti-droplet',     cat:'Raid',
+    check:p=>p.cls==='Paladin',note:'Mana regen for casters'},
+  {id:'motw',     label:'Mark of the Wild',     icon:'ti-leaf',        cat:'Raid',
+    check:p=>p.cls==='Druid',note:'Stats + armor'},
+  {id:'ai',       label:'Arcane Intellect',     icon:'ti-brain',       cat:'Raid',
+    check:p=>p.cls==='Mage',note:'Intellect boost for all casters'},
+  {id:'fort',     label:'Power Word: Fortitude',icon:'ti-heart',       cat:'Raid',
+    check:p=>p.cls==='Priest',note:'Max health boost'},
+  {id:'ds',       label:'Divine Spirit',        icon:'ti-sparkles',    cat:'Raid',
+    check:p=>p.cls==='Priest'&&(p.spec==='Holy'||p.spec==='Discipline'),note:'Spirit regen (Holy/Disc Priest)'},
+  // Melee
+  {id:'windfury', label:'Windfury Totem',       icon:'ti-wind',        cat:'Melee',
+    check:p=>p.cls==='Shaman'&&p.spec==='Enhancement',note:'Huge melee haste — requires Enh Shaman'},
+  {id:'trueshot', label:'Trueshot Aura',         icon:'ti-bow-arrow',   cat:'Melee',
+    check:p=>p.cls==='Hunter'&&p.spec==='Marksmanship',note:'+AP aura — Marksmanship Hunter'},
+  {id:'lotp',     label:'Leader of the Pack',   icon:'ti-paw',         cat:'Melee',
+    check:p=>p.cls==='Druid'&&(p.spec==='Feral'||p.spec==='Guardian'),note:'Melee crit aura — Feral/Guardian Druid'},
+  {id:'bshout',   label:'Battle Shout',         icon:'ti-volume',      cat:'Melee',
+    check:p=>p.cls==='Warrior',note:'+AP party buff'},
+  // Caster
+  {id:'wow',      label:'Wrath of Air Totem',   icon:'ti-cloud-storm', cat:'Caster',
+    check:p=>p.cls==='Shaman'&&(p.spec==='Restoration'||p.spec==='Elemental'),note:'5% spell haste — high value for casters'},
+  {id:'tow',      label:'Totem of Wrath',       icon:'ti-flame',       cat:'Caster',
+    check:p=>p.cls==='Shaman'&&p.spec==='Elemental',note:'Hit + crit aura — Elemental Shaman only'},
+  {id:'coe',      label:'Curse of Elements',    icon:'ti-hexagon',     cat:'Caster',
+    check:p=>p.cls==='Warlock',note:'-10% spell resistances on target'},
+  {id:'shadowweave',label:'Shadow Weaving',     icon:'ti-moon',        cat:'Caster',
+    check:p=>p.cls==='Priest'&&p.spec==='Shadow',note:'Stacks shadow damage amp — Shadow Priest'},
+  // Cooldowns (critical)
+  {id:'bl',       label:'Bloodlust / Heroism',  icon:'ti-bolt',        cat:'Cooldowns',critical:true,
+    check:p=>p.cls==='Shaman',note:'MUST HAVE — +30% haste for 40s'},
+  {id:'rebirth',  label:'Rebirth',              icon:'ti-refresh',     cat:'Cooldowns',
+    check:p=>p.cls==='Druid',note:'Combat rez — Druid'},
+  {id:'soulstone',label:'Soulstone',            icon:'ti-diamond',     cat:'Cooldowns',
+    check:p=>p.cls==='Warlock',note:'Pre-combat rez — Warlock'},
+  {id:'innervate',label:'Innervate',            icon:'ti-circle-dot',  cat:'Cooldowns',
+    check:p=>p.cls==='Druid',note:'Full mana restore for 1 healer'},
+  {id:'di',       label:'Divine Intervention',  icon:'ti-shield-check',cat:'Cooldowns',
+    check:p=>p.cls==='Paladin',note:'Combat wipe recovery — Paladin'},
+];
+
+// ============================================================
+// PRE-RAID CHECKLIST
+// ============================================================
+let checklistState={}; // {'PlayerName_yyyy-mm-dd':{itemId:bool,...}}
+
+const CHECKLIST_ITEMS=[
+  {id:'flask',       label:'Flask stacked (appropriate for spec)',icon:'ti-flask',      roles:null},
+  {id:'food',        label:'Food buff ready',                     icon:'ti-salad',      roles:null},
+  {id:'healthstone', label:'Healthstone from a Warlock',          icon:'ti-diamond',    roles:null},
+  {id:'repair',      label:'Armor fully repaired',                icon:'ti-shield',     roles:null},
+  {id:'mpot',        label:'Mana Pots ×5+',                      icon:'ti-droplet',    roles:['Healer','Ranged']},
+  {id:'hpot',        label:'Health Pots ×5+',                    icon:'ti-heart',      roles:['Tank','Melee']},
+  {id:'reagents',    label:'Class reagents topped up',            icon:'ti-package',    roles:['Priest','Paladin','Mage','Druid']},
+  {id:'elixir',      label:'Sharpening Stone / Wizard Oil',       icon:'ti-test-pipe',  roles:['Melee','Ranged']},
+];
+
+function clKey(playerName){return playerName+'_'+todayKey();}
+function getCLState(playerName){return checklistState[clKey(playerName)]||{};}
+function setCLItem(playerName,itemId,val){
+  const k=clKey(playerName);
+  if(!checklistState[k])checklistState[k]={};
+  checklistState[k][itemId]=val;
+  saveChecklist();
+  // re-render the checklist portion only (avoid full POV re-render)
+  renderPOV();
+}
 </script>
 <script>
 // ============================================================
@@ -1696,7 +1840,7 @@ function nav(el,page){
   const mainEl=document.querySelector('.main');if(mainEl)mainEl.scrollTop=0;
   // On mobile: collapse sidebar after navigating
   if(window.innerWidth<=640) collapseSidebar();
-  ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles})[page]?.();
+  ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles,progression:renderProgression,buffs:renderBuffs})[page]?.();
 }
 
 // ============================================================
@@ -3686,6 +3830,25 @@ function renderPOV(){
     ${player.resFire?'<span class="badge res-fi">🔥 Fire Res</span>':''}
   </div>`;
 
+  // Pre-raid checklist
+  const clState=getCLState(playerName);
+  const clItems=CHECKLIST_ITEMS.filter(item=>!item.roles||item.roles.includes(player.type)||item.roles.includes(player.cls));
+  const checkedCount=clItems.filter(item=>clState[item.id]).length;
+  const allDone=checkedCount===clItems.length;
+  html+=`<div class="cl-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
+      <span style="font-size:10px;font-weight:600;color:${allDone?'#5DCAA5':'var(--t2)'};text-transform:uppercase;letter-spacing:.07em"><i class="ti ti-checklist"></i> Pre-raid Checklist (${checkedCount}/${clItems.length})</span>
+      ${allDone?'<span style="font-size:10px;color:#5DCAA5"><i class="ti ti-circle-check"></i> Ready!</span>':''}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 10px">
+    ${clItems.map(item=>`<div class="cl-item${clState[item.id]?' done':''}" onclick="setCLItem('${playerName}','${item.id}',${!clState[item.id]})">
+      <input type="checkbox" ${clState[item.id]?'checked':''} onclick="event.stopPropagation();setCLItem('${playerName}','${item.id}',this.checked)">
+      <i class="ti ${item.icon}" style="font-size:12px;color:${clState[item.id]?'var(--t3)':'var(--t2)'}"></i>
+      <span>${item.label}</span>
+    </div>`).join('')}
+    </div>
+  </div>`;
+
   // Interrupts & Dispels summary
   html+=`<div style="background:var(--bg2);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;border:1px solid var(--border)"><div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px"><span style="color:var(--t2)">Interrupt: <strong style="color:${player.interrupt>0?'#6ab4e8':'var(--t3)'}">${player.interrupt>0?player.interrupt+' charges':'None'}</strong></span><span style="color:var(--t2)">Dispels: <strong style="color:var(--t1)">${effectiveDispels(player).length?effectiveDispels(player).join(', '):'None'}</strong></span><span style="color:var(--t2)">Role type: <strong style="color:var(--t1)">${player.type}</strong></span></div></div>`;
 
@@ -3700,6 +3863,7 @@ function renderPOV(){
       const liveAsgn=getActiveBossAssignment(boss);
       const tankAssign=liveAsgn.tanks?.find(t=>t.name===playerName);
       const healerAssign=liveAsgn.healers?.includes(playerName);
+      const healerTarget=liveAsgn.healerTargets?.[playerName]||'';
       const specialAssign=liveAsgn.special?.find(s=>s.players?.includes(playerName));
       // mag cube assign
       let cubeAssign='';
@@ -3769,7 +3933,7 @@ const svg=svgHtml;
           ${hasSomething?'<span class="badge" style="background:rgba(26,158,114,.1);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.25)"><i class="ti ti-alert-circle"></i> Active role</span>':'<span class="badge" style="background:rgba(100,100,100,.08);color:var(--t3)">No direct assignment</span>'}
         </div>
         ${tankAssign?`<div class="pov-task"><i class="ti ti-shield" style="color:#e07060"></i><span><strong>Tank role:</strong> ${tankAssign.role}</span></div>`:''}
-        ${healerAssign?`<div class="pov-task"><i class="ti ti-heart" style="color:#5DCAA5"></i><span><strong>Healer:</strong> Assigned healer for this encounter</span></div>`:''}
+        ${healerAssign?`<div class="pov-task"><i class="ti ti-heart" style="color:#5DCAA5"></i><span><strong>Healer:</strong> Assigned healer for this encounter${healerTarget?' — <strong style="color:#5DCAA5">Target: '+healerTarget+'</strong>':''}</span></div>`:''}
         ${specialAssign?`<div class="pov-task"><i class="ti ti-star" style="color:var(--gold)"></i><span><strong>${specialAssign.label}</strong></span></div>`:''}
         ${cubeAssign}
         ${intHtml}
@@ -3849,7 +4013,10 @@ function getDefaultBossAssignment(boss){
   };
 }
 function getActiveBossAssignment(boss){
-  return bossAssignments[boss.id]||getDefaultBossAssignment(boss);
+  const stored=bossAssignments[boss.id];
+  const def=getDefaultBossAssignment(boss);
+  if(stored) return{tanks:stored.tanks||def.tanks,healers:stored.healers||def.healers,special:stored.special||def.special,healerTargets:stored.healerTargets||{}};
+  return{...def,healerTargets:{}};
 }
 function ensureBossAssignment(bossId){
   if(!bossAssignments[bossId]){
@@ -3864,6 +4031,16 @@ function setBossAssign(bossId,raidKey,field,idx,value){
   if(field==='tank') ba.tanks[idx].name=value;
   else if(field==='healer') ba.healers[idx]=value;
   else if(field==='special-remove') ba.special[idx].players=ba.special[idx].players.filter(n=>n!==value);
+  saveBossAssignments();
+  renderBossPage(raidKey);
+}
+function setBossHealerTarget(bossId,raidKey,healer,target){
+  if(!isRL()||!healer) return;
+  ensureBossAssignment(bossId);
+  const ba=bossAssignments[bossId]; if(!ba) return;
+  if(!ba.healerTargets) ba.healerTargets={};
+  if(target) ba.healerTargets[healer]=target;
+  else delete ba.healerTargets[healer];
   saveBossAssignments();
   renderBossPage(raidKey);
 }
@@ -3910,9 +4087,11 @@ function renderBossCard(boss,raidKey){
     ?tanks.map((t,i)=>`<div class="rrow" style="gap:6px"><span style="font-size:10px;color:var(--t3);min-width:130px">${t.role}</span><select style="${selStyle}" onchange="setBossAssign('${boss.id}','${raidKey}','tank',${i},this.value)"><option value="">— None —</option>${ROSTER.map(p=>`<option value="${p.name}" ${p.name===t.name?'selected':''}>${p.name}${p.present?'':' ·'}</option>`).join('')}</select></div>`).join('')
     :tanks.map(t=>`<div class="rrow">${t.name?pill(t.name,!gp(t.name)?.present):'<span style="font-size:11px;color:var(--t3)">—</span>'}<span style="font-size:10px;color:var(--t3);margin-left:4px">${t.role}</span></div>`).join('');
 
+  const healerTargets=asgn.healerTargets||{};
+  const targetOpts=['MT','OT','OT2','Group 1','Group 2','Group 3','Raid'].map(t=>`<option value="${t}">${t}</option>`).join('');
   const healersHTML=rl
-    ?`${healers.map((h,i)=>`<div class="rrow" style="gap:6px"><select style="${selStyle}" onchange="setBossAssign('${boss.id}','${raidKey}','healer',${i},this.value)"><option value="">— None —</option>${ROSTER.filter(p=>p.type==='Healer').map(p=>`<option value="${p.name}" ${p.name===h?'selected':''}>${p.name}${p.present?'':' ·'}</option>`).join('')}</select><button class="btn btn-sm" style="padding:2px 5px;color:var(--red);font-size:11px" onclick="removeBossAssignItem('${boss.id}','${raidKey}','healer',${i})">×</button></div>`).join('')}<select style="${addSelStyle}" onchange="addBossAssignItem('${boss.id}','${raidKey}','healer',this.value);this.value=''"><option value="">+ Add healer</option>${healerOpts}</select>`
-    :healers.map(h=>`<div class="rrow">${h?pill(h,!gp(h)?.present):'<span style="font-size:11px;color:var(--t3)">—</span>'}</div>`).join('');
+    ?`${healers.map((h,i)=>`<div class="rrow" style="gap:4px"><select style="${selStyle}" onchange="setBossAssign('${boss.id}','${raidKey}','healer',${i},this.value)"><option value="">— None —</option>${ROSTER.filter(p=>p.type==='Healer').map(p=>`<option value="${p.name}" ${p.name===h?'selected':''}>${p.name}${p.present?'':' ·'}</option>`).join('')}</select><select style="${selStyle};width:80px;color:${healerTargets[h]?'var(--t1)':'var(--t3)'}" onchange="setBossHealerTarget('${boss.id}','${raidKey}','${h}',this.value)"><option value="">→ target</option>${targetOpts.replace(`value="${healerTargets[h]||''}"`,`value="${healerTargets[h]||''}" selected`)}</select><button class="btn btn-sm" style="padding:2px 5px;color:var(--red);font-size:11px" onclick="removeBossAssignItem('${boss.id}','${raidKey}','healer',${i})">×</button></div>`).join('')}<select style="${addSelStyle}" onchange="addBossAssignItem('${boss.id}','${raidKey}','healer',this.value);this.value=''"><option value="">+ Add healer</option>${healerOpts}</select>`
+    :healers.map(h=>`<div class="rrow">${h?pill(h,!gp(h)?.present):'<span style="font-size:11px;color:var(--t3)">—</span>'}${healerTargets[h]?`<span style="font-size:10px;color:var(--t3);margin-left:4px">→ ${healerTargets[h]}</span>`:''}</div>`).join('');
 
   const specialHTML=special.length?`<div style="margin-top:10px"><div class="sht" style="margin-bottom:6px">Special Assignments</div>${special.map((s,si)=>`<div style="margin-bottom:8px"><div style="font-size:11px;font-weight:600;color:var(--t2);margin-bottom:4px">${s.label}</div><div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">${(s.players||[]).map(n=>`${pill(n,!gp(n)?.present)}${rl?`<button class="btn btn-sm" style="padding:1px 5px;color:var(--red);font-size:10px;margin-left:-2px" onclick="setBossAssign('${boss.id}','${raidKey}','special-remove',${si},'${n}')">×</button>`:''}`.trim()).join('')}${rl?`<select style="${addSelStyle}" onchange="addBossAssignItem('${boss.id}','${raidKey}','special',this.value,${si});this.value=''"><option value="">+ Add</option>${allOpts}</select>`:''}</div></div>`).join('')}</div>`:'';
 
@@ -4773,6 +4952,156 @@ function submitReview(raidId){
 }
 
 // ============================================================
+// PROGRESSION
+// ============================================================
+function renderProgression(){
+  const el=document.getElementById('progression-content');if(!el)return;
+  const rl=isRL();
+  let totalKilled=0,totalBosses=0;
+  INSTANCE_DEFS.forEach(inst=>{
+    totalKilled+=inst.bosses.filter(b=>killLog[b.id]?.kills>0).length;
+    totalBosses+=inst.bosses.length;
+  });
+  let html=`<div class="srow" style="margin-bottom:16px">
+    ${box(totalKilled,'Bosses Killed','#5DCAA5')}
+    ${box(totalBosses-totalKilled,'Remaining','#e07b72')}
+    ${box(totalBosses,'Total Bosses','var(--t2)')}
+  </div>`;
+  INSTANCE_DEFS.forEach(inst=>{
+    const killed=inst.bosses.filter(b=>killLog[b.id]?.kills>0).length;
+    const total=inst.bosses.length;
+    const pct=Math.round((killed/total)*100);
+    html+=`<div class="card" style="margin-bottom:10px">
+      <div class="ct" style="font-family:Cinzel,serif;font-size:13px">
+        <i class="ti ti-sword" style="color:${inst.color}"></i>${inst.name}
+        <span class="badge" style="margin-left:auto;background:${killed===total?'rgba(26,158,114,.15)':'var(--bg3)'};color:${killed===total?'#5DCAA5':'var(--t2)'};">${killed}/${total}</span>
+      </div>
+      <div class="pb" style="margin-bottom:10px"><div class="pf" style="width:${pct}%;background:${killed===total?'var(--gre)':inst.color}"></div></div>
+      ${inst.bosses.map(b=>{
+        const kd=killLog[b.id];
+        const isDead=kd&&kd.kills>0;
+        return`<div class="prog-boss">
+          <i class="ti ${isDead?'ti-circle-check':'ti-circle'}" style="color:${isDead?'#5DCAA5':'var(--t3)'}"></i>
+          <span style="flex:1;font-size:12px;color:${isDead?'var(--t1)':'var(--t2)'}">${b.name}</span>
+          ${isDead
+            ?`<span class="prog-kill"><i class="ti ti-check"></i> ${kd.kills}× ${kd.firstKill?'· First: '+fmtKey(kd.firstKill):''}</span>`
+            :`<span class="prog-nokill">Not yet</span>`}
+          ${rl?`<div style="display:flex;gap:4px;margin-left:6px">
+            <button class="btn btn-s btn-sm" style="font-size:10px;padding:2px 8px" onclick="logBossKill('${b.id}')"><i class="ti ti-plus"></i> Kill</button>
+            ${isDead?`<button class="btn btn-sm" style="font-size:10px;padding:2px 7px;color:var(--t3)" onclick="resetBossKill('${b.id}','${b.name}')" title="Reset kill log"><i class="ti ti-x"></i></button>`:''}
+          </div>`:''}
+        </div>`;
+      }).join('')}
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+function logBossKill(bossId){
+  if(!isRL())return;
+  if(!killLog[bossId])killLog[bossId]={firstKill:todayKey(),kills:0};
+  if(!killLog[bossId].firstKill)killLog[bossId].firstKill=todayKey();
+  killLog[bossId].kills=(killLog[bossId].kills||0)+1;
+  saveKillLog();renderProgression();toast('Kill logged!','ok');
+}
+function resetBossKill(bossId,bossName){
+  if(!isRL())return;
+  delete killLog[bossId];
+  saveKillLog();renderProgression();toast(bossName+' kill record reset','ok');
+}
+
+// ============================================================
+// BUFF COVERAGE
+// ============================================================
+function renderBuffs(){
+  const el=document.getElementById('buffs-content');if(!el)return;
+  const pr=present();
+  const cats=['Raid','Melee','Caster','Cooldowns'];
+  const missing=RAID_BUFFS.filter(b=>b.critical&&!pr.some(p=>b.check(p)));
+  let html='';
+  if(missing.length){
+    html+=`<div class="miss-banner" style="margin-bottom:10px"><i class="ti ti-alert-triangle"></i> Critical buffs missing tonight: <strong>${missing.map(b=>b.label).join(', ')}</strong></div>`;
+  }
+  html+=`<div style="font-size:11px;color:var(--t3);margin-bottom:12px">Coverage based on <strong style="color:var(--t1)">${pr.length}</strong> present players. Absent players are excluded.</div>`;
+  cats.forEach(cat=>{
+    const buffs=RAID_BUFFS.filter(b=>b.cat===cat);
+    const coveredCount=buffs.filter(b=>pr.some(p=>b.check(p))).length;
+    html+=`<div class="card" style="margin-bottom:10px">
+      <div class="ct"><i class="ti ti-checklist" style="color:var(--acc)"></i>${cat} Buffs
+        <span class="badge" style="margin-left:auto;background:${coveredCount===buffs.length?'rgba(26,158,114,.12)':'rgba(200,120,65,.12)'};color:${coveredCount===buffs.length?'#5DCAA5':'#e09a65'}">${coveredCount}/${buffs.length}</span>
+      </div>
+      ${buffs.map(b=>{
+        const providers=pr.filter(p=>b.check(p));
+        const ok=providers.length>0;
+        return`<div class="bm-row">
+          <i class="ti ${b.icon}" style="font-size:14px;width:18px;text-align:center;color:${ok?'#5DCAA5':b.critical?'#e07b72':'var(--t3)'}"></i>
+          <span style="flex:1;color:${ok?'var(--t1)':b.critical?'#e07b72':'var(--t2)'};font-weight:${b.critical&&!ok?600:400}">${b.label}</span>
+          <span style="font-size:10px;color:var(--t3);flex-shrink:0;margin:0 6px">${b.note}</span>
+          ${ok
+            ?`<span class="bm-prov">${providers.map(p=>p.name).join(', ')}</span>`
+            :`<span style="font-size:10px;color:${b.critical?'#e07b72':'var(--t3)'};white-space:nowrap">${b.critical?'⚠ MISSING':'—'}</span>`}
+        </div>`;
+      }).join('')}
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+// ============================================================
+// DISCORD EXPORT
+// ============================================================
+function toggleDiscordPanel(){
+  const panel=document.getElementById('discord-panel');
+  if(!panel)return;
+  if(panel.style.display==='none'){
+    panel.style.display='block';
+    refreshDiscordText();
+  } else {
+    panel.style.display='none';
+  }
+}
+function refreshDiscordText(){
+  const pr=present();
+  const tanks=pr.filter(p=>effectiveRole(p)==='Tank');
+  const healers=pr.filter(p=>effectiveRole(p)==='Healer');
+  const melee=pr.filter(p=>effectiveRole(p)==='Melee');
+  const ranged=pr.filter(p=>effectiveRole(p)==='Ranged');
+  const lines=[
+    '📅 **Boogaloo Raid — '+fmtKey(todayKey())+'**',
+    '═══════════════════════════════',
+    '🛡 **Tanks ('+tanks.length+'):** '+(tanks.map(p=>p.name).join(', ')||'—'),
+    '💚 **Healers ('+healers.length+'):** '+(healers.map(p=>p.name).join(', ')||'—'),
+    '⚔️ **Melee ('+melee.length+'):** '+(melee.map(p=>p.name).join(', ')||'—'),
+    '🏹 **Ranged ('+ranged.length+'):** '+(ranged.map(p=>p.name).join(', ')||'—'),
+    '═══════════════════════════════',
+    '**Total: '+pr.length+' players present**',
+  ];
+  const el=document.getElementById('discord-text');
+  if(el) el.textContent=lines.join('\n');
+}
+function copyDiscordExport(btn){
+  refreshDiscordText();
+  const el=document.getElementById('discord-text');
+  const text=el?.textContent||'';
+  const doFallback=()=>{
+    const ta=document.createElement('textarea');
+    ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');}catch(e){}
+    document.body.removeChild(ta);
+    toast('Discord export copied!','ok');
+    const orig=btn.innerHTML;btn.innerHTML='<i class="ti ti-check"></i> Copied!';
+    setTimeout(()=>btn.innerHTML=orig,2000);
+  };
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>{
+      toast('Discord export copied!','ok');
+      const orig=btn.innerHTML;btn.innerHTML='<i class="ti ti-check"></i> Copied!';
+      setTimeout(()=>btn.innerHTML=orig,2000);
+    }).catch(doFallback);
+  }else{doFallback();}
+}
+
+// ============================================================
 // SIDEBAR COLLAPSE
 // ============================================================
 function toggleSidebar(){
@@ -4853,6 +5182,7 @@ function applyFirebaseKey(key,data){
     else if(key==='healerTanks'){const d=_fbArr(data);if(d.length){_fbSync(healerTanks,d);try{localStorage.setItem('boogalo-healerTanks',JSON.stringify(healerTanks));}catch(e){}}renderRoles?.();}
     else if(key==='groups'){if(data){const outer=_fbArr(data);if(outer.length){groups.length=0;outer.forEach(g=>groups.push(_fbArr(g)));try{localStorage.setItem('boogalo-groups',JSON.stringify(groups));}catch(e){}}}renderRoles?.();}
     else if(key==='bossAssignments'){if(data&&typeof data==='object'){Object.keys(bossAssignments).forEach(k=>delete bossAssignments[k]);Object.assign(bossAssignments,data);try{localStorage.setItem('boogalo-bossAssignments',JSON.stringify(bossAssignments));}catch(e){}}['gruul','mag','tk','ssc','kara'].forEach(rk=>{const el=document.getElementById(rk+'-content');if(el&&el.children.length)renderBossPage(rk);});}
+    else if(key==='killLog'){if(data&&typeof data==='object'){Object.keys(killLog).forEach(k=>delete killLog[k]);Object.assign(killLog,data);try{localStorage.setItem('boogalo-killLog',JSON.stringify(killLog));}catch(e){}}const pe=document.getElementById('progression-content');if(pe&&pe.children.length)renderProgression?.();}
   }finally{_fbIgnore=false;}
 }
 
@@ -4861,7 +5191,7 @@ function initFirebaseSync(){
   // One SDK listener per top-level key — all share a single WebSocket connection.
   // Each fires immediately with the current value on connect, then on every change.
   ['raids','roster','vortex','weights','alts','roleOverrides','applications',
-   'specRequests','reviews','vortexRequests','healerTanks','groups','bossAssignments'].forEach(key=>{
+   'specRequests','reviews','vortexRequests','healerTanks','groups','bossAssignments','killLog'].forEach(key=>{
     _fbDB.ref(key).on('value', snap=>{
       const data=snap.val();
       if(data!==null&&data!==undefined) applyFirebaseKey(key,data);
@@ -4884,6 +5214,8 @@ window.onload=function(){
   try{const sht=localStorage.getItem('boogalo-healerTanks');if(sht){const h=JSON.parse(sht);if(Array.isArray(h)&&h.length){healerTanks.length=0;h.forEach(x=>healerTanks.push(x));}}}catch(e){}
   try{const sg=localStorage.getItem('boogalo-groups');if(sg){const g=JSON.parse(sg);if(Array.isArray(g)&&g.length){groups.length=0;g.forEach(x=>groups.push(Array.isArray(x)?x:[])); }}}catch(e){}
   try{const sba=localStorage.getItem('boogalo-bossAssignments');if(sba){const b=JSON.parse(sba);if(b&&typeof b==='object')Object.assign(bossAssignments,b);}}catch(e){}
+  try{const skl=localStorage.getItem('boogalo-killLog');if(skl){const k=JSON.parse(skl);if(k&&typeof k==='object')Object.assign(killLog,k);}}catch(e){}
+  try{const scl=localStorage.getItem('boogalo-checklist');if(scl){const c=JSON.parse(scl);if(c&&typeof c==='object')Object.assign(checklistState,c);}}catch(e){}
   // Initialise app — Firebase SDK listeners fire within ~100ms and update all views
   restoreSidebarState();
   seedRaids();
