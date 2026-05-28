@@ -2436,7 +2436,7 @@ function renderRoles(){
       </div>`;}).join('')}
       ${isRL()?`<select onchange="addToGroup(${i},this.value);this.value=''" style="margin-top:5px;font-size:10px;width:100%;background:var(--bg2);border:1px solid var(--borderl);border-radius:4px;padding:2px 4px;color:var(--t2)">
         <option value="">＋ Add player</option>
-        ${ROSTER.map(p=>`<option value="${p.name}">${p.name}${g.includes(p.name)?' ✓':''}</option>`).join('')}
+        ${ROSTER.filter(p=>!groupedNames.has(p.name)).map(p=>`<option value="${p.name}">${p.name}</option>`).join('')}
       </select>`:''}
     </div>`).join('');
   if(isRL()&&unassigned.length){
