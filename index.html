@@ -2454,8 +2454,8 @@ function renderRoles(){
     presentHealers.map(h=>{
       const ht=healerTanks.find(x=>x.healer===h.name)||{healer:h.name,tank:'General raid'};
       if(isRL()){
-        return `<div class="rrow">${pill(h.healer)}<i class="ti ti-arrow-right" style="color:var(--t3);font-size:11px"></i>
-          <select onchange="setHealerTankAssignment('${h.healer}',this.value)" style="font-size:10px;width:auto;background:var(--bg3);border:1px solid var(--borderl);border-radius:4px;padding:2px 5px;color:var(--t2)">
+        return `<div class="rrow">${pill(h.name)}<i class="ti ti-arrow-right" style="color:var(--t3);font-size:11px"></i>
+          <select onchange="setHealerTankAssignment('${h.name}',this.value)" style="font-size:10px;width:auto;background:var(--bg3);border:1px solid var(--borderl);border-radius:4px;padding:2px 5px;color:var(--t2)">
             ${allTanks.map(t=>`<option${ht.tank===t.name?' selected':''}>${t.name}</option>`).join('')}
             <option${ht.tank==='General raid'?' selected':''}>General raid</option>
           </select></div>`;
