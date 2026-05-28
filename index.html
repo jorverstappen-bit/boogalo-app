@@ -415,8 +415,15 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'pov')"><i class="ti ti-user-circle"></i><span>Player POV</span></div>
       <div class="ni" onclick="nav(this,'roster')"><i class="ti ti-users"></i><span>Roster (view)</span></div>
       <div class="ni" onclick="nav(this,'loot')"><i class="ti ti-trophy"></i><span>Loot Priority</span></div>
-      <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
       <div class="ni" onclick="nav(this,'buffs')"><i class="ti ti-checklist"></i><span>Buff Coverage</span></div>
+    </div>
+    <div class="sbs"><div class="sbl">Raids</div>
+      <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
+      <div class="ni" onclick="nav(this,'gruul')"><i class="ti ti-sword"></i><span>Gruul's Lair</span></div>
+      <div class="ni" onclick="nav(this,'mag')"><i class="ti ti-flame"></i><span>Magtheridon</span></div>
+      <div class="ni" onclick="nav(this,'tk')"><i class="ti ti-bolt"></i><span>Tempest Keep</span></div>
+      <div class="ni" onclick="nav(this,'ssc')"><i class="ti ti-droplet"></i><span>Serpent Shrine</span></div>
+      <div class="ni" onclick="nav(this,'kara')"><i class="ti ti-building-castle"></i><span>Karazhan</span></div>
     </div>
     <div class="sbs"><div class="sbl">My Account</div>
       <div class="ni" onclick="nav(this,'signup')"><i class="ti ti-forms"></i><span>Apply for Raid</span></div>
@@ -1012,6 +1019,73 @@ function removeFromRaidGroup(raidId,gi,name){
   const r=raidSchedule.find(x=>x.id===raidId); if(!r||!r.raidGroups) return;
   r.raidGroups[gi]=r.raidGroups[gi].filter(n=>n!==name);
   saveRaids(); renderRaids();
+}
+function autoAssignRaidGroups(raidId){
+  if(!isRL()) return;
+  const r=raidSchedule.find(x=>x.id===raidId);
+  if(!r||!r.confirmed.length){toast('No confirmed roster to assign','err');return;}
+  const conf=r.confirmed.map(n=>gp(n)).filter(Boolean);
+  const g=[[],[],[],[],[]];
+  const placed=new Set();
+  const place=(p,gi)=>{if(p&&!placed.has(p.name)){g[gi].push(p.name);placed.add(p.name);}};
+
+  // Categorise confirmed players
+  const tanks=conf.filter(p=>p.type==='Tank');
+  const healers=conf.filter(p=>p.type==='Healer');
+  const melee=conf.filter(p=>p.type==='Melee');
+  const ranged=conf.filter(p=>p.type==='Ranged');
+
+  const warDruidTanks=tanks.filter(p=>p.cls==='Warrior'||(p.cls==='Druid'&&p.spec==='Guardian'));
+  const palTanks=tanks.filter(p=>p.cls==='Paladin');
+  const otherTanks=tanks.filter(p=>!warDruidTanks.includes(p)&&!palTanks.includes(p));
+
+  const enhShamans=melee.filter(p=>p.spec==='Enhancement');
+  const otherMelee=melee.filter(p=>p.spec!=='Enhancement');
+  const hunters=ranged.filter(p=>p.cls==='Hunter');
+  const casters=ranged.filter(p=>p.cls!=='Hunter');
+
+  // G4 casters: Balance Druid, Shadow Priest, Mages
+  const g4Casters=casters.filter(p=>(p.cls==='Druid'&&p.spec==='Balance')||(p.cls==='Priest'&&p.spec==='Shadow')||p.cls==='Mage');
+  // G3 casters: Warlocks + everything else
+  const g3Casters=casters.filter(p=>!g4Casters.includes(p));
+
+  // G5 — Healers
+  healers.forEach(p=>place(p,4));
+
+  // G1 — Warrior/Druid tanks + other tanks + Enh Shaman #1
+  warDruidTanks.forEach(p=>place(p,0));
+  otherTanks.forEach(p=>place(p,0));
+  if(enhShamans.length>=1) place(enhShamans[0],0);
+
+  // G2 — Enh Shaman #2+
+  for(let i=1;i<enhShamans.length;i++) place(enhShamans[i],1);
+
+  // Fill melee: G1 first (up to 5), overflow to G2
+  otherMelee.forEach(p=>{ if(g[0].length<5) place(p,0); else place(p,1); });
+
+  // Hunters → G2 (melee synergy), overflow to G1
+  hunters.forEach(p=>{ if(g[1].length<5) place(p,1); else place(p,0); });
+
+  // G4 — Balance Druid + Shadow Priest + Mages
+  g4Casters.forEach(p=>place(p,3));
+
+  // Paladin tanks → G3 (prefer) or G4
+  palTanks.forEach(p=>{ if(g[2].length<5) place(p,2); else place(p,3); });
+
+  // G3 — Warlocks + other ranged
+  g3Casters.forEach(p=>{ if(g[2].length<5) place(p,2); else place(p,3); });
+
+  // Safety: any unplaced goes to smallest group
+  conf.forEach(p=>{
+    if(!placed.has(p.name)){
+      const minGi=g.reduce((m,gr,i)=>gr.length<g[m].length?i:m,0);
+      g[minGi].push(p.name); placed.add(p.name);
+    }
+  });
+
+  r.raidGroups=g;
+  saveRaids(); renderRaids();
+  toast('Groups auto-assigned','ok');
 }
 function setHealerTankAssignment(healer,tank){
   if(!isRL()) return;
@@ -4567,9 +4641,14 @@ function fullRaidCard(r,highlight){
   const rg=r.raidGroups&&r.raidGroups.length===5?r.raidGroups:[[],[],[],[],[]];
   const rgGrouped=new Set(rg.flat());
   const rgUnassigned=r.confirmed.filter(n=>!rgGrouped.has(n));
-  const raidGroupGrid=r.confirmed.length?`
-    <div style="margin-top:10px">
-      <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px"><i class="ti ti-layout-grid"></i> Raid Groups</div>
+
+  const rosterSection=r.confirmed.length?`
+    <hr class="rec-divider">
+    <div style="margin-bottom:10px">
+      <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+        <span><i class="ti ti-layout-grid" style="margin-right:4px"></i>Raid Groups <span style="font-weight:400;opacity:.65">${confirmedCount}/${r.max} confirmed</span></span>
+        ${isRL()&&!past?`<button class="btn btn-sm" style="font-size:10px;padding:2px 9px" onclick="autoAssignRaidGroups('${r.id}')"><i class="ti ti-wand"></i> Auto Assign</button>`:''}
+      </div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:6px">
         ${rg.map((g,gi)=>`<div style="background:var(--bg2);border-radius:var(--r);padding:6px;border:1px solid var(--border)">
           <div style="font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Group ${gi+1}</div>
@@ -4583,21 +4662,7 @@ function fullRaidCard(r,highlight){
           </select>`:''}
         </div>`).join('')}
       </div>
-      ${rgUnassigned.length?`<div style="font-size:10px;color:var(--ora);display:flex;align-items:center;gap:5px;flex-wrap:wrap"><i class="ti ti-alert-triangle"></i> Not in any group: ${rgUnassigned.map(n=>pill(n,!gp(n)?.present)).join(' ')}</div>`:'<div style="font-size:10px;color:#5DCAA5"><i class="ti ti-check"></i> All players assigned to groups</div>'}
-    </div>`:'';
-
-  const rosterSection=r.confirmed.length?`
-    <hr class="rec-divider">
-    <div style="margin-bottom:10px">
-      <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
-        <span>Confirmed Roster (${confirmedCount}/${r.max})</span>
-      </div>
-      ${['Tank','Mage Tank','Healer','Melee','Ranged'].filter(role=>confByRole[role]&&confByRole[role].length>0).map(role=>`
-        <div style="margin-bottom:6px">
-          <span class="badge" style="background:${RB[role]};color:${RC[role]};border:0.5px solid ${RC[role]}30;margin-bottom:4px">${role}s (${confByRole[role].length})</span>
-          <div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:3px">${confByRole[role].map(n=>pill(n,false)+(isRL()&&!past?`<button onclick="removeFromRaid('${r.id}','`+n+`')" title="Unassign" style="background:none;border:none;cursor:pointer;color:var(--t3);padding:0 2px;font-size:11px" onmouseover="this.style.color='#e07b72'" onmouseout="this.style.color='var(--t3)'">✕</button>`:'') ).join('')}</div>
-        </div>`).join('')}
-      ${raidGroupGrid}
+      ${rgUnassigned.length?`<div style="font-size:10px;color:var(--ora);display:flex;align-items:center;gap:5px;flex-wrap:wrap"><i class="ti ti-alert-triangle"></i> Not in any group: ${rgUnassigned.map(n=>pill(n,!gp(n)?.present)+(isRL()&&!past?`<button onclick="removeFromRaid('${r.id}','${n}')" title="Remove from raid" style="background:none;border:none;cursor:pointer;color:var(--t3);padding:0 2px;font-size:11px;margin-left:-3px" onmouseover="this.style.color='#e07b72'" onmouseout="this.style.color='var(--t3)'">✕</button>`:'') ).join(' ')}</div>`:'<div style="font-size:10px;color:#5DCAA5"><i class="ti ti-check"></i> All players assigned to groups</div>'}
     </div>${assignPanel}${assignDisplay}`:
     `<hr class="rec-divider"><div style="font-size:11px;color:var(--t3);padding:4px 0 10px">No confirmed roster yet.${!past&&isRL()?' Accept sign-ups below.':''}</div>`;
 
@@ -5093,7 +5158,7 @@ function openReviewForm(raidId){
   document.getElementById('reviews-content').innerHTML=`
     <div class="card ab">
       <div class="ct"><i class="ti ti-star" style="color:var(--gold)"></i>Post-Raid Review — ${r.name} (${fmtKey(r.date)})</div>
-      ${['o:Overall rating','c:Coordination','a:Atmosphere'].map(sf=>{const[f,l]=sf.split(':');return`<div style="margin-bottom:12px"><div class="fl" style="margin-bottom:6px">${l}</div><div id="stars-${raidId}-${f}">${[1,2,3,4,5].map(i=>`<span class="star" onclick="setStar('${raidId}','${f}',${i})"><i class="ti ti-star"></i></span>`).join('')}</div></div>`;}).join('')}
+      ${['o:Overall rating','c:Coordination','a:Atmosphere'].map(sf=>{const[f,l]=sf.split(':');return`<div style="margin-bottom:14px"><div class="fl" style="margin-bottom:6px">${l}</div><div id="stars-${raidId}-${f}" style="display:flex;align-items:center;gap:4px">${[1,2,3,4,5].map(i=>`<span onclick="setStar('${raidId}','${f}',${i})" onmouseover="hoverStar('${raidId}','${f}',${i})" onmouseout="hoverStar('${raidId}','${f}',0)" style="font-size:26px;cursor:pointer;color:rgba(255,255,255,.15);transition:color .1s;line-height:1;padding:0 1px">★</span>`).join('')}<span id="star-val-${raidId}-${f}" style="font-size:11px;color:var(--t3);margin-left:6px">0/5</span></div></div>`;}).join('')}
       <div class="fg"><span class="fl">Notes / Observations</span><textarea id="rv-notes-${raidId}" placeholder="What went well? What needs improvement?" style="min-height:70px;resize:vertical"></textarea></div>
       <div class="g2">
         <div class="fg" style="margin-bottom:0"><span class="fl">MVP of the Raid</span><select id="rv-mvp-${raidId}"><option value="">— select —</option>${r.signedUp.map(n=>`<option>${n}</option>`).join('')}</select></div>
@@ -5109,7 +5174,18 @@ function openReviewForm(raidId){
 function setStar(raidId,field,val){
   reviewStars[raidId]=reviewStars[raidId]||{};reviewStars[raidId][field]=val;
   const container=document.getElementById(`stars-${raidId}-${field}`);
-  if(container)container.querySelectorAll('.star').forEach((s,i)=>{s.className='star'+(i<val?' on':'');});
+  if(container){
+    container.querySelectorAll('span[onclick]').forEach((s,i)=>{s.style.color=i<val?'#f5a623':'rgba(255,255,255,.15)';});
+    const lbl=document.getElementById(`star-val-${raidId}-${field}`);
+    if(lbl)lbl.textContent=val+'/5';
+  }
+}
+function hoverStar(raidId,field,val){
+  const container=document.getElementById(`stars-${raidId}-${field}`);
+  if(!container)return;
+  const set=reviewStars[raidId]?.[field]||0;
+  const active=val||set;
+  container.querySelectorAll('span[onclick]').forEach((s,i)=>{s.style.color=i<active?'#f5a623':'rgba(255,255,255,.15)';});
 }
 function submitReview(raidId){
   const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
