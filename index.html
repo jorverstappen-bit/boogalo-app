@@ -5246,8 +5246,9 @@ function addToICal(raidId){
 // CREATE RAID
 // ============================================================
 function renderCreateRaid(){
-  if(!isRL()){
-    document.getElementById('app').innerHTML='<div class="empty"><i class="ti ti-lock"></i><p>Raid Leaders only.</p></div>';
+  if(!canManageRaids()){
+    const pg=document.getElementById('page-create-raid');
+    if(pg) pg.innerHTML='<div class="empty"><i class="ti ti-lock"></i><p>Access restricted.</p></div>';
     return;
   }
   // Set default date = tomorrow; min = today
