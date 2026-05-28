@@ -1707,7 +1707,10 @@ function openProfile(name){
           ${name[0].toUpperCase()}
         </div>
         <div>
-          <div style="font-size:20px;font-weight:700;color:var(--t1)">${name}</div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="font-size:20px;font-weight:700;color:var(--t1)">${name}</div>
+            ${(isRL()||(isNamed()&&CURRENT_USER?.name===name))?`<button class="btn btn-sm" onclick="renamePlayer('${name}')" title="Edit name" style="padding:2px 7px;font-size:11px"><i class="ti ti-pencil"></i></button>`:''}
+          </div>
           <div style="font-size:12px;color:${cc};margin-top:2px">${p.cls} · ${p.spec}${p.flexSpec?' / '+p.flexSpec:''}</div>
           <div style="font-size:11px;color:var(--t2);margin-top:2px">${p.type} · ${p.present?'<span style="color:var(--gre)">Present tonight</span>':'<span style="color:var(--t3)">Absent tonight</span>'}</div>
         </div>
@@ -1814,6 +1817,63 @@ function removeAlt(mainName, altName){
   saveAlts();
   openProfile(mainName);
   toast('Alt removed','ok');
+}
+function renamePlayer(oldName){
+  const canEdit=isRL()||(isNamed()&&CURRENT_USER?.name===oldName);
+  if(!canEdit) return;
+  const newName=prompt('Enter new name for '+oldName+':',oldName);
+  if(!newName||!newName.trim()) return;
+  const n=newName.trim();
+  if(n===oldName) return;
+  if(ROSTER.find(p=>p.name===n)){toast('Name already in use','err');return;}
+  const p=gp(oldName);
+  if(!p) return;
+  // 1. Roster
+  p.name=n;
+  // 2. Raid schedule
+  const ren=arr=>arr?arr.map(x=>x===oldName?n:x):arr;
+  raidSchedule.forEach(r=>{
+    r.signedUp=ren(r.signedUp);r.confirmed=ren(r.confirmed);r.attended=ren(r.attended);
+    if(r.assignments){
+      if(r.assignments.MT===oldName)r.assignments.MT=n;
+      if(r.assignments.OT1===oldName)r.assignments.OT1=n;
+      if(r.assignments.OT2===oldName)r.assignments.OT2=n;
+      if(r.assignments.healerTargets){
+        const ht=r.assignments.healerTargets;
+        if(ht[oldName]){ht[n]=ht[oldName];delete ht[oldName];}
+        Object.keys(ht).forEach(k=>{if(ht[k]===oldName)ht[k]=n;});
+      }
+    }
+  });
+  // 3. playerAlts
+  if(playerAlts[oldName]){playerAlts[n]=playerAlts[oldName];delete playerAlts[oldName];}
+  Object.keys(playerAlts).forEach(main=>{playerAlts[main]=playerAlts[main].map(a=>a===oldName?n:a);});
+  // 4. roleOverrides
+  if(roleOverrides[oldName]!==undefined){roleOverrides[n]=roleOverrides[oldName];delete roleOverrides[oldName];}
+  // 5. groups
+  groups.forEach(g=>{const i=g.indexOf(oldName);if(i!==-1)g[i]=n;});
+  // 6. reviews
+  reviews.forEach(rv=>{if(rv.mvp===oldName)rv.mvp=n;if(rv.submittedBy===oldName)rv.submittedBy=n;});
+  // 7. bossAssignments
+  Object.values(bossAssignments).forEach(ba=>{
+    if(ba.tanks)ba.tanks.forEach(t=>{if(t.name===oldName)t.name=n;});
+    if(ba.healers)ba.healers=ba.healers.map(h=>typeof h==='string'?(h===oldName?n:h):(h.name===oldName?{...h,name:n}:h));
+    if(ba.special)ba.special.forEach(s=>{if(s.players)s.players=s.players.map(x=>x===oldName?n:x);});
+    if(ba.healerTargets){
+      if(ba.healerTargets[oldName]){ba.healerTargets[n]=ba.healerTargets[oldName];delete ba.healerTargets[oldName];}
+      Object.keys(ba.healerTargets).forEach(k=>{if(ba.healerTargets[k]===oldName)ba.healerTargets[k]=n;});
+    }
+  });
+  // 8. CURRENT_USER
+  if(CURRENT_USER?.name===oldName){
+    CURRENT_USER=p;
+    const mpName=document.getElementById('my-profile-name');
+    if(mpName)mpName.textContent=n;
+    try{sessionStorage.setItem('boogalo-lastuser',n);}catch(e){}
+  }
+  saveRoster();saveRaids();saveAlts();saveRoleOverrides();saveGroups();saveReviews();saveBossAssignments();
+  openProfile(n);
+  toast(oldName+' renamed to '+n,'ok');
 }
 
 function logout(){
