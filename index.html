@@ -5358,9 +5358,10 @@ function renderReviews(){
         <div class="sbox"><div class="snum" style="color:var(--gold);font-size:18px">${rv.atmosphere}/5</div><div class="slbl">Atmosphere</div></div>
       </div>
       ${rv.notes?`<div style="font-size:11px;color:var(--t2);background:var(--bg3);padding:8px 10px;border-radius:var(--r);margin-bottom:8px;line-height:1.5">${rv.notes}</div>`:''}
-      <div style="display:flex;gap:14px;font-size:11px;flex-wrap:wrap">
+      <div style="display:flex;gap:14px;font-size:11px;flex-wrap:wrap;align-items:center">
         ${rv.mvp?`<span style="color:var(--t2)"><i class="ti ti-trophy" style="color:var(--gold)"></i> MVP: ${pill(rv.mvp)}</span>`:''}
         ${rv.improvements?`<span style="color:var(--t2)"><i class="ti ti-tool" style="color:var(--t3)"></i> Improve: ${rv.improvements}</span>`:''}
+        ${rv.wclUrl?`<a href="${rv.wclUrl}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:500;background:rgba(204,102,0,.12);color:#e87c2e;border:0.5px solid rgba(204,102,0,.3);text-decoration:none" title="Open Warcraft Logs"><i class="ti ti-chart-dots-3" style="font-size:12px"></i> Warcraft Logs</a>`:''}
       </div>
     </div>`;
   }).join('');
@@ -5381,7 +5382,8 @@ function openReviewForm(raidId){
         <div class="fg" style="margin-bottom:0"><span class="fl">MVP of the Raid</span><select id="rv-mvp-${raidId}"><option value="">— select —</option>${r.signedUp.map(n=>`<option>${n}</option>`).join('')}</select></div>
         <div class="fg" style="margin-bottom:0"><span class="fl">Main Improvement Area</span><input id="rv-improve-${raidId}" placeholder="e.g. Interrupt rotation"></div>
       </div>
-      <div class="fg" style="margin-top:10px"><span class="fl">Your in-game name</span><input id="rv-author-${raidId}" placeholder="In-game name" value="${authorVal}"></div>
+      <div class="fg" style="margin-top:10px"><span class="fl"><i class="ti ti-external-link" style="font-size:11px;margin-right:3px"></i>Warcraft Logs URL <span style="font-size:9px;color:var(--t3)">(optional)</span></span><input type="url" id="rv-wcl-${raidId}" placeholder="https://classic.warcraftlogs.com/reports/…"></div>
+      <div class="fg" style="margin-top:6px"><span class="fl">Your in-game name</span><input id="rv-author-${raidId}" placeholder="In-game name" value="${authorVal}"></div>
       <div style="display:flex;gap:8px;margin-top:4px">
         <button class="btn btn-s" onclick="submitReview('${raidId}')"><i class="ti ti-check"></i>Submit Review</button>
         <button class="btn btn-sm" onclick="renderReviews()">Cancel</button>
@@ -5402,7 +5404,8 @@ function editReview(rvId){
         <div class="fg" style="margin-bottom:0"><span class="fl">MVP of the Raid</span><select id="rv-mvp-${rv.raidId}"><option value="">— select —</option>${(r.signedUp||[]).map(n=>`<option ${rv.mvp===n?'selected':''}>${n}</option>`).join('')}</select></div>
         <div class="fg" style="margin-bottom:0"><span class="fl">Main Improvement Area</span><input id="rv-improve-${rv.raidId}" value="${rv.improvements||''}" placeholder="e.g. Interrupt rotation"></div>
       </div>
-      <div class="fg" style="margin-top:10px"><span class="fl">Your in-game name</span><input id="rv-author-${rv.raidId}" value="${rv.submittedBy||''}" placeholder="In-game name"></div>
+      <div class="fg" style="margin-top:10px"><span class="fl"><i class="ti ti-external-link" style="font-size:11px;margin-right:3px"></i>Warcraft Logs URL <span style="font-size:9px;color:var(--t3)">(optional)</span></span><input type="url" id="rv-wcl-${rv.raidId}" placeholder="https://classic.warcraftlogs.com/reports/…" value="${rv.wclUrl||''}"></div>
+      <div class="fg" style="margin-top:6px"><span class="fl">Your in-game name</span><input id="rv-author-${rv.raidId}" value="${rv.submittedBy||''}" placeholder="In-game name"></div>
       <div style="display:flex;gap:8px;margin-top:4px">
         <button class="btn btn-s" onclick="submitReview('${rv.raidId}')"><i class="ti ti-check"></i>Update Review</button>
         <button class="btn btn-sm" onclick="_editingReviewId=null;renderReviews()">Cancel</button>
@@ -5435,7 +5438,8 @@ function submitReview(raidId){
   const stars=reviewStars[raidId]||{};
   if(!stars.o){toast('Please rate the overall experience','err');return;}
   const author=document.getElementById('rv-author-'+raidId)?.value.trim()||CURRENT_USER?.name||'Anonymous';
-  const data={raidId,raidName:r.name,raidDate:r.date,overallRating:stars.o,coordination:stars.c||0,atmosphere:stars.a||0,notes:document.getElementById('rv-notes-'+raidId)?.value.trim()||'',mvp:document.getElementById('rv-mvp-'+raidId)?.value||'',improvements:document.getElementById('rv-improve-'+raidId)?.value.trim()||'',submittedBy:author};
+  const wclUrl=document.getElementById('rv-wcl-'+raidId)?.value.trim()||'';
+  const data={raidId,raidName:r.name,raidDate:r.date,overallRating:stars.o,coordination:stars.c||0,atmosphere:stars.a||0,notes:document.getElementById('rv-notes-'+raidId)?.value.trim()||'',mvp:document.getElementById('rv-mvp-'+raidId)?.value||'',improvements:document.getElementById('rv-improve-'+raidId)?.value.trim()||'',submittedBy:author,wclUrl};
   if(_editingReviewId){
     const idx=reviews.findIndex(rv=>rv.id===_editingReviewId);
     if(idx!==-1) reviews[idx]={...reviews[idx],...data};
