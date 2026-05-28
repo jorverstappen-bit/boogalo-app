@@ -813,9 +813,9 @@ let ROSTER=[
   {name:'Disloyal',cls:'Priest',spec:'Shadow',flexSpec:'',type:'Ranged',dispel:['Magic','Disease'],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
   {name:'Noonii',cls:'Mage',spec:'Arcane',flexSpec:'Frost',type:'Ranged',dispel:['Curse'],interrupt:3,present:true,resFrost:false,resNature:false,resFire:false},
   {name:'Unholysparkz',cls:'Paladin',spec:'Holy',flexSpec:'Protection',type:'Healer',dispel:['Magic','Disease','Poison'],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Sygrdrifa',cls:'Shaman',spec:'Enhancement',flexSpec:'',type:'Melee',dispel:[],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Jodazugzug',cls:'Warrior',spec:'Arms',flexSpec:'',type:'Melee',dispel:[],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'kdawg',cls:'Shaman',spec:'Restoration',flexSpec:'Enhancement',type:'Healer',dispel:[],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
+  {name:'Sygrdrifa',cls:'Shaman',spec:'Enhancement',flexSpec:'',type:'Melee',dispel:['Poison','Disease','Purge'],interrupt:1,present:true,resFrost:false,resNature:false,resFire:false},
+  {name:'Jodazugzug',cls:'Warrior',spec:'Arms',flexSpec:'',type:'Melee',dispel:['Purge'],interrupt:2,present:true,resFrost:false,resNature:false,resFire:false},
+  {name:'kdawg',cls:'Shaman',spec:'Restoration',flexSpec:'Enhancement',type:'Healer',dispel:['Poison','Disease','Purge'],interrupt:5,present:true,resFrost:false,resNature:false,resFire:false},
 ];
 
 // Nether Vortex tally
@@ -1237,7 +1237,6 @@ function setView(v, user){
   document.getElementById('rl-form').style.display='none';
   // Nav visibility
   const isRl=v==='rl';
-  const hasFull=v==='rl'||v==='participant';
   document.getElementById('nav-rl').style.display=isRl?'block':'none';
   document.getElementById('nav-par').style.display=(v==='participant')?'block':'none';
   document.getElementById('nav-guest').style.display=v==='guest'?'block':'none';
@@ -1324,13 +1323,11 @@ function filterAuthNames(val){
   const matches=ROSTER.filter(p=>p.name.toLowerCase().includes(q)).slice(0,8);
   if(!matches.length){dd.style.display='none';return;}
   dd.style.display='block';
-  const clsCols={'Warrior':'#C79C6E','Paladin':'#F58CBA','Hunter':'#ABD473','Rogue':'#FFF569',
-    'Priest':'#e8e8e8','Shaman':'#5ab4f8','Mage':'#69CCF0','Warlock':'#9482C9','Druid':'#FF7D0A'};
   dd.innerHTML=matches.map(p=>`
     <div onclick="selectAuthName('${p.name}')"
       style="padding:7px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);min-height:44px"
       onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">
-      <span style="width:30px;height:30px;border-radius:50%;background:${clsCols[p.cls]||'#aaa'}22;border:1.5px solid ${clsCols[p.cls]||'#aaa'}88;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:${clsCols[p.cls]||'#aaa'};flex-shrink:0">${p.name[0]}</span>
+      <span style="width:30px;height:30px;border-radius:50%;background:${CC[p.cls]||'#aaa'}22;border:1.5px solid ${CC[p.cls]||'#aaa'}88;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:${CC[p.cls]||'#aaa'};flex-shrink:0">${p.name[0]}</span>
       <div style="min-width:0;flex:1">
         <div style="font-size:12px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</div>
         <div style="font-size:10px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.cls} · ${p.spec} · ${p.type}</div>
@@ -1364,7 +1361,6 @@ function tryNameLogin(){
 function toggleTheme(){
   const isLight=document.documentElement.getAttribute('data-theme')==='light';
   const next=isLight?'dark':'light';
-  document.documentElement.setAttribute('data-theme',next==='light'?'light':'');
   if(next==='light') document.documentElement.setAttribute('data-theme','light');
   else document.documentElement.removeAttribute('data-theme');
   const btn=document.getElementById('theme-btn');
@@ -1471,8 +1467,7 @@ function renderProfileList(){
     const attPct=total?Math.round((attended/total)*100):0;
     const alts=(playerAlts[p.name]||[]);
     const w={Tank:getWeight(p.name,'Tank'),Healer:getWeight(p.name,'Healer'),Melee:getWeight(p.name,'Melee'),Ranged:getWeight(p.name,'Ranged')};
-    const clsCols={'Warrior':'#C79C6E','Paladin':'#F58CBA','Hunter':'#ABD473','Rogue':'#FFF569','Priest':'#e8e8e8','Shaman':'#5ab4f8','Mage':'#69CCF0','Warlock':'#9482C9','Druid':'#FF7D0A'};
-    const cc=clsCols[p.cls]||'#aaa';
+    const cc=CC[p.cls]||'#aaa';
     return`<div class="card" style="cursor:pointer;transition:border-color .15s" onclick="openProfile('${p.name}')"
         onmouseover="this.style.borderColor='var(--acc)'" onmouseout="this.style.borderColor=''">
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
@@ -1509,8 +1504,7 @@ function renderProfileList(){
 function openProfile(name){
   const p=gp(name);
   if(!p) return;
-  const clsCols={'Warrior':'#C79C6E','Paladin':'#F58CBA','Hunter':'#ABD473','Rogue':'#FFF569','Priest':'#e8e8e8','Shaman':'#5ab4f8','Mage':'#69CCF0','Warlock':'#9482C9','Druid':'#FF7D0A'};
-  const cc=clsCols[p.cls]||'#aaa';
+  const cc=CC[p.cls]||'#aaa';
   const alts=playerAlts[name]||[];
   const completed=raidSchedule.filter(r=>r.status==='completed');
   const attended=raidSchedule.filter(r=>r.attended?.includes(name));
@@ -1730,8 +1724,6 @@ function seedRaids(){
     });
   }
 }
-
-function seedReviews(){}
 
 // ============================================================
 // ATTENDANCE
@@ -4781,9 +4773,6 @@ function submitReview(raidId){
 }
 
 // ============================================================
-// INIT
-// ============================================================
-// ============================================================
 // SIDEBAR COLLAPSE
 // ============================================================
 function toggleSidebar(){
@@ -4905,13 +4894,11 @@ window.onload=function(){
     const saved=sessionStorage.getItem('boogalo-lastuser');
     if(saved){const p=ROSTER.find(x=>x.name===saved);if(p)setView('participant',p);}
   }catch(e){}
-  seedReviews();
   updateSigSpecs();
   updateNPSpecs();
   const dl=document.getElementById('pov-datalist');
   if(dl)ROSTER.forEach(p=>{const o=document.createElement('option');o.value=p.name;dl.appendChild(o);});
   const pr=document.getElementById('pov-raid');if(pr)pr.addEventListener('change',updatePOVBossFilter);
-  updateSigSpecs();updateNPSpecs();
   updatePendingBadge();updateSRBadge();updateRevBadge();
 };
 
