@@ -999,6 +999,20 @@ function removeFromGroup(gi,name){
   groups[gi]=groups[gi].filter(n=>n!==name);
   saveGroups(); renderRoles();
 }
+function addToRaidGroup(raidId,gi,name){
+  if(!name||!isRL()) return;
+  const r=raidSchedule.find(x=>x.id===raidId); if(!r) return;
+  if(!r.raidGroups) r.raidGroups=[[],[],[],[],[]];
+  r.raidGroups.forEach(g=>{const i=g.indexOf(name);if(i!==-1)g.splice(i,1);});
+  r.raidGroups[gi].push(name);
+  saveRaids(); renderRaids();
+}
+function removeFromRaidGroup(raidId,gi,name){
+  if(!isRL()) return;
+  const r=raidSchedule.find(x=>x.id===raidId); if(!r||!r.raidGroups) return;
+  r.raidGroups[gi]=r.raidGroups[gi].filter(n=>n!==name);
+  saveRaids(); renderRaids();
+}
 function setHealerTankAssignment(healer,tank){
   if(!isRL()) return;
   let h=healerTanks.find(x=>x.healer===healer);
@@ -4549,6 +4563,29 @@ function fullRaidCard(r,highlight){
       </div>`:''}
     </div>`:'';
 
+  // Raid-specific group grid
+  const rg=r.raidGroups&&r.raidGroups.length===5?r.raidGroups:[[],[],[],[],[]];
+  const rgGrouped=new Set(rg.flat());
+  const rgUnassigned=r.confirmed.filter(n=>!rgGrouped.has(n));
+  const raidGroupGrid=r.confirmed.length?`
+    <div style="margin-top:10px">
+      <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px"><i class="ti ti-layout-grid"></i> Raid Groups</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:6px">
+        ${rg.map((g,gi)=>`<div style="background:var(--bg2);border-radius:var(--r);padding:6px;border:1px solid var(--border)">
+          <div style="font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Group ${gi+1}</div>
+          ${g.map(n=>`<div style="display:flex;align-items:center;gap:1px;padding:1px 0">
+            ${pill(n,!gp(n)?.present)}
+            ${isRL()&&!past?`<button onclick="removeFromRaidGroup('${r.id}',${gi},'${n}')" style="background:none;border:none;color:var(--t3);cursor:pointer;padding:0 2px;font-size:12px;line-height:1;opacity:.6" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.6">×</button>`:''}
+          </div>`).join('')}
+          ${isRL()&&!past?`<select onchange="addToRaidGroup('${r.id}',${gi},this.value);this.value=''" style="margin-top:3px;font-size:10px;width:100%;background:var(--bg3);border:1px solid var(--borderl);border-radius:4px;padding:2px 4px;color:var(--t2)">
+            <option value="">＋ Add</option>
+            ${rgUnassigned.map(n=>`<option value="${n}">${n}</option>`).join('')}
+          </select>`:''}
+        </div>`).join('')}
+      </div>
+      ${rgUnassigned.length?`<div style="font-size:10px;color:var(--ora);display:flex;align-items:center;gap:5px;flex-wrap:wrap"><i class="ti ti-alert-triangle"></i> Not in any group: ${rgUnassigned.map(n=>pill(n,!gp(n)?.present)).join(' ')}</div>`:'<div style="font-size:10px;color:#5DCAA5"><i class="ti ti-check"></i> All players assigned to groups</div>'}
+    </div>`:'';
+
   const rosterSection=r.confirmed.length?`
     <hr class="rec-divider">
     <div style="margin-bottom:10px">
@@ -4560,6 +4597,7 @@ function fullRaidCard(r,highlight){
           <span class="badge" style="background:${RB[role]};color:${RC[role]};border:0.5px solid ${RC[role]}30;margin-bottom:4px">${role}s (${confByRole[role].length})</span>
           <div style="display:flex;flex-wrap:wrap;gap:2px;margin-top:3px">${confByRole[role].map(n=>pill(n,false)+(isRL()&&!past?`<button onclick="removeFromRaid('${r.id}','`+n+`')" title="Unassign" style="background:none;border:none;cursor:pointer;color:var(--t3);padding:0 2px;font-size:11px" onmouseover="this.style.color='#e07b72'" onmouseout="this.style.color='var(--t3)'">✕</button>`:'') ).join('')}</div>
         </div>`).join('')}
+      ${raidGroupGrid}
     </div>${assignPanel}${assignDisplay}`:
     `<hr class="rec-divider"><div style="font-size:11px;color:var(--t3);padding:4px 0 10px">No confirmed roster yet.${!past&&isRL()?' Accept sign-ups below.':''}</div>`;
 
@@ -4960,7 +4998,7 @@ function createRaid(){
   if(!date){toast('Select a date','err');return;}
   if(date<todayKey()){toast('Cannot create a raid in the past','err');return;}
   if(!isRL()){toast('Raid Leaders only','err');return;}
-  raidSchedule.push({id:genId(),name,date,start,end,max,extra,rl,notes,signedUp:[],confirmed:[],attended:[],status:isPast(date)?'completed':'upcoming',rosterPosted:false,pug:false});
+  raidSchedule.push({id:genId(),name,date,start,end,max,extra,rl,notes,signedUp:[],confirmed:[],attended:[],status:isPast(date)?'completed':'upcoming',rosterPosted:false,pug:false,raidGroups:[[],[],[],[],[]]});
   renderCalendar();toast(`${name} raid created!`,'ok');
   document.getElementById('cr-notes').value='';
 }
@@ -5301,7 +5339,7 @@ function _fbSync(arr,data){arr.length=0;data.forEach(x=>arr.push(x));}
 function applyFirebaseKey(key,data){
   _fbIgnore=true;
   try{
-    if(key==='raids'){if(data&&typeof data==='object'){const d=_fbArr(data).map(r=>r?({...r,signedUp:r.signedUp?_fbArr(r.signedUp):[],confirmed:r.confirmed?_fbArr(r.confirmed):[],attended:r.attended?_fbArr(r.attended):[]}):null).filter(Boolean);raidSchedule=d;normalizeRaidStatuses();try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();}
+    if(key==='raids'){if(data&&typeof data==='object'){const d=_fbArr(data).map(r=>r?({...r,signedUp:r.signedUp?_fbArr(r.signedUp):[],confirmed:r.confirmed?_fbArr(r.confirmed):[],attended:r.attended?_fbArr(r.attended):[],raidGroups:r.raidGroups?_fbArr(r.raidGroups).map(g=>g?_fbArr(g):[]):[[],[],[],[],[]]}):null).filter(Boolean);raidSchedule=d;normalizeRaidStatuses();try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();}
     else if(key==='roster'){if(data&&typeof data==='object'){const d=_fbArr(data).map(p=>p?({...p,dispel:p.dispel?_fbArr(p.dispel):[]}):null).filter(Boolean);_fbSync(ROSTER,d);normalizeRosterRoles();try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}}renderRoster?.();renderAttendance?.();renderRoles?.();renderRes?.();renderProfiles?.();}
     else if(key==='vortex'){if(data&&typeof data==='object'){Object.assign(vortexCounts,data);try{localStorage.setItem('boogalo-vortex',JSON.stringify(vortexCounts));}catch(e){}}renderVortex?.();}
     else if(key==='weights'){if(data&&typeof data==='object'){Object.keys(playerWeights).forEach(k=>delete playerWeights[k]);Object.assign(playerWeights,data);try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}}}
