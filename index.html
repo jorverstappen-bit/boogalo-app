@@ -2022,14 +2022,13 @@ function setPlayerSpec(name, field, value){
   const p=gp(name);
   if(!p||!isRL()) return;
   p[field]=value;
-  // If swapping main spec: update interrupts/dispels based on class
+  // When main spec changes, auto-update the role to match
   if(field==='spec'){
-    const intMap={Warrior:2,Rogue:2,Shaman:1,Mage:3,Paladin:1};
-    if(value==='Protection'&&p.cls==='Warrior') p.type='Tank';
-    if(value==='Guardian'&&p.cls==='Druid') p.type='Tank';
-    if(value==='Protection'&&p.cls==='Paladin') p.type='Tank';
+    const role=SPEC_ROLE[value];
+    if(role) p.type=role;
   }
   saveRoster();
+  renderRoster?.();
   toast(`${name} → ${field==='spec'?'Main':'Flex'}: ${value||'—'}`,'ok');
 }
 
