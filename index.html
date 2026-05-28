@@ -4474,6 +4474,7 @@ function renderRLReview(){
       <div style="font-size:12px;color:var(--t2);margin-bottom:6px">${a.spec}${a.flexSpec?' / '+a.flexSpec:''} · ${a.experience}</div>
       ${a.note?`<div style="font-size:11px;color:var(--t3);background:var(--bg3);padding:6px 9px;border-radius:var(--r);margin-bottom:8px">${a.note}</div>`:''}
       <div style="font-size:10px;color:var(--t3);margin-bottom:8px"><i class="ti ti-info-circle"></i> Open armory link above to verify gear score on Thunderstrike EU Normal server</div>
+      ${ROSTER.find(p=>p.name.toLowerCase()===a.name.toLowerCase())?`<div style="background:rgba(200,80,60,.12);border:0.5px solid rgba(200,80,60,.3);color:#e07b72;border-radius:var(--r);padding:6px 10px;font-size:11px;margin-bottom:8px;display:flex;align-items:center;gap:6px"><i class="ti ti-alert-triangle"></i><strong>${a.name}</strong> is already on the roster — decline this application.</div>`:''}
       ${a.status==='pending'?`<div style="display:flex;gap:6px;flex-wrap:wrap">
         <button class="btn btn-s btn-sm" onclick="decideApp('${a.id}','approved')"><i class="ti ti-user-plus"></i>Approve + Add to Roster</button>
         <button class="btn btn-d btn-sm" onclick="decideApp('${a.id}','declined')"><i class="ti ti-x"></i>Decline</button>
@@ -4483,10 +4484,19 @@ function renderRLReview(){
 function switchAppTab(el,tab){appTab=tab;document.querySelectorAll('#page-rl-review .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderRLReview();}
 function decideApp(id,decision){
   const a=applications.find(x=>x.id===id);if(!a)return;
+  const alreadyOnRoster=ROSTER.find(p=>p.name.toLowerCase()===a.name.toLowerCase());
   a.status=decision;
-  if(decision==='approved'&&!gp(a.name)){ROSTER.push({name:a.name,cls:a.cls,spec:a.spec,flexSpec:a.flexSpec||'',type:a.role,dispel:[],interrupt:0,present:false,resFrost:false,resNature:false,resFire:false});saveRoster();}
+  if(decision==='approved'){
+    if(!alreadyOnRoster){
+      ROSTER.push({name:a.name,cls:a.cls,spec:a.spec,flexSpec:a.flexSpec||'',type:a.role,dispel:[],interrupt:0,present:false,resFrost:false,resNature:false,resFire:false});
+      saveRoster();
+    } else {
+      toast(a.name+' is already on the roster — approved but not added again','warn');
+    }
+  }
   saveApplications();
-  updatePendingBadge();renderRLReview();toast(`Application ${decision}!`,decision==='approved'?'ok':'err');
+  updatePendingBadge();renderRLReview();
+  if(!alreadyOnRoster||decision!=='approved') toast('Application '+decision+'!',decision==='approved'?'ok':'err');
 }
 function updatePendingBadge(){const n=applications.filter(a=>a.status==='pending').length;const b=document.getElementById('pending-badge');if(b){b.textContent=n;b.style.display=n>0?'inline':'none';}}
 </script>
