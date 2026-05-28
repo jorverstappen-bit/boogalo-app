@@ -964,7 +964,8 @@ function effectiveType(name){const p=gp(name);return p?effectiveRole(p):'';}
 function effectiveDispels(p){
   let d=(p.dispel||[]).slice();
   if(p.cls==='Priest'&&p.spec==='Shadow') d=d.filter(x=>x!=='Disease');
-  if(p.cls==='Druid'&&p.spec==='Balance') d=d.filter(x=>x!=='Poison');
+  if(p.cls==='Druid'&&(p.spec==='Balance'||p.spec==='Feral')) d=d.filter(x=>x!=='Poison');
+  if(p.cls==='Paladin'&&p.spec==='Retribution') d=d.filter(x=>x!=='Magic'&&x!=='Disease'&&x!=='Poison');
   return d;
 }
 
