@@ -3371,31 +3371,37 @@ function roomSVG(bossId, role, phase, viewMode, resType){
     moroes(){
       let s=bg('rect')+compass()+phaseLabel('MOROES','');
       const cx=W/2, cy=H/2;
+      // Banquet hall room
       s+=`<rect x="25" y="25" width="${W-50}" height="${H-50}" rx="3" fill="rgba(20,25,40,.5)" stroke="#c9a435" stroke-width="1.5"/>`;
-      // Banquet hall tables (background detail)
+      // Tables as background detail
       s+=`<rect x="50" y="50" width="120" height="55" rx="3" fill="rgba(40,30,20,.3)" stroke="rgba(201,164,53,.2)" stroke-width="0.8"/>`;
       s+=`<rect x="350" y="50" width="120" height="55" rx="3" fill="rgba(40,30,20,.3)" stroke="rgba(201,164,53,.2)" stroke-width="0.8"/>`;
       s+=`<rect x="50" y="225" width="120" height="55" rx="3" fill="rgba(40,30,20,.3)" stroke="rgba(201,164,53,.2)" stroke-width="0.8"/>`;
       s+=`<rect x="350" y="225" width="120" height="55" rx="3" fill="rgba(40,30,20,.3)" stroke="rgba(201,164,53,.2)" stroke-width="0.8"/>`;
-      // 4 guest adds in corners (CC'd)
-      const addCorners=[[82,78,'S'],[W-82,78,'S'],[82,H-78,'S'],[W-82,H-78,'S']];
-      addCorners.forEach(([x,y,l])=>{
-        s+=`<circle cx="${x}" cy="${y}" r="18" fill="rgba(100,60,160,.15)" stroke="${RC.Add}" stroke-width="1" stroke-dasharray="4 3"/>`;
-        s+=addNode(x,y,l,13);
-        s+=goldLabel(x,y+24,'CC','middle');
+      // Doorway arch at top centre
+      s+=`<rect x="${cx-62}" y="28" width="124" height="14" rx="2" fill="rgba(40,30,20,.6)" stroke="rgba(201,164,53,.4)" stroke-width="0.8"/>`;
+      s+=goldLabel(cx,39,'DOORWAY ARCH — TANK HERE','middle');
+      // Stack zone indicator
+      s+=`<circle cx="${cx}" cy="145" r="58" fill="rgba(124,111,224,.06)" stroke="rgba(124,111,224,.3)" stroke-width="1.5" stroke-dasharray="5 3"/>`;
+      s+=goldLabel(cx,82,'STACK ZONE — ALL ADDS ON BOSS','middle');
+      // Boss in centre of stack
+      s+=bossNode(cx,145,'Mor',15);
+      // 4 adds clustered tightly around boss (all CC'd)
+      [[cx-24,128,'S'],[cx+24,128,'S'],[cx-24,162,'S'],[cx+24,162,'S']].forEach(([x,y,l])=>{
+        s+=`<circle cx="${x}" cy="${y}" r="14" fill="rgba(100,60,160,.15)" stroke="${RC.Add}" stroke-width="1" stroke-dasharray="3 2"/>`;
+        s+=addNode(x,y,l,10);
       });
-      // Moroes boss — doorway arch (north centre)
-      s+=bossNode(cx,cy-30,'Mor',15);
-      s+=node(cx+28,cy-30,'MT',RC.Tank,13);
-      // OT for CC breaks
-      s+=node(cx+28,cy+10,'OT',RC.Tank,12);
-      // Gouge rogues flanking (melee)
-      [[cx-22,cy-16],[cx-18,cy+12],[cx+12,cy-14],[cx+10,cy+14],[cx-32,cy],[cx-28,cy-28]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
-      // Healers
-      [[cx-75,cy+40],[cx+72,cy+40],[cx-80,cy-10],[cx+78,cy-10]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
-      // Ranged back
-      [[cx-60,cy+90],[cx-25,cy+100],[cx+25,cy+100],[cx+60,cy+90],[cx-95,cy+65],[cx+92,cy+65]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
-      s+=goldLabel(cx,H-22,'Gouge rotation on Moroes | Re-CC immediately on break');
+      s+=goldLabel(cx,112,"ALL CC’d",'middle');
+      // MT and OT flanking the stack
+      s+=node(cx-52,145,'MT',RC.Tank,13);
+      s+=node(cx+52,145,'OT',RC.Tank,12);
+      // Melee behind cluster
+      [[cx-28,cy+20],[cx,cy+26],[cx+28,cy+20],[cx-48,cy+10],[cx+48,cy+10],[cx,cy+42]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers flanking
+      [[cx-82,cy+6],[cx+80,cy+6],[cx-80,cy+38],[cx+78,cy+38]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged further back
+      [[cx-65,cy+88],[cx-28,cy+98],[cx+28,cy+98],[cx+65,cy+88],[cx-100,cy+60],[cx+98,cy+60]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx,H-22,'All adds stacked on boss | Gouge rotation | Re-CC immediately on break');
       s+=legend();
       return s;
     },
