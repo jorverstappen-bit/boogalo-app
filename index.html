@@ -277,12 +277,17 @@ tr:hover td{background:rgba(255,255,255,.013)}
       </div>
 
       <!-- Guest / RL options -->
-      <div style="display:flex;gap:8px;margin-bottom:8px">
+      <div style="display:flex;gap:8px;margin-bottom:6px">
         <button class="btn" style="flex:1;justify-content:center;padding:9px;font-size:12px;background:var(--bg3);border-color:var(--borderl)" onclick="setView('guest')">
           <i class="ti ti-eye"></i> View as Guest
         </button>
         <button class="btn btn-g" style="flex:1;justify-content:center;padding:9px;font-size:12px" onclick="showRLForm()">
           <i class="ti ti-shield-check"></i> Raid Leader
+        </button>
+      </div>
+      <div style="margin-bottom:8px">
+        <button class="btn" style="width:100%;justify-content:center;padding:9px;font-size:12px;background:rgba(255,162,0,.08);border-color:rgba(255,162,0,.25);color:var(--gold)" onclick="showOfficerForm()">
+          <i class="ti ti-star"></i> Officer
         </button>
       </div>
       <p style="font-size:10px;color:var(--t3);margin-top:6px">Guest mode is view-only · Sign in with your name for full access</p>
@@ -328,10 +333,20 @@ tr:hover td{background:rgba(255,255,255,.013)}
 
     <!-- RL key form -->
     <div id="rl-form" style="display:none;margin-top:4px">
-      <button onclick="document.getElementById('rl-form').style.display='none'" style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:11px;margin-bottom:8px;display:flex;align-items:center;gap:4px"><i class="ti ti-arrow-left"></i> Back</button>
+      <button onclick="document.getElementById('rl-form').style.display='none';document.getElementById('auth-step1').style.display='block'" style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:11px;margin-bottom:8px;display:flex;align-items:center;gap:4px"><i class="ti ti-arrow-left"></i> Back</button>
       <input type="password" id="rl-key" placeholder="Enter RL key…" style="margin-bottom:8px;text-align:center;width:100%" onkeydown="if(event.key==='Enter')checkKey()">
       <button class="btn btn-p" style="width:100%;justify-content:center" onclick="checkKey()"><i class="ti ti-lock-open"></i> Unlock as Raid Leader</button>
       <div id="key-err" style="display:none;font-size:11px;color:#e07b72;margin-top:6px"><i class="ti ti-alert-circle"></i> Wrong key — try again.</div>
+    </div>
+
+    <!-- Officer key form -->
+    <div id="officer-form" style="display:none;margin-top:4px">
+      <button onclick="document.getElementById('officer-form').style.display='none';document.getElementById('auth-step1').style.display='block'" style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:11px;margin-bottom:8px;display:flex;align-items:center;gap:4px"><i class="ti ti-arrow-left"></i> Back</button>
+      <div style="font-size:13px;font-weight:600;color:var(--gold);margin-bottom:6px;display:flex;align-items:center;gap:6px"><i class="ti ti-star"></i> Officer Access</div>
+      <p style="font-size:10px;color:var(--t3);margin-bottom:10px">Officers can create &amp; edit raids and manage rosters.</p>
+      <input type="password" id="officer-key" placeholder="Enter officer key…" style="margin-bottom:8px;text-align:center;width:100%" onkeydown="if(event.key==='Enter')checkOfficerKey()">
+      <button class="btn" style="width:100%;justify-content:center;background:rgba(255,162,0,.1);border-color:rgba(255,162,0,.3);color:var(--gold)" onclick="checkOfficerKey()"><i class="ti ti-lock-open"></i> Unlock as Officer</button>
+      <div id="officer-err" style="display:none;font-size:11px;color:#e07b72;margin-top:6px"><i class="ti ti-alert-circle"></i> Wrong key — try again.</div>
     </div>
   </div>
 </div>
@@ -431,6 +446,28 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <div class="sbs"><div class="sbl">My Account</div>
       <div class="ni" onclick="nav(this,'signup')"><i class="ti ti-forms"></i><span>Apply for Raid</span></div>
       <div class="ni" onclick="nav(this,'specreq')"><i class="ti ti-refresh"></i><span>Request Spec Change</span></div>
+    </div>
+  </div>
+  <div id="nav-officer" style="display:none">
+    <div class="sbs"><div class="sbl">Schedule</div>
+      <div class="ni" onclick="nav(this,'calendar')"><i class="ti ti-calendar"></i><span>Calendar</span></div>
+      <div class="ni" onclick="nav(this,'raids')"><i class="ti ti-list"></i><span>Upcoming Raids</span></div>
+      <div class="ni" onclick="nav(this,'create-raid')"><i class="ti ti-plus"></i><span>Create Raid</span></div>
+    </div>
+    <div class="sbs"><div class="sbl">Sign-up</div>
+      <div class="ni" onclick="nav(this,'signup')"><i class="ti ti-forms"></i><span>Apply for Raid</span></div>
+    </div>
+    <div class="sbs"><div class="sbl">Raids</div>
+      <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
+      <div class="ni" onclick="nav(this,'gruul')"><i class="ti ti-sword"></i><span>Gruul's Lair</span></div>
+      <div class="ni" onclick="nav(this,'mag')"><i class="ti ti-flame"></i><span>Magtheridon</span></div>
+      <div class="ni" onclick="nav(this,'tk')"><i class="ti ti-bolt"></i><span>Tempest Keep</span></div>
+      <div class="ni" onclick="nav(this,'ssc')"><i class="ti ti-droplet"></i><span>Serpent Shrine</span></div>
+      <div class="ni" onclick="nav(this,'kara')"><i class="ti ti-building-castle"></i><span>Karazhan</span></div>
+    </div>
+    <div class="sbs"><div class="sbl">Analysis</div>
+      <div class="ni" onclick="nav(this,'profiles')"><i class="ti ti-user-circle"></i><span>Profiles</span></div>
+      <div class="ni" onclick="nav(this,'reviews')"><i class="ti ti-star"></i><span>Reviews</span></div>
     </div>
   </div>
   </div><!-- end sb-nav -->
@@ -797,7 +834,8 @@ tr:hover td{background:rgba(255,255,255,.013)}
 // BOOGALO — CORE DATA & ENGINE
 // ============================================================
 const RL_KEY="boogalo-rl";
-let VIEW=null; // 'rl' | 'participant' | 'guest'
+const OFFICER_KEY="boogalo-officer";
+let VIEW=null; // 'rl' | 'participant' | 'guest' | 'officer'
 let CURRENT_USER=null; // roster player when signed in by name
 let rosterSortCol='name';let rosterSortDir=1;
 let appTab='pending';let srTab='pending';let stTab='overview';
@@ -806,6 +844,7 @@ let bossAssignments={}; // {bossId:{tanks:[{role,name}],healers:[],special:[{lab
 const SIGNUP_POOL_MAX=100; // sign-up queue cap; r.max is the raid roster limit (25)
 let calYear=new Date().getFullYear();let calMonth=new Date().getMonth();
 let reviewStars={};let selectedDay=null;
+let _editingReviewId=null;
 
 const CC={Warrior:'#C79C6E',Paladin:'#F58CBA',Hunter:'#ABD473',Rogue:'#FFF569',Priest:'#e8e8e8',Shaman:'#5ab4f8',Mage:'#69CCF0',Warlock:'#9482C9',Druid:'#FF7D0A'};
 const CB={Warrior:'rgba(199,156,110,.15)',Paladin:'rgba(245,140,186,.15)',Hunter:'rgba(171,212,115,.15)',Rogue:'rgba(255,245,105,.1)',Priest:'rgba(220,220,220,.1)',Shaman:'rgba(41,128,220,.18)',Mage:'rgba(105,204,240,.15)',Warlock:'rgba(148,130,201,.15)',Druid:'rgba(255,125,10,.15)'};
@@ -1016,86 +1055,84 @@ function removeFromGroup(gi,name){
   saveGroups(); renderRoles();
 }
 function addToRaidGroup(raidId,gi,name){
-  if(!name||!isRL()) return;
+  if(!name||!canManageRaids()) return;
   const r=raidSchedule.find(x=>x.id===raidId); if(!r) return;
-  if(!r.raidGroups) r.raidGroups=[[],[],[],[],[]];
-  if(r.raidGroups[gi]?.length>=5){toast('Group '+(gi+1)+' is full (max 5)','err');return;}
+  const numGroups=r.max<=10?2:5;
+  const maxPerGrp=Math.ceil(r.max/numGroups);
+  if(!r.raidGroups) r.raidGroups=Array.from({length:numGroups},()=>[]);
+  if(r.raidGroups[gi]?.length>=maxPerGrp){toast('Group '+(gi+1)+' is full (max '+maxPerGrp+')','err');return;}
   r.raidGroups.forEach(g=>{const i=g.indexOf(name);if(i!==-1)g.splice(i,1);});
   r.raidGroups[gi].push(name);
   saveRaids(); renderRaids();
 }
 function removeFromRaidGroup(raidId,gi,name){
-  if(!isRL()) return;
+  if(!canManageRaids()) return;
   const r=raidSchedule.find(x=>x.id===raidId); if(!r||!r.raidGroups) return;
   r.raidGroups[gi]=r.raidGroups[gi].filter(n=>n!==name);
   saveRaids(); renderRaids();
 }
 function autoAssignRaidGroups(raidId){
-  if(!isRL()) return;
+  if(!canManageRaids()) return;
   const r=raidSchedule.find(x=>x.id===raidId);
   if(!r||!r.confirmed.length){toast('No confirmed roster to assign','err');return;}
   const conf=r.confirmed.map(n=>gp(n)).filter(Boolean);
-  const g=[[],[],[],[],[]];
+  const numGroups=r.max<=10?2:5;
+  const maxPerGrp=Math.ceil(r.max/numGroups);
+  const g=Array.from({length:numGroups},()=>[]);
   const placed=new Set();
   // Returns true if placed, false if group full or already placed
-  const place=(p,gi)=>{if(!p||placed.has(p.name)||g[gi].length>=5)return false;g[gi].push(p.name);placed.add(p.name);return true;};
+  const place=(p,gi)=>{if(!p||placed.has(p.name)||g[gi].length>=maxPerGrp)return false;g[gi].push(p.name);placed.add(p.name);return true;};
   // Try groups in priority order until one accepts
   const tryIn=(p,...gis)=>{for(const gi of gis)if(place(p,gi))return;};
 
-  // Categorise
   const tanks=conf.filter(p=>p.type==='Tank');
   const healers=conf.filter(p=>p.type==='Healer');
   const melee=conf.filter(p=>p.type==='Melee');
   const ranged=conf.filter(p=>p.type==='Ranged');
 
-  const warDruidTanks=tanks.filter(p=>p.cls==='Warrior'||(p.cls==='Druid'&&p.spec==='Guardian'));
-  const palTanks=tanks.filter(p=>p.cls==='Paladin');
-  const otherTanks=tanks.filter(p=>!warDruidTanks.includes(p)&&!palTanks.includes(p));
+  if(numGroups===2){
+    // Karazhan / 10-man: 1 tank + 1 healer + 3 DPS per group
+    // Tanks: first → G0, second → G1, overflow → smallest
+    tanks.forEach((p,i)=>place(p,Math.min(i,1)));
+    // Healers: first → G0, second → G1, overflow → smallest
+    healers.forEach((p,i)=>place(p,Math.min(i,1)));
+    // Fill rest (melee first, then ranged)
+    [...melee,...ranged].forEach(p=>tryIn(p,0,1));
+  } else {
+    // 25-man TBC composition
+    const warDruidTanks=tanks.filter(p=>p.cls==='Warrior'||(p.cls==='Druid'&&p.spec==='Guardian'));
+    const palTanks=tanks.filter(p=>p.cls==='Paladin');
+    const otherTanks=tanks.filter(p=>!warDruidTanks.includes(p)&&!palTanks.includes(p));
+    const enhShamans=melee.filter(p=>p.spec==='Enhancement');
+    const otherMelee=melee.filter(p=>p.spec!=='Enhancement');
+    const hunters=ranged.filter(p=>p.cls==='Hunter');
+    const casters=ranged.filter(p=>p.cls!=='Hunter');
+    // G4: Balance Druid, Shadow Priest, Mages
+    const g4Casters=casters.filter(p=>(p.cls==='Druid'&&p.spec==='Balance')||(p.cls==='Priest'&&p.spec==='Shadow')||p.cls==='Mage');
+    // G3: Warlocks + other ranged
+    const g3Casters=casters.filter(p=>!g4Casters.includes(p));
+    // G5 — Healers
+    healers.forEach(p=>tryIn(p,4,3,2,1,0));
+    // G1 — Warrior/Druid tanks + other tanks
+    warDruidTanks.forEach(p=>place(p,0));
+    otherTanks.forEach(p=>place(p,0));
+    // Enh Shamans: one per group in order, waterfall on full
+    enhShamans.forEach((p,i)=>{
+      const preferred=Math.min(i,4);
+      if(!place(p,preferred)) tryIn(p,...[0,1,2,3,4].filter(x=>x!==preferred));
+    });
+    otherMelee.forEach(p=>tryIn(p,0,1,2,3,4));
+    hunters.forEach(p=>tryIn(p,1,0,2,3,4));
+    g4Casters.forEach(p=>tryIn(p,3,2,4,1,0));
+    palTanks.forEach(p=>tryIn(p,2,3,1,0,4));
+    g3Casters.forEach(p=>tryIn(p,2,3,4,1,0));
+  }
 
-  const enhShamans=melee.filter(p=>p.spec==='Enhancement');
-  const otherMelee=melee.filter(p=>p.spec!=='Enhancement');
-  const hunters=ranged.filter(p=>p.cls==='Hunter');
-  const casters=ranged.filter(p=>p.cls!=='Hunter');
-
-  // G4: Balance Druid, Shadow Priest, Mages
-  const g4Casters=casters.filter(p=>(p.cls==='Druid'&&p.spec==='Balance')||(p.cls==='Priest'&&p.spec==='Shadow')||p.cls==='Mage');
-  // G3: Warlocks + other ranged
-  const g3Casters=casters.filter(p=>!g4Casters.includes(p));
-
-  // G5 — Healers (max 5)
-  healers.forEach(p=>tryIn(p,4,3,2,1,0));
-
-  // G1 — Warrior/Druid tanks + non-pala other tanks
-  warDruidTanks.forEach(p=>place(p,0));
-  otherTanks.forEach(p=>place(p,0));
-
-  // Enh Shamans: #1→G1, #2→G2, #3→G3, #4→G4, #5→G5 (one per group)
-  // If preferred group is full, waterfall to the next available
-  enhShamans.forEach((p,i)=>{
-    const preferred=Math.min(i,4);
-    if(!place(p,preferred)) tryIn(p,...[0,1,2,3,4].filter(x=>x!==preferred));
-  });
-
-  // Fill melee into G1 (up to 5) then G2
-  otherMelee.forEach(p=>tryIn(p,0,1,2,3,4));
-
-  // Hunters → G2 first (shaman/melee synergy), overflow to G1
-  hunters.forEach(p=>tryIn(p,1,0,2,3,4));
-
-  // G4: Balance Druid + Shadow Priest + Mages
-  g4Casters.forEach(p=>tryIn(p,3,2,4,1,0));
-
-  // Paladin tanks → G3 prefer, G4 fallback
-  palTanks.forEach(p=>tryIn(p,2,3,1,0,4));
-
-  // G3: Warlocks + other ranged
-  g3Casters.forEach(p=>tryIn(p,2,3,4,1,0));
-
-  // Safety: any unplaced → smallest group (overflow beyond 25)
+  // Safety: any unplaced → smallest group
   conf.forEach(p=>{
     if(!placed.has(p.name)){
       const minGi=g.reduce((m,gr,i)=>gr.length<g[m].length?i:m,0);
-      if(g[minGi].length<5){g[minGi].push(p.name);placed.add(p.name);}
+      g[minGi].push(p.name);placed.add(p.name);
     }
   });
 
@@ -1484,6 +1521,8 @@ function present(){return ROSTER.filter(p=>p.present);}
 function isRL(){return VIEW==='rl';}
 function isGuest(){return VIEW==='guest';}
 function isNamed(){return VIEW==='participant'&&CURRENT_USER!==null;}
+function isOfficer(){return VIEW==='officer';}
+function canManageRaids(){return VIEW==='rl'||VIEW==='officer';}
 // Guests can view but not sign up, not write reviews, not interact with signups
 function canInteract(){return !isGuest();}
 function ikey(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
@@ -1502,11 +1541,13 @@ function setView(v, user){
   document.getElementById('auth').style.display='none';
   document.getElementById('auth-step1').style.display='block';
   document.getElementById('rl-form').style.display='none';
+  const offForm=document.getElementById('officer-form');if(offForm)offForm.style.display='none';
   // Nav visibility
   const isRl=v==='rl';
   document.getElementById('nav-rl').style.display=isRl?'block':'none';
   document.getElementById('nav-par').style.display=(v==='participant')?'block':'none';
   document.getElementById('nav-guest').style.display=v==='guest'?'block':'none';
+  document.getElementById('nav-officer').style.display=v==='officer'?'block':'none';
   // View pill
   const vp=document.getElementById('vp');
   if(vp){
@@ -1515,6 +1556,11 @@ function setView(v, user){
       vp.style.cursor='';
       vp.onclick=null;
       vp.innerHTML='<i class="ti ti-shield-check" style="font-size:9px"></i> Raid Leader';
+    } else if(v==='officer'){
+      vp.className='vpill rl';
+      vp.style.cursor='';
+      vp.onclick=null;
+      vp.innerHTML='<i class="ti ti-star" style="font-size:9px;color:var(--gold)"></i> Officer';
     } else if(v==='participant'&&CURRENT_USER){
       vp.className='vpill par';
       vp.style.cursor='pointer';
@@ -1552,6 +1598,9 @@ function setView(v, user){
       if(vortexRequests.length) saveVortexRequests();
     }, 500);
   }
+  else if(v==='officer'){
+    document.querySelector('#nav-officer .ni')?.click();
+  }
   else if(v==='participant'){
     document.querySelector('#nav-par .ni[onclick*="pov"]')?.click();
     // Push any participant-authored data that's stored locally but may not be in Firebase yet
@@ -1564,6 +1613,8 @@ function setView(v, user){
   }
   else if(v==='guest') document.querySelector('#nav-guest .ni[onclick*="roster"]')?.click();
   else document.querySelector('#nav-par .ni')?.click();
+  // Always start the raid timer — needed after login since timer won't show otherwise
+  startRaidTimer?.();
 }
 
 function goMyProfile(){
@@ -1581,6 +1632,14 @@ function showRLForm(){
 function checkKey(){
   if(document.getElementById('rl-key').value===RL_KEY){setView('rl');}
   else{document.getElementById('key-err').style.display='block';}
+}
+function showOfficerForm(){
+  document.getElementById('auth-step1').style.display='none';
+  document.getElementById('officer-form').style.display='block';
+}
+function checkOfficerKey(){
+  if(document.getElementById('officer-key').value===OFFICER_KEY){setView('officer');}
+  else{document.getElementById('officer-err').style.display='block';}
 }
 
 function filterAuthNames(val){
@@ -2061,16 +2120,23 @@ function logout(){
   // Reset auth form to step 1
   const s1=document.getElementById('auth-step1');
   const rlf=document.getElementById('rl-form');
+  const off=document.getElementById('officer-form');
   if(s1) s1.style.display='block';
   if(rlf) rlf.style.display='none';
+  if(off) off.style.display='none';
   const ni=document.getElementById('auth-name');
   if(ni) ni.value='';
   document.getElementById('auth').style.display='flex';
   document.getElementById('nav-rl').style.display='none';
   document.getElementById('nav-par').style.display='none';
+  document.getElementById('nav-officer').style.display='none';
   document.getElementById('rl-form').style.display='none';
   document.getElementById('key-err').style.display='none';
   document.getElementById('rl-key').value='';
+  const offErr=document.getElementById('officer-err');
+  if(offErr) offErr.style.display='none';
+  const offKey=document.getElementById('officer-key');
+  if(offKey) offKey.value='';
 }
 
 // ============================================================
@@ -4686,7 +4752,7 @@ function fullRaidCard(r,highlight){
   const asgn=r.assignments||{MT:'',OT1:'',OT2:'',healerTargets:{}};
   const confirmedTanks=r.confirmed.filter(n=>{const p=gp(n);return p?.type==='Tank'||p?.type==='Mage Tank';});
   const confirmedHealers=r.confirmed.filter(n=>{const p=gp(n);return p?.type==='Healer';});
-  const assignPanel=isRL()&&!past&&r.confirmed.length?`
+  const assignPanel=canManageRaids()&&!past&&r.confirmed.length?`
     <hr class="rec-divider">
     <div style="margin-bottom:10px">
       <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px"><i class="ti ti-shield-check" style="margin-right:4px"></i>Role Assignments</div>
@@ -4715,8 +4781,8 @@ function fullRaidCard(r,highlight){
       </div>`:''}
     </div>`:'';
 
-  // Assignments read-only display for non-RL (shown when assignments exist)
-  const assignDisplay=!isRL()&&r.confirmed.length&&(asgn.MT||asgn.OT1||Object.keys(asgn.healerTargets||{}).length)?`
+  // Assignments read-only display for non-manager (shown when assignments exist)
+  const assignDisplay=!canManageRaids()&&r.confirmed.length&&(asgn.MT||asgn.OT1||Object.keys(asgn.healerTargets||{}).length)?`
     <hr class="rec-divider">
     <div style="margin-bottom:8px">
       <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px"><i class="ti ti-shield-check"></i> Assignments</div>
@@ -4733,8 +4799,10 @@ function fullRaidCard(r,highlight){
       </div>`:''}
     </div>`:'';
 
-  // Raid-specific group grid
-  const rg=Array.from({length:5},(_,i)=>Array.isArray(r.raidGroups?.[i])?r.raidGroups[i]:[]);
+  // Raid-specific group grid (2 groups for 10-man, 5 for 25-man)
+  const numGroups=r.max<=10?2:5;
+  const maxPerGrp=Math.ceil(r.max/numGroups);
+  const rg=Array.from({length:numGroups},(_,i)=>Array.isArray(r.raidGroups?.[i])?r.raidGroups[i]:[]);
   const rgGrouped=new Set(rg.flat());
   const rgUnassigned=r.confirmed.filter(n=>!rgGrouped.has(n));
 
@@ -4743,27 +4811,50 @@ function fullRaidCard(r,highlight){
     <div style="margin-bottom:10px">
       <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
         <span><i class="ti ti-layout-grid" style="margin-right:4px"></i>Raid Groups <span style="font-weight:400;opacity:.65">${confirmedCount}/${r.max} confirmed</span></span>
-        ${isRL()&&!past?`<button class="btn btn-sm" style="font-size:10px;padding:2px 9px" onclick="autoAssignRaidGroups('${r.id}')"><i class="ti ti-wand"></i> Auto Assign</button>`:''}
+        ${canManageRaids()&&!past?`<button class="btn btn-sm" style="font-size:10px;padding:2px 9px" onclick="autoAssignRaidGroups('${r.id}')"><i class="ti ti-wand"></i> Auto Assign</button>`:''}
       </div>
-      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-bottom:6px">
+      <div style="display:grid;grid-template-columns:repeat(${numGroups},1fr);gap:5px;margin-bottom:6px">
         ${rg.map((g,gi)=>`<div style="background:var(--bg2);border-radius:var(--r);padding:6px;border:1px solid var(--border)">
           <div style="font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Group ${gi+1}</div>
           ${g.map(n=>`<div style="display:flex;align-items:center;gap:1px;padding:1px 0">
             ${pill(n,!gp(n)?.present)}
-            ${isRL()&&!past?`<button onclick="removeFromRaidGroup('${r.id}',${gi},'${n}')" style="background:none;border:none;color:var(--t3);cursor:pointer;padding:0 2px;font-size:12px;line-height:1;opacity:.6" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.6">×</button>`:''}
+            ${canManageRaids()&&!past?`<button onclick="removeFromRaidGroup('${r.id}',${gi},'${n}')" style="background:none;border:none;color:var(--t3);cursor:pointer;padding:0 2px;font-size:12px;line-height:1;opacity:.6" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.6">×</button>`:''}
           </div>`).join('')}
-          ${isRL()&&!past&&g.length<5?`<select onchange="addToRaidGroup('${r.id}',${gi},this.value);this.value=''" style="margin-top:3px;font-size:10px;width:100%;background:var(--bg3);border:1px solid var(--borderl);border-radius:4px;padding:2px 4px;color:var(--t2)">
+          ${canManageRaids()&&!past&&g.length<maxPerGrp?`<select onchange="addToRaidGroup('${r.id}',${gi},this.value);this.value=''" style="margin-top:3px;font-size:10px;width:100%;background:var(--bg3);border:1px solid var(--borderl);border-radius:4px;padding:2px 4px;color:var(--t2)">
             <option value="">＋ Add</option>
             ${rgUnassigned.map(n=>`<option value="${n}">${n}</option>`).join('')}
-          </select>`:isRL()&&!past&&g.length>=5?`<div style="font-size:9px;color:var(--t3);text-align:center;padding:3px 0;opacity:.6">Full</div>`:''}
+          </select>`:canManageRaids()&&!past&&g.length>=maxPerGrp?`<div style="font-size:9px;color:var(--t3);text-align:center;padding:3px 0;opacity:.6">Full</div>`:''}
         </div>`).join('')}
       </div>
-      ${rgUnassigned.length?`<div style="font-size:10px;color:var(--ora);display:flex;align-items:center;gap:5px;flex-wrap:wrap"><i class="ti ti-alert-triangle"></i> Not in any group: ${rgUnassigned.map(n=>pill(n,!gp(n)?.present)+(isRL()&&!past?`<button onclick="removeFromRaid('${r.id}','${n}')" title="Remove from raid" style="background:none;border:none;cursor:pointer;color:var(--t3);padding:0 2px;font-size:11px;margin-left:-3px" onmouseover="this.style.color='#e07b72'" onmouseout="this.style.color='var(--t3)'">✕</button>`:'') ).join(' ')}</div>`:'<div style="font-size:10px;color:#5DCAA5"><i class="ti ti-check"></i> All players assigned to groups</div>'}
+      ${rgUnassigned.length?`<div style="font-size:10px;color:var(--ora);display:flex;align-items:center;gap:5px;flex-wrap:wrap"><i class="ti ti-alert-triangle"></i> Not in any group: ${rgUnassigned.map(n=>pill(n,!gp(n)?.present)+(canManageRaids()&&!past?`<button onclick="removeFromRaid('${r.id}','${n}')" title="Remove from raid" style="background:none;border:none;cursor:pointer;color:var(--t3);padding:0 2px;font-size:11px;margin-left:-3px" onmouseover="this.style.color='#e07b72'" onmouseout="this.style.color='var(--t3)'">✕</button>`:'') ).join(' ')}</div>`:'<div style="font-size:10px;color:#5DCAA5"><i class="ti ti-check"></i> All players assigned to groups</div>'}
     </div>${assignPanel}${assignDisplay}`:
-    `<hr class="rec-divider"><div style="font-size:11px;color:var(--t3);padding:4px 0 10px">No confirmed roster yet.${!past&&isRL()?' Accept sign-ups below.':''}</div>`;
+    `<hr class="rec-divider"><div style="font-size:11px;color:var(--t3);padding:4px 0 10px">No confirmed roster yet.${!past&&canManageRaids()?' Accept sign-ups below.':''}</div>`;
 
-  // Sign-up management (RL only, upcoming raids)
-  const signupMgmt=isRL()&&!past?`
+  // Attendees section for past raids (RL can correct attendance records)
+  const attended=effAttended(r);
+  const attendeesSection=past?`
+    <hr class="rec-divider">
+    <div style="margin-bottom:10px">
+      <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+        <span><i class="ti ti-users" style="margin-right:3px"></i>Attendees <span style="font-weight:400;opacity:.65">(${attended.length})</span></span>
+        ${isRL()?`<span style="font-size:9px;font-weight:400;color:var(--t3)">Correct attendance if needed</span>`:''}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:3px;margin-bottom:${isRL()?'8px':'0'}">
+        ${attended.map(n=>`<div style="display:inline-flex;align-items:center;gap:1px">${pill(n,false)}${isRL()?`<button onclick="removeRaidAttendee('${r.id}','${n}')" style="background:none;border:none;color:var(--t3);cursor:pointer;padding:0 2px;font-size:11px;line-height:1;opacity:.6;margin-left:-2px" title="Remove" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.6">×</button>`:''}</div>`).join('')}
+      </div>
+      ${isRL()?`<div style="display:flex;gap:6px;align-items:center;margin-top:4px">
+        <select id="att-add-${r.id}" style="flex:1;font-size:11px;background:var(--bg3);border:1px solid var(--borderl);border-radius:var(--r);padding:4px 6px;color:var(--t2)">
+          <option value="">＋ Add attendee…</option>
+          ${ROSTER.map(p=>`<option value="${p.name}">${p.name}</option>`).join('')}
+        </select>
+        <button class="btn btn-s btn-sm" onclick="addRaidAttendeeFromSelect('${r.id}')"><i class="ti ti-check"></i> Add</button>
+      </div>`:''}
+    </div>`:'';
+
+
+
+  // Sign-up management (RL/Officer only, upcoming raids)
+  const signupMgmt=canManageRaids()&&!past?`
     <hr class="rec-divider">
     <div style="margin-bottom:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
@@ -4790,7 +4881,7 @@ function fullRaidCard(r,highlight){
       }).join(''):`<div style="font-size:11px;color:var(--t3);padding:4px 0">${r.signedUp.length?'All sign-ups reviewed.':'No sign-ups yet.'}</div>`}
     </div>`:
     // Participant sees sign-ups they submitted
-    !isRL()&&r.signedUp.length?`
+    !canManageRaids()&&r.signedUp.length?`
     <hr class="rec-divider">
     <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">
       Sign-ups (${r.signedUp.length})
@@ -4835,8 +4926,8 @@ function fullRaidCard(r,highlight){
       ${isT?'<span class="badge" style="background:var(--accg);color:var(--acc);border:0.5px solid rgba(124,111,224,.3)"><i class="ti ti-bolt"></i>Tonight</span>':''}
       ${past?'<span class="badge" style="background:rgba(100,100,100,.08);color:var(--t3)">Completed</span>':''}
       ${confirmedCount>0&&!past?`<span class="badge" style="background:var(--gred);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.3)"><i class="ti ti-check"></i>${confirmedCount}/${r.max} confirmed</span>`:''}
-      ${r.srLink?`<a href="${r.srLink}" target="_blank" rel="noopener" class="badge" style="background:rgba(26,158,114,.12);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.3);text-decoration:none;cursor:pointer" title="Open Soft Reserves"><i class="ti ti-external-link"></i> Soft Reserves</a>`:isRL()&&!past?`<span class="badge" style="background:rgba(100,100,100,.06);color:var(--t3);border:0.5px dashed rgba(100,100,100,.25);cursor:pointer" onclick="if(document.getElementById('raid-edit-${r.id}').style.display==='none')toggleRaidEdit('${r.id}');setTimeout(()=>{const el=document.getElementById('re-srlink-${r.id}');if(el){el.focus();el.select();}},50)" title="Add Soft Reserves link"><i class="ti ti-link"></i> + SR link</span>`:''}
-      ${isRL()?`<button class="btn btn-sm" onclick="toggleRaidEdit('${r.id}')" id="edit-btn-${r.id}" title="Edit raid details" style="margin-left:auto;font-size:11px;padding:3px 8px"><i class="ti ti-pencil"></i> Edit</button>`:''}
+      ${r.srLink?`<a href="${r.srLink}" target="_blank" rel="noopener" class="badge" style="background:rgba(26,158,114,.12);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.3);text-decoration:none;cursor:pointer" title="Open Soft Reserves"><i class="ti ti-external-link"></i> Soft Reserves</a>`:canManageRaids()&&!past?`<span class="badge" style="background:rgba(100,100,100,.06);color:var(--t3);border:0.5px dashed rgba(100,100,100,.25);cursor:pointer" onclick="if(document.getElementById('raid-edit-${r.id}').style.display==='none')toggleRaidEdit('${r.id}');setTimeout(()=>{const el=document.getElementById('re-srlink-${r.id}');if(el){el.focus();el.select();}},50)" title="Add Soft Reserves link"><i class="ti ti-link"></i> + SR link</span>`:''}
+      ${canManageRaids()?`<button class="btn btn-sm" onclick="toggleRaidEdit('${r.id}')" id="edit-btn-${r.id}" title="Edit raid details" style="margin-left:auto;font-size:11px;padding:3px 8px"><i class="ti ti-pencil"></i> Edit</button>`:''}
     </div>
     ${isRL()&&r.srToken?`<div style="padding:2px 0 6px"><span class="badge" style="background:rgba(255,162,0,.1);color:#f5a623;border:0.5px solid rgba(255,162,0,.28);font-family:monospace;font-size:10px;letter-spacing:.03em"><i class="ti ti-lock" style="margin-right:3px"></i>SR Token: ${r.srToken}</span></div>`:''}
     <!-- Inline edit form (RL only) -->
@@ -4908,6 +4999,7 @@ function fullRaidCard(r,highlight){
     <div class="pb" style="margin-bottom:4px"><div class="pf" style="width:${pct}%;background:${pct>=100?'var(--red)':'var(--gre)'}"></div></div>
     <div style="font-size:10px;color:var(--t3);margin-bottom:8px">${confirmedCount}/${r.max} confirmed · ${pendingSignups.length} pending review</div>
     ${rosterSection}
+    ${attendeesSection}
     ${signupMgmt}
     ${rosterPost}
     ${absentSection}
@@ -4916,9 +5008,9 @@ function fullRaidCard(r,highlight){
       ${!past&&!(isNamed()&&r.signedUp.includes(CURRENT_USER.name))?`<button class="btn btn-s btn-sm" onclick="signUp('${r.id}')"><i class="ti ti-user-plus"></i>Sign up</button>`:''}
       ${!past&&isNamed()&&r.signedUp.includes(CURRENT_USER.name)?`<button class="btn btn-w btn-sm" onclick="unSignUp('${r.id}')"><i class="ti ti-user-minus"></i>Unsign</button>`:''}
       <button class="btn btn-sm" onclick="addToICal('${r.id}')"><i class="ti ti-calendar-plus"></i>Add to calendar</button>
-      ${isRL()&&!past?`<button class="btn btn-w btn-sm" onclick="postRoster('${r.id}')"><i class="ti ti-list"></i>${r.rosterPosted?'Update roster':'Post roster'}</button>`:''}
-      ${isRL()&&!past?`<button class="btn btn-sm" onclick="togglePUG('${r.id}')"><i class="ti ti-users"></i>${r.pug?'Remove PUG':'Mark PUG'}</button>`:''}
-      ${(isRL()||isNamed())&&past&&!reviews.find(rv=>rv.raidId===r.id)?`<button class="btn btn-g btn-sm" onclick="openReviewForm('${r.id}')"><i class="ti ti-star"></i>Write review</button>`:''}
+      ${canManageRaids()&&!past?`<button class="btn btn-w btn-sm" onclick="postRoster('${r.id}')"><i class="ti ti-list"></i>${r.rosterPosted?'Update roster':'Post roster'}</button>`:''}
+      ${canManageRaids()&&!past?`<button class="btn btn-sm" onclick="togglePUG('${r.id}')"><i class="ti ti-users"></i>${r.pug?'Remove PUG':'Mark PUG'}</button>`:''}
+      ${(canManageRaids()||isNamed())&&past&&!reviews.find(rv=>rv.raidId===r.id)?`<button class="btn btn-g btn-sm" onclick="openReviewForm('${r.id}')"><i class="ti ti-star"></i>Write review</button>`:''}
     </div>
   </div>`;
 }
@@ -4974,7 +5066,7 @@ function toggleRaidEdit(raidId){
 }
 
 function saveRaidEdit(raidId){
-  if(!isRL()) return;
+  if(!canManageRaids()) return;
   const r=raidSchedule.find(x=>x.id===raidId);
   if(!r){ toast('Raid not found','err'); return; }
   const name   = document.getElementById('re-name-'+raidId)?.value?.trim();
@@ -5004,7 +5096,7 @@ function saveRaidEdit(raidId){
 }
 
 function deleteRaid(raidId){
-  if(!isRL()) return;
+  if(!canManageRaids()) return;
   const r=raidSchedule.find(x=>x.id===raidId);
   if(!r) return;
   if(!confirm('Delete "'+r.name+'" on '+fmtKey(r.date)+'? This cannot be undone.')) return;
@@ -5018,7 +5110,7 @@ function postRoster(raidId){const r=raidSchedule.find(x=>x.id===raidId);if(r){r.
 
 function acceptSignup(raidId, name){
   const r=raidSchedule.find(x=>x.id===raidId);
-  if(!r||!isRL()) return;
+  if(!r||!canManageRaids()) return;
   if(!r.confirmed) r.confirmed=[];
   if(r.confirmed.includes(name)){toast(name+' already confirmed','err');return;}
   if(r.confirmed.length>=r.max){toast('Raid is full ('+r.max+'/'+r.max+')','err');return;}
@@ -5029,7 +5121,7 @@ function acceptSignup(raidId, name){
 
 function declineSignup(raidId, name){
   const r=raidSchedule.find(x=>x.id===raidId);
-  if(!r||!isRL()) return;
+  if(!r||!canManageRaids()) return;
   r.signedUp=r.signedUp.filter(n=>n!==name);
   if(r.confirmed) r.confirmed=r.confirmed.filter(n=>n!==name);
   saveRaids();renderRaids();
@@ -5038,7 +5130,7 @@ function declineSignup(raidId, name){
 
 function acceptAllSignups(raidId){
   const r=raidSchedule.find(x=>x.id===raidId);
-  if(!r||!isRL()) return;
+  if(!r||!canManageRaids()) return;
   if(!r.confirmed) r.confirmed=[];
   const pending=r.signedUp.filter(n=>!r.confirmed.includes(n));
   const slots=r.max-r.confirmed.length;
@@ -5050,7 +5142,7 @@ function acceptAllSignups(raidId){
 
 function autoFillByWeight(raidId){
   const r=raidSchedule.find(x=>x.id===raidId);
-  if(!r||!isRL()) return;
+  if(!r||!canManageRaids()) return;
   if(!r.confirmed) r.confirmed=[];
   const slots=r.max-r.confirmed.length;
   if(slots<=0){toast('Raid is already full','err');return;}
@@ -5093,7 +5185,7 @@ function autoFillByWeight(raidId){
 
 function declineAllSignups(raidId){
   const r=raidSchedule.find(x=>x.id===raidId);
-  if(!r||!isRL()) return;
+  if(!r||!canManageRaids()) return;
   const pending=r.signedUp.filter(n=>!r.confirmed.includes(n));
   r.signedUp=r.signedUp.filter(n=>r.confirmed.includes(n));
   saveRaids();renderRaids();
@@ -5102,19 +5194,38 @@ function declineAllSignups(raidId){
 
 function removeFromRaid(raidId, name){
   const r=raidSchedule.find(x=>x.id===raidId);
-  if(!r||!isRL()) return;
+  if(!r||!canManageRaids()) return;
   r.confirmed=(r.confirmed||[]).filter(n=>n!==name);
   saveRaids();renderRaids();
   toast(name+' removed from confirmed roster','ok');
 }
+function addRaidAttendee(raidId, name){
+  if(!isRL()||!name) return;
+  const r=raidSchedule.find(x=>x.id===raidId); if(!r) return;
+  if(!r.attended) r.attended=[...effAttended(r)];
+  if(r.attended.includes(name)){toast(name+' is already in attendees','err');return;}
+  r.attended.push(name);
+  saveRaids();renderRaids();toast(name+' added to attendees','ok');
+}
+function removeRaidAttendee(raidId, name){
+  if(!isRL()) return;
+  const r=raidSchedule.find(x=>x.id===raidId); if(!r) return;
+  if(!r.attended) r.attended=[...effAttended(r)];
+  r.attended=r.attended.filter(n=>n!==name);
+  saveRaids();renderRaids();toast(name+' removed from attendees','ok');
+}
+function addRaidAttendeeFromSelect(raidId){
+  const sel=document.getElementById('att-add-'+raidId);
+  if(sel&&sel.value) addRaidAttendee(raidId,sel.value);
+}
 function setRaidRole(raidId, role, name){
-  const r=raidSchedule.find(x=>x.id===raidId);if(!r||!isRL())return;
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r||!canManageRaids())return;
   if(!r.assignments)r.assignments={MT:'',OT1:'',OT2:'',healerTargets:{}};
   r.assignments[role]=name;
   saveRaids();renderRaids();
 }
 function setHealerTarget(raidId, healer, target){
-  const r=raidSchedule.find(x=>x.id===raidId);if(!r||!isRL())return;
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r||!canManageRaids())return;
   if(!r.assignments)r.assignments={MT:'',OT1:'',OT2:'',healerTargets:{}};
   if(!r.assignments.healerTargets)r.assignments.healerTargets={};
   r.assignments.healerTargets[healer]=target;
@@ -5158,8 +5269,9 @@ function createRaid(){
   const notes=document.getElementById('cr-notes').value.trim();
   if(!date){toast('Select a date','err');return;}
   if(date<todayKey()){toast('Cannot create a raid in the past','err');return;}
-  if(!isRL()){toast('Raid Leaders only','err');return;}
-  raidSchedule.push({id:genId(),name,date,start,end,max,extra,rl,notes,signedUp:[],confirmed:[],attended:[],status:isPast(date)?'completed':'upcoming',rosterPosted:false,pug:false,raidGroups:[[],[],[],[],[]]});
+  if(!canManageRaids()){toast('Raid Leaders only','err');return;}
+  const numGrp=max<=10?2:5;
+  raidSchedule.push({id:genId(),name,date,start,end,max,extra,rl,notes,signedUp:[],confirmed:[],attended:[],status:isPast(date)?'completed':'upcoming',rosterPosted:false,pug:false,raidGroups:Array.from({length:numGrp},()=>[])});
   renderCalendar();toast(`${name} raid created!`,'ok');
   document.getElementById('cr-notes').value='';
 }
@@ -5224,15 +5336,21 @@ function renderStatsRaids(){
 function updateRevBadge(){const n=raidSchedule.filter(r=>r.status==='completed'&&!reviews.find(rv=>rv.raidId===r.id)).length;const b=document.getElementById('rev-badge');if(b){b.textContent=n;b.style.display=n>0?'inline':'none';}}
 function renderReviews(){
   updateRevBadge();
+  // Ensure all reviews have an id (migration for old entries)
+  reviews.forEach(rv=>{if(!rv.id)rv.id=genId();});
   const needsReview=raidSchedule.filter(r=>r.status==='completed'&&!reviews.find(rv=>rv.raidId===r.id));
   const el=document.getElementById('reviews-content');
   let html='';
   if(needsReview.length){html+=`<div class="card ab" style="margin-bottom:12px"><div class="ct"><i class="ti ti-edit" style="color:var(--acc)"></i>Raids awaiting review (${needsReview.length})</div>${needsReview.map(r=>`<div class="rrow"><div><div style="font-size:12px;font-weight:600">${r.name}</div><div style="font-size:10px;color:var(--t3)">${fmtKey(r.date)}</div></div><button class="btn btn-g btn-sm" style="margin-left:auto" onclick="openReviewForm('${r.id}')"><i class="ti ti-star"></i>Review</button></div>`).join('')}</div>`;}
-  html+=reviews.slice().reverse().map(rv=>`
-    <div class="rv-card">
+  html+=reviews.slice().reverse().map(rv=>{
+    const canEdit=isRL()||(CURRENT_USER&&CURRENT_USER.name.toLowerCase()===(rv.submittedBy||'').toLowerCase());
+    return`<div class="rv-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:5px">
-        <div><div style="font-size:13px;font-weight:600">${rv.raidName}</div><div style="font-size:10px;color:var(--t3)">${fmtKey(rv.raidDate)} · by ${rv.submittedBy}</div></div>
-        <div>${[1,2,3,4,5].map(i=>`<span class="star${i<=rv.overallRating?' on':''}"><i class="ti ti-star"></i></span>`).join('')}</div>
+        <div><div style="font-size:13px;font-weight:600">${rv.raidName}</div><div style="font-size:10px;color:var(--t3)">${fmtKey(rv.raidDate)} · by ${rv.submittedBy||'Anonymous'}</div></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div>${[1,2,3,4,5].map(i=>`<span class="star${i<=rv.overallRating?' on':''}"><i class="ti ti-star"></i></span>`).join('')}</div>
+          ${canEdit&&rv.id?`<button class="btn btn-sm" onclick="editReview('${rv.id}')" title="Edit review" style="padding:2px 7px;font-size:11px"><i class="ti ti-pencil"></i></button>`:''}
+        </div>
       </div>
       <div class="g3" style="margin-bottom:8px">
         <div class="sbox"><div class="snum" style="color:#5DCAA5;font-size:18px">${rv.overallRating}/5</div><div class="slbl">Overall</div></div>
@@ -5244,13 +5362,16 @@ function renderReviews(){
         ${rv.mvp?`<span style="color:var(--t2)"><i class="ti ti-trophy" style="color:var(--gold)"></i> MVP: ${pill(rv.mvp)}</span>`:''}
         ${rv.improvements?`<span style="color:var(--t2)"><i class="ti ti-tool" style="color:var(--t3)"></i> Improve: ${rv.improvements}</span>`:''}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
   if(!needsReview.length&&!reviews.length)html='<div class="empty"><i class="ti ti-star"></i><p>No reviews yet. Complete a raid to write one.</p></div>';
   el.innerHTML=html;
 }
 function openReviewForm(raidId){
   const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
+  _editingReviewId=null;
   reviewStars[raidId]={o:0,c:0,a:0};
+  const authorVal=CURRENT_USER?.name||'';
   document.getElementById('reviews-content').innerHTML=`
     <div class="card ab">
       <div class="ct"><i class="ti ti-star" style="color:var(--gold)"></i>Post-Raid Review — ${r.name} (${fmtKey(r.date)})</div>
@@ -5260,12 +5381,38 @@ function openReviewForm(raidId){
         <div class="fg" style="margin-bottom:0"><span class="fl">MVP of the Raid</span><select id="rv-mvp-${raidId}"><option value="">— select —</option>${r.signedUp.map(n=>`<option>${n}</option>`).join('')}</select></div>
         <div class="fg" style="margin-bottom:0"><span class="fl">Main Improvement Area</span><input id="rv-improve-${raidId}" placeholder="e.g. Interrupt rotation"></div>
       </div>
-      <div class="fg" style="margin-top:10px"><span class="fl">Your name</span><input id="rv-author-${raidId}" placeholder="In-game name"></div>
+      <div class="fg" style="margin-top:10px"><span class="fl">Your in-game name</span><input id="rv-author-${raidId}" placeholder="In-game name" value="${authorVal}"></div>
       <div style="display:flex;gap:8px;margin-top:4px">
         <button class="btn btn-s" onclick="submitReview('${raidId}')"><i class="ti ti-check"></i>Submit Review</button>
         <button class="btn btn-sm" onclick="renderReviews()">Cancel</button>
       </div>
     </div>`;
+}
+function editReview(rvId){
+  const rv=reviews.find(x=>x.id===rvId);if(!rv)return;
+  const r=raidSchedule.find(x=>x.id===rv.raidId);if(!r)return;
+  _editingReviewId=rvId;
+  reviewStars[rv.raidId]={o:rv.overallRating||0,c:rv.coordination||0,a:rv.atmosphere||0};
+  document.getElementById('reviews-content').innerHTML=`
+    <div class="card ab">
+      <div class="ct"><i class="ti ti-pencil" style="color:var(--acc)"></i>Edit Review — ${rv.raidName} (${fmtKey(rv.raidDate)})</div>
+      ${['o:Overall rating','c:Coordination','a:Atmosphere'].map(sf=>{const[f,l]=sf.split(':');return`<div style="margin-bottom:14px"><div class="fl" style="margin-bottom:6px">${l}</div><div id="stars-${rv.raidId}-${f}" style="display:flex;align-items:center;gap:4px">${[1,2,3,4,5].map(i=>`<span onclick="setStar('${rv.raidId}','${f}',${i})" onmouseover="hoverStar('${rv.raidId}','${f}',${i})" onmouseout="hoverStar('${rv.raidId}','${f}',0)" style="font-size:26px;cursor:pointer;color:rgba(255,255,255,.15);transition:color .1s;line-height:1;padding:0 1px">★</span>`).join('')}<span id="star-val-${rv.raidId}-${f}" style="font-size:11px;color:var(--t3);margin-left:6px">0/5</span></div></div>`;}).join('')}
+      <div class="fg"><span class="fl">Notes / Observations</span><textarea id="rv-notes-${rv.raidId}" placeholder="What went well? What needs improvement?" style="min-height:70px;resize:vertical">${rv.notes||''}</textarea></div>
+      <div class="g2">
+        <div class="fg" style="margin-bottom:0"><span class="fl">MVP of the Raid</span><select id="rv-mvp-${rv.raidId}"><option value="">— select —</option>${(r.signedUp||[]).map(n=>`<option ${rv.mvp===n?'selected':''}>${n}</option>`).join('')}</select></div>
+        <div class="fg" style="margin-bottom:0"><span class="fl">Main Improvement Area</span><input id="rv-improve-${rv.raidId}" value="${rv.improvements||''}" placeholder="e.g. Interrupt rotation"></div>
+      </div>
+      <div class="fg" style="margin-top:10px"><span class="fl">Your in-game name</span><input id="rv-author-${rv.raidId}" value="${rv.submittedBy||''}" placeholder="In-game name"></div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-s" onclick="submitReview('${rv.raidId}')"><i class="ti ti-check"></i>Update Review</button>
+        <button class="btn btn-sm" onclick="_editingReviewId=null;renderReviews()">Cancel</button>
+      </div>
+    </div>`;
+  setTimeout(()=>{
+    setStar(rv.raidId,'o',rv.overallRating||0);
+    setStar(rv.raidId,'c',rv.coordination||0);
+    setStar(rv.raidId,'a',rv.atmosphere||0);
+  },10);
 }
 function setStar(raidId,field,val){
   reviewStars[raidId]=reviewStars[raidId]||{};reviewStars[raidId][field]=val;
@@ -5287,10 +5434,17 @@ function submitReview(raidId){
   const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
   const stars=reviewStars[raidId]||{};
   if(!stars.o){toast('Please rate the overall experience','err');return;}
-  const author=document.getElementById('rv-author-'+raidId)?.value.trim()||'Anonymous';
-  reviews.push({raidId,raidName:r.name,raidDate:r.date,overallRating:stars.o,coordination:stars.c||0,atmosphere:stars.a||0,notes:document.getElementById('rv-notes-'+raidId)?.value.trim()||'',mvp:document.getElementById('rv-mvp-'+raidId)?.value||'',improvements:document.getElementById('rv-improve-'+raidId)?.value.trim()||'',submittedBy:author});
-  saveReviews();
-  updateRevBadge();renderReviews();toast('Review submitted!','ok');
+  const author=document.getElementById('rv-author-'+raidId)?.value.trim()||CURRENT_USER?.name||'Anonymous';
+  const data={raidId,raidName:r.name,raidDate:r.date,overallRating:stars.o,coordination:stars.c||0,atmosphere:stars.a||0,notes:document.getElementById('rv-notes-'+raidId)?.value.trim()||'',mvp:document.getElementById('rv-mvp-'+raidId)?.value||'',improvements:document.getElementById('rv-improve-'+raidId)?.value.trim()||'',submittedBy:author};
+  if(_editingReviewId){
+    const idx=reviews.findIndex(rv=>rv.id===_editingReviewId);
+    if(idx!==-1) reviews[idx]={...reviews[idx],...data};
+    _editingReviewId=null;
+    saveReviews();updateRevBadge();renderReviews();toast('Review updated!','ok');
+  } else {
+    reviews.push({id:genId(),...data});
+    saveReviews();updateRevBadge();renderReviews();toast('Review submitted!','ok');
+  }
 }
 
 // ============================================================
@@ -5511,7 +5665,7 @@ function _fbSync(arr,data){arr.length=0;data.forEach(x=>arr.push(x));}
 function applyFirebaseKey(key,data){
   _fbIgnore=true;
   try{
-    if(key==='raids'){if(data&&typeof data==='object'){const d=_fbArr(data).map(r=>r?({...r,signedUp:r.signedUp?_fbArr(r.signedUp):[],confirmed:r.confirmed?_fbArr(r.confirmed):[],attended:r.attended?_fbArr(r.attended):[],raidGroups:[0,1,2,3,4].map(i=>{const g=(r.raidGroups||{})[i];return g?_fbArr(g):[]})}):null).filter(Boolean);raidSchedule=d;normalizeRaidStatuses();try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();}
+    if(key==='raids'){if(data&&typeof data==='object'){const d=_fbArr(data).map(r=>r?({...r,signedUp:r.signedUp?_fbArr(r.signedUp):[],confirmed:r.confirmed?_fbArr(r.confirmed):[],attended:r.attended?_fbArr(r.attended):[],raidGroups:(()=>{const ng=r.max<=10?2:5;return Array.from({length:ng},(_,i)=>{const g=(r.raidGroups||{})[i];return g?_fbArr(g):[];});})()} ):null).filter(Boolean);raidSchedule=d;normalizeRaidStatuses();try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();}
     else if(key==='roster'){if(data&&typeof data==='object'){const d=_fbArr(data).map(p=>p?({...p,dispel:p.dispel?_fbArr(p.dispel):[]}):null).filter(Boolean);_fbSync(ROSTER,d);normalizeRosterRoles();try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}}renderRoster?.();renderAttendance?.();renderRoles?.();renderRes?.();renderProfiles?.();}
     else if(key==='vortex'){if(data&&typeof data==='object'){Object.assign(vortexCounts,data);try{localStorage.setItem('boogalo-vortex',JSON.stringify(vortexCounts));}catch(e){}}renderVortex?.();}
     else if(key==='weights'){if(data&&typeof data==='object'){Object.keys(playerWeights).forEach(k=>delete playerWeights[k]);Object.assign(playerWeights,data);try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}}}
