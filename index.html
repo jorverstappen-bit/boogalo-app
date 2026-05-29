@@ -1525,6 +1525,8 @@ const RAID_BUFFS=[
     check:p=>p.cls==='Warlock',note:'-10% spell resistances on target'},
   {id:'shadowweave',label:'Shadow Weaving',     icon:'ti-moon',        cat:'Caster',
     check:p=>p.cls==='Priest'&&p.spec==='Shadow',note:'Stacks shadow damage amp — Shadow Priest'},
+  {id:'misery',     label:'Misery',             icon:'ti-eye-off',     cat:'Caster',
+    check:p=>p.cls==='Priest'&&p.spec==='Shadow'&&p.type==='Ranged',note:'+5% spell hit on target — Shadow Priest (Ranged)'},
   // Cooldowns (critical)
   {id:'bl',       label:'Bloodlust / Heroism',  icon:'ti-bolt',        cat:'Cooldowns',critical:true,
     check:p=>p.cls==='Shaman',note:'MUST HAVE — +30% haste for 40s'},
@@ -1849,8 +1851,8 @@ function renderProfileList(){
   if(!el) return;
   if(!players.length){el.innerHTML='<div class="empty"><i class="ti ti-user-off"></i><p>No players found.</p></div>';return;}
   el.innerHTML=players.map(p=>{
-    const total=raidSchedule.filter(r=>r.status==='completed').length;
-    const attended=raidSchedule.filter(r=>r.status==='completed'&&effAttended(r).includes(p.name)).length;
+    const total=raidSchedule.filter(r=>r.status==='completed'&&!/kara/i.test(r.name)).length;
+    const attended=raidSchedule.filter(r=>r.status==='completed'&&!/kara/i.test(r.name)&&effAttended(r).includes(p.name)).length;
     const attPct=total?Math.round((attended/total)*100):0;
     const alts=(playerAlts[p.name]||[]);
     const w={Tank:getWeight(p.name,'Tank'),Healer:getWeight(p.name,'Healer'),Melee:getWeight(p.name,'Melee'),Ranged:getWeight(p.name,'Ranged')};
@@ -1893,7 +1895,7 @@ function openProfile(name){
   if(!p) return;
   const cc=CC[p.cls]||'#aaa';
   const alts=playerAlts[name]||[];
-  const completed=raidSchedule.filter(r=>r.status==='completed');
+  const completed=raidSchedule.filter(r=>r.status==='completed'&&!/kara/i.test(r.name));
   const attended=completed.filter(r=>effAttended(r).includes(name));
   const signedUp=raidSchedule.filter(r=>r.signedUp?.includes(name));
   const attPct=completed.length?Math.round((attended.length/completed.length)*100):0;
@@ -4779,7 +4781,9 @@ function compactRaidCard(r){
   if(!r.signedUp)  r.signedUp=[];
   const confirmedPct=Math.min(100,Math.round((r.confirmed?.length||0)/r.max*100));
   const todK=todayKey();const isT=r.date===todK;const past=isPast(r.date)&&!isT;
-  return`<div class="rec ${past?'pst':isT?'ton':'upc'}" style="margin-bottom:8px">
+  const bg=raidBg(r.name);
+  const bgStyle=bg?`background-image:linear-gradient(rgba(10,12,17,.75),rgba(10,12,17,.75)),url('${bg}');background-size:cover;background-position:center top;`:'';
+  return`<div class="rec ${past?'pst':isT?'ton':'upc'}" style="margin-bottom:8px;${bgStyle}">
     <div class="rec-name">${r.name}${r.pug?'<span class="badge" style="background:rgba(192,57,43,.12);color:#e07b72;border:0.5px solid rgba(192,57,43,.3)">PUG</span>':''}</div>
     <div class="rec-meta"><span><i class="ti ti-clock"></i>${r.start}–${r.end}${r.extra>0?' (+'+r.extra+'m)':''}</span><span><i class="ti ti-forms"></i>${r.signedUp.length} signed up</span><span><i class="ti ti-users"></i>${r.confirmed?.length||0}/${r.max} confirmed</span></div>
     <div class="pb"><div class="pf" style="width:${confirmedPct}%;background:${confirmedPct>=100?'var(--red)':'var(--gre)'}"></div></div>
@@ -4789,6 +4793,15 @@ function compactRaidCard(r){
       <button class="btn btn-sm" onclick="addToICal('${r.id}')"><i class="ti ti-calendar-plus"></i>Add to calendar</button>
     </div>
   </div>`;
+}
+function raidBg(name){
+  const n=(name||'').toLowerCase();
+  if(n.includes('kara')) return 'img/kara.jpg';
+  if(n.includes('gruul')) return 'img/gruul.jpg';
+  if(n.includes('mag')) return 'img/mag.jpg';
+  if(n.includes('ssc')||n.includes('serpent')) return 'img/ssc.jpg';
+  if(n.includes('tk')||n.includes('tempest')) return 'img/tk.jpg';
+  return null;
 }
 function fullRaidCard(r,highlight){
   if(!r.confirmed) r.confirmed=[];
@@ -4980,7 +4993,9 @@ function fullRaidCard(r,highlight){
   const rosterPost=r.rosterPosted?`<div style="font-family:monospace;font-size:10px;background:var(--bg3);padding:8px;border-radius:var(--r);border:1px solid var(--border);max-height:80px;overflow:auto;line-height:1.6;margin-bottom:8px">${buildRosterPost(r)}</div>`:'';
 
   const hlStyle=highlight?'box-shadow:0 0 0 2px var(--acc),0 0 20px rgba(124,111,224,.2);':'';
-  return`<div class="rec ${past?'pst':isT?'ton':'upc'}" style="${hlStyle}">
+  const bg=raidBg(r.name);
+  const bgStyle=bg?`background-image:linear-gradient(rgba(10,12,17,.75),rgba(10,12,17,.75)),url('${bg}');background-size:cover;background-position:center top;`:'';
+  return`<div class="rec ${past?'pst':isT?'ton':'upc'}" style="${hlStyle}${bgStyle}">
     <div class="rec-name">
       <span>${r.name}</span>
       ${r.testInput?'<span class="badge" style="background:rgba(100,100,100,.12);color:var(--t3);border:0.5px solid rgba(100,100,100,.3)"><i class="ti ti-test-pipe"></i>Test input</span>':''}
@@ -5092,6 +5107,7 @@ function unSignUp(raidId){
   if(!r.signedUp.includes(name)){toast('You are not signed up for this raid','err');return;}
   r.signedUp=r.signedUp.filter(n=>n!==name);
   if(r.confirmed)r.confirmed=r.confirmed.filter(n=>n!==name);
+  if(r.raidGroups)r.raidGroups.forEach(g=>{const i=g.indexOf(name);if(i!==-1)g.splice(i,1);});
   saveRaids();renderRaids();renderCalendar();
   toast('Removed from '+r.name,'ok');
 }
