@@ -589,6 +589,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <select id="rf-type" onchange="renderRoster()" style="width:auto"><option value="">All roles</option><option>Tank</option><option>Healer</option><option>Melee</option><option>Ranged</option></select>
     <select id="rf-cls" onchange="renderRoster()" style="width:auto"><option value="">All classes</option></select>
     <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer"><input type="checkbox" id="rf-pres" onchange="renderRoster()"> Present only</label>
+    <select id="rf-alt" onchange="renderRoster()" style="width:auto"><option value="">Mains &amp; Alts</option><option value="main">Mains only</option><option value="alt">Alts only</option></select>
     <div style="flex:1"></div>
     <button class="btn btn-s btn-sm" id="add-player-toggle" onclick="toggleAddPlayer()" style="display:none"><i class="ti ti-plus"></i>Add player</button>
   </div>
@@ -600,7 +601,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <th onclick="sortRoster('spec')">Spec <span id="sort-spec"></span></th>
       <th onclick="sortRoster('type')">Role <span id="sort-type"></span></th>
       <th onclick="sortRoster('flexSpec')">Flex spec <span id="sort-flexSpec"></span></th><th id="swap-col" style="display:none">Swap</th>
-      <th>Interrupt</th><th>Dispels</th>
+      <th onclick="sortRoster('isAlt')">Alt <span id="sort-isAlt"></span></th>
       <th id="del-col" style="display:none"></th>
     </tr></thead>
     <tbody id="roster-tbody"></tbody>
@@ -2240,7 +2241,7 @@ function seedRaids(){
       raidSchedule.push({id:genId(),name:r.name,date:k,start:r.start,end:r.end,extra:r.extra,
         max:r.name.includes('Kara')?10:25,rl:'Holsteinbeef',notes:r.notes,
         signedUp:[],confirmed:[],attended:[],
-        status:'upcoming',rosterPosted:false,pug:false});
+        status:'upcoming',rosterPosted:false,pug:false,cleanup:false});
     });
   }
 }
@@ -2331,6 +2332,7 @@ function renderRoster(){
   const rfType=document.getElementById('rf-type')?.value||'';
   const rfCls=document.getElementById('rf-cls')?.value||'';
   const rfPres=document.getElementById('rf-pres')?.checked||false;
+  const rfAlt=document.getElementById('rf-alt')?.value||'';
   // populate class filter
   const clsSel=document.getElementById('rf-cls');
   if(clsSel&&clsSel.options.length<=1){['Warrior','Paladin','Hunter','Rogue','Priest','Shaman','Mage','Warlock','Druid'].forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;clsSel.appendChild(o);});}
@@ -2344,14 +2346,19 @@ function renderRoster(){
   const sortable=[...ROSTER].filter(p=>{
     const flexRole=p.flexSpec?SPEC_TO_ROLE[p.flexSpec]:'';
     const roleMatch=!rfType||(p.type===rfType)||(flexRole===rfType);
-    return roleMatch&&(!rfCls||p.cls===rfCls)&&(!rfPres||p.present);
+    const isAlt=!!getMainOf(p.name);
+    const altMatch=!rfAlt||(rfAlt==='main'&&!isAlt)||(rfAlt==='alt'&&isAlt);
+    return roleMatch&&(!rfCls||p.cls===rfCls)&&(!rfPres||p.present)&&altMatch;
   }).sort((a,b)=>{
-    let av=a[rosterSortCol]??'';let bv=b[rosterSortCol]??'';
+    let av,bv;
+    if(rosterSortCol==='isAlt'){av=getMainOf(a.name)?1:0;bv=getMainOf(b.name)?1:0;}
+    else{av=a[rosterSortCol]??'';bv=b[rosterSortCol]??'';}
     if(typeof av==='boolean')return rosterSortDir*(av===bv?0:av?-1:1);
+    if(typeof av==='number')return rosterSortDir*(av-bv);
     return rosterSortDir*String(av).localeCompare(String(bv));
   });
   // sort arrows
-  ['name','cls','spec','type','flexSpec','present'].forEach(c=>{const el=document.getElementById('sort-'+c);if(el)el.textContent=rosterSortCol===c?(rosterSortDir===1?'↑':'↓'):'';});
+  ['name','cls','spec','type','flexSpec','present','isAlt'].forEach(c=>{const el=document.getElementById('sort-'+c);if(el)el.textContent=rosterSortCol===c?(rosterSortDir===1?'↑':'↓'):'';});
   // stats
   const pr=ROSTER.filter(p=>p.present);
   document.getElementById('roster-stats').innerHTML=box(ROSTER.length,'Total','var(--acc)')+box(pr.length,'Present','#5DCAA5')+box(pr.filter(p=>p.type==='Tank').length,'Tanks','#e07060')+box(pr.filter(p=>p.type==='Healer').length,'Healers','#5DCAA5');
@@ -2361,10 +2368,9 @@ function renderRoster(){
     <td>${pill(p.name,!p.present)}</td>
     <td>${ctag(p.cls)}</td>
     <td>${isRL()?`<select style="font-size:11px;padding:2px 6px;width:auto;background:var(--bg3);border-color:var(--borderl);color:var(--t1)" onchange="setPlayerSpec('${p.name}','spec',this.value)">${(CLASS_SPECS[p.cls]||[p.spec]).map(s=>`<option value="${s}" ${s===p.spec?'selected':''}>${s}</option>`).join('')}</select>`:`<span style="font-size:11px;color:var(--t2)">${p.spec}</span>`}</td>
-    <td><div style="display:flex;align-items:center;gap:4px">${rtag(p.type)}${isRL()?`<select style="font-size:10px;padding:2px 4px;width:auto;background:var(--bg3);border-color:var(--borderl);color:var(--t2)" onchange="setPlayerRole('${p.name}',this.value)"><option ${p.type==='Tank'?'selected':''}>Tank</option><option ${p.type==='Mage Tank'?'selected':''}>Mage Tank</option><option ${p.type==='Healer'?'selected':''}>Healer</option><option ${p.type==='Melee'?'selected':''}>Melee</option><option ${p.type==='Ranged'?'selected':''}>Ranged</option></select>`:''}</div></td>
+    <td>${(()=>{const rs={'Tank':'color:#e07060;background:rgba(200,80,60,.15);border-color:rgba(200,80,60,.4)','Mage Tank':'color:#e07060;background:rgba(200,80,60,.15);border-color:rgba(200,80,60,.4)','Healer':'color:#5DCAA5;background:rgba(26,158,114,.15);border-color:rgba(26,158,114,.4)','Melee':'color:#e09a65;background:rgba(200,120,65,.15);border-color:rgba(200,120,65,.4)','Ranged':'color:#6ab4e8;background:rgba(41,128,185,.15);border-color:rgba(41,128,185,.4)'};const s=rs[p.type]||'color:var(--t2);background:var(--bg3);border-color:var(--borderl)';return isRL()?`<select style="font-size:11px;padding:2px 9px;width:auto;border-radius:20px;font-weight:600;${s}" onchange="setPlayerRole('${p.name}',this.value)"><option ${p.type==='Tank'?'selected':''}>Tank</option><option ${p.type==='Mage Tank'?'selected':''}>Mage Tank</option><option ${p.type==='Healer'?'selected':''}>Healer</option><option ${p.type==='Melee'?'selected':''}>Melee</option><option ${p.type==='Ranged'?'selected':''}>Ranged</option></select>`:rtag(p.type);})()}</td>
     <td>${isRL()?`<select style="font-size:11px;padding:2px 6px;width:auto;background:var(--bg3);border-color:var(--borderl);color:var(--t3)" onchange="setPlayerSpec('${p.name}','flexSpec',this.value)"><option value="">—</option>${(CLASS_SPECS[p.cls]||[]).map(s=>`<option value="${s}" ${s===p.flexSpec?'selected':''}>${s}</option>`).join('')}</select>`:`<span style="font-size:11px;color:var(--t3)">${p.flexSpec||'—'}</span>`}</td>
-    <td><span style="font-size:11px;color:${p.interrupt>0?'#6ab4e8':'var(--t3)'}">${p.interrupt>0?`${p.interrupt} charges`:'None'}</span></td>
-    <td style="font-size:10px;color:var(--t2)">${effectiveDispels(p).join(', ')||'—'}</td>
+    <td>${(()=>{const m=getMainOf(p.name);return m?`<span class="badge" style="background:rgba(124,111,224,.12);color:var(--acc);border:0.5px solid rgba(124,111,224,.3);gap:4px"><i class="ti ti-user-share" style="font-size:10px"></i>Alt of ${m}</span>`:'<span style="color:var(--t3);font-size:11px">—</span>'})()}</td>
     ${isRL()?`<td><button class="btn btn-sm" style="font-size:10px;padding:3px 7px" onclick="swapSpecs('${p.name}')" title="Swap main ↔ flex spec"><i class="ti ti-switch-horizontal"></i></button></td><td><button class="btn btn-sm" style="font-size:10px;background:var(--redd);border-color:rgba(192,57,43,.25);color:#e07b72" onclick="removePlayer('${p.name}')"><i class="ti ti-trash"></i></button></td>`:'<td style="display:none"></td><td style="display:none"></td>'}
   </tr>`).join('');
   // RL-only weight panel
@@ -2606,6 +2612,7 @@ function setPlayerRole(name, role){
   if(!p||!isRL()) return;
   p.type=role;
   saveRoster();
+  renderRoster?.();
   toast(`${name} → ${role}`,'ok');
 }
 
@@ -4698,7 +4705,7 @@ function decideApp(id,decision){
   a.status=decision;
   if(decision==='approved'){
     if(!alreadyOnRoster){
-      ROSTER.push({name:a.name,cls:a.cls,spec:a.spec,flexSpec:a.flexSpec||'',type:a.role,dispel:[],interrupt:0,present:false,resFrost:false,resNature:false,resFire:false});
+      ROSTER.push({name:a.name,cls:a.cls,spec:a.spec,flexSpec:a.flexSpec||'',type:a.role,dispel:[],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false});
       saveRoster();
     } else {
       toast(a.name+' is already on the roster — approved but not added again','warn');
@@ -4784,7 +4791,7 @@ function compactRaidCard(r){
   const bg=raidBg(r.name);
   const bgStyle=bg?`background-image:linear-gradient(rgba(10,12,17,.75),rgba(10,12,17,.75)),url('${bg}');background-size:cover;background-position:center top;`:'';
   return`<div class="rec ${past?'pst':isT?'ton':'upc'}" style="margin-bottom:8px;${bgStyle}">
-    <div class="rec-name">${r.name}${r.pug?'<span class="badge" style="background:rgba(192,57,43,.12);color:#e07b72;border:0.5px solid rgba(192,57,43,.3)">PUG</span>':''}</div>
+    <div class="rec-name">${r.name}${r.pug?'<span class="badge" style="background:rgba(192,57,43,.12);color:#e07b72;border:0.5px solid rgba(192,57,43,.3)">PUG</span>':''}${r.cleanup?'<span class="badge" style="background:rgba(41,128,185,.12);color:#6ab4e8;border:0.5px solid rgba(41,128,185,.3)"><i class="ti ti-broom"></i>Cleanup</span>':''}</div>
     <div class="rec-meta"><span><i class="ti ti-clock"></i>${r.start}–${r.end}${r.extra>0?' (+'+r.extra+'m)':''}</span><span><i class="ti ti-forms"></i>${r.signedUp.length} signed up</span><span><i class="ti ti-users"></i>${r.confirmed?.length||0}/${r.max} confirmed</span></div>
     <div class="pb"><div class="pf" style="width:${confirmedPct}%;background:${confirmedPct>=100?'var(--red)':'var(--gre)'}"></div></div>
     <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
@@ -4962,7 +4969,19 @@ function fullRaidCard(r,highlight){
     <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">
       Sign-ups (${r.signedUp.length})
     </div>
-    <div style="display:flex;flex-wrap:wrap;gap:2px;margin-bottom:8px">${r.signedUp.filter(n=>{const p=gp(n);return !p||p.present;}).map(n=>pill(n,false)).join('')}</div>`:'';
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${r.signedUp.filter(n=>{const p=gp(n);return !p||p.present;}).map(n=>{
+      const isMe=isNamed()&&n===CURRENT_USER.name;
+      const mp=gp(n);const mc=mp?CC[mp.cls]||'#aaa':'#aaa';const mb=mp?CB[mp.cls]||'rgba(100,100,100,.12)':'rgba(100,100,100,.12)';
+      return isMe
+        ?`<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 6px 2px 9px;border-radius:20px;font-size:11px;font-weight:700;background:${mb};color:${mc};border:1.5px solid ${mc};box-shadow:0 0 8px ${mc}66">
+            <i class="ti ti-user" style="font-size:10px"></i>${n}
+            <span onclick="unSignUp('${r.id}')" title="Unsign from this raid"
+              style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:${mc}33;color:${mc};font-size:10px;font-weight:700;line-height:1;margin-left:1px"
+              onmouseover="this.style.background='rgba(192,57,43,.4)';this.style.color='#e07b72'"
+              onmouseout="this.style.background='${mc}33';this.style.color='${mc}'">×</span>
+          </span>`
+        :pill(n,false);
+    }).join('')}</div>`:'';
 
   // "Not signed up" section (RL only)
   // Show "not signed up" to everyone — each name is clickable to self-sign-up
@@ -4975,17 +4994,19 @@ function fullRaidCard(r,highlight){
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:4px">${notSignedUp.map(n=>{
         const p=gp(n);
+        const isMe=isNamed()&&n===CURRENT_USER.name;
         return `<span
           onclick="quickSignUp('${r.id}','${n}')"
-          title="Click to sign up as ${n}"
-          style="cursor:pointer;display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:500;
+          title="${isMe?'Click to sign yourself up':'Click to sign up as '+n}"
+          style="cursor:pointer;display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:${isMe?'700':'500'};
                  background:${p?CB[p.cls]||'rgba(100,100,100,.12)':'rgba(100,100,100,.12)'};
                  color:${p?CC[p.cls]||'#aaa':'#aaa'};
-                 border:0.5px solid ${p?CC[p.cls]||'#aaa':'#aaa'}40;
-                 opacity:.5;transition:opacity .15s,transform .1s"
+                 border:${isMe?`1.5px solid ${p?CC[p.cls]||'#aaa':'#aaa'}`:`0.5px solid ${p?CC[p.cls]||'#aaa':'#aaa'}40`};
+                 opacity:${isMe?'1':'.5'};transition:opacity .15s,transform .1s;
+                 ${isMe?`box-shadow:0 0 8px ${p?CC[p.cls]||'#aaa':'#aaa'}66`:''}"
           onmouseover="this.style.opacity='1';this.style.transform='scale(1.05)'"
-          onmouseout="this.style.opacity='.5';this.style.transform=''">
-          ${n}
+          onmouseout="this.style.opacity='${isMe?'1':'.5'}';this.style.transform=''">
+          ${isMe?'<i class="ti ti-user" style="font-size:10px;margin-right:3px"></i>':''}${n}
         </span>`;
       }).join('')}</div>
     </div>`:'';
@@ -5001,6 +5022,7 @@ function fullRaidCard(r,highlight){
       ${r.testInput?'<span class="badge" style="background:rgba(100,100,100,.12);color:var(--t3);border:0.5px solid rgba(100,100,100,.3)"><i class="ti ti-test-pipe"></i>Test input</span>':''}
       ${highlight?'<span class="badge" style="background:rgba(124,111,224,.18);color:var(--acc);border:0.5px solid rgba(124,111,224,.35)"><i class="ti ti-bolt"></i>Next up</span>':''}
       ${r.pug?'<span class="badge" style="background:rgba(192,57,43,.12);color:#e07b72;border:0.5px solid rgba(192,57,43,.3)"><i class="ti ti-users"></i>PUG</span>':''}
+      ${r.cleanup?'<span class="badge" style="background:rgba(41,128,185,.12);color:#6ab4e8;border:0.5px solid rgba(41,128,185,.3)"><i class="ti ti-broom"></i>Cleanup</span>':''}
       ${isT?'<span class="badge" style="background:var(--accg);color:var(--acc);border:0.5px solid rgba(124,111,224,.3)"><i class="ti ti-bolt"></i>Tonight</span>':''}
       ${past?'<span class="badge" style="background:rgba(100,100,100,.08);color:var(--t3)">Completed</span>':''}
       ${confirmedCount>0&&!past?`<span class="badge" style="background:var(--gred);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.3)"><i class="ti ti-check"></i>${confirmedCount}/${r.max} confirmed</span>`:''}
@@ -5088,6 +5110,8 @@ function fullRaidCard(r,highlight){
       <button class="btn btn-sm" onclick="addToICal('${r.id}')"><i class="ti ti-calendar-plus"></i>Add to calendar</button>
       ${canManageRaids()&&!past?`<button class="btn btn-w btn-sm" onclick="postRoster('${r.id}')"><i class="ti ti-list"></i>${r.rosterPosted?'Update roster':'Post roster'}</button>`:''}
       ${canManageRaids()&&!past?`<button class="btn btn-sm" onclick="togglePUG('${r.id}')"><i class="ti ti-users"></i>${r.pug?'Remove PUG':'Mark PUG'}</button>`:''}
+      ${canManageRaids()&&!past?`<button class="btn btn-sm" onclick="toggleCleanup('${r.id}')" style="${r.cleanup?'background:rgba(41,128,185,.15);border-color:rgba(41,128,185,.35);color:#6ab4e8':''}"><i class="ti ti-broom"></i>${r.cleanup?'Remove Cleanup':'Mark Cleanup'}</button>`:''}
+      ${canManageRaids()&&past?`<button class="btn btn-sm btn-s" onclick="createCleanupRaid('${r.id}')" style="background:rgba(41,128,185,.12);border-color:rgba(41,128,185,.35);color:#6ab4e8"><i class="ti ti-broom"></i>Create cleanup raid</button>`:''}
       ${(canManageRaids()||isNamed())&&past&&!reviews.find(rv=>rv.raidId===r.id)?`<button class="btn btn-g btn-sm" onclick="openReviewForm('${r.id}')"><i class="ti ti-star"></i>Write review</button>`:''}
     </div>
   </div>`;
@@ -5185,6 +5209,32 @@ function deleteRaid(raidId){
 }
 
 function togglePUG(raidId){const r=raidSchedule.find(x=>x.id===raidId);if(r){r.pug=!r.pug;saveRaids();renderRaids();}}
+function toggleCleanup(raidId){const r=raidSchedule.find(x=>x.id===raidId);if(r){r.cleanup=!r.cleanup;saveRaids();renderRaids();}}
+function createCleanupRaid(raidId){
+  const src=raidSchedule.find(x=>x.id===raidId);
+  if(!src||!canManageRaids()) return;
+  // Default date = 7 days after source raid
+  const srcDate=new Date(src.date+'T12:00:00');
+  srcDate.setDate(srcDate.getDate()+7);
+  const defaultDate=srcDate.toISOString().slice(0,10);
+  const dateInput=prompt('Cleanup raid date (YYYY-MM-DD):',defaultDate);
+  if(!dateInput||!dateInput.match(/^\d{4}-\d{2}-\d{2}$/)){toast('Invalid date','err');return;}
+  const newRaid={
+    id:genId(),name:src.name,date:dateInput,
+    start:src.start,end:src.end,max:src.max,extra:src.extra,
+    rl:src.rl,notes:src.notes||'',
+    signedUp:[],confirmed:[],attended:[],
+    status:isPast(dateInput)?'completed':'upcoming',
+    rosterPosted:false,pug:false,cleanup:true,
+    raidGroups:Array.from({length:src.max<=10?2:5},()=>[])
+  };
+  raidSchedule.push(newRaid);
+  saveRaids();
+  // Switch to upcoming tab and re-render
+  switchRaidsTab('upcoming');
+  renderCalendar();
+  toast('Cleanup raid created for '+dateInput,'ok');
+}
 function postRoster(raidId){const r=raidSchedule.find(x=>x.id===raidId);if(r){r.rosterPosted=true;saveRaids();renderRaids();toast('Roster posted!','ok');}}
 
 function acceptSignup(raidId, name){
@@ -5351,7 +5401,7 @@ function createRaid(){
   if(date<todayKey()){toast('Cannot create a raid in the past','err');return;}
   if(!canManageRaids()){toast('Raid Leaders only','err');return;}
   const numGrp=max<=10?2:5;
-  raidSchedule.push({id:genId(),name,date,start,end,max,extra,rl,notes,signedUp:[],confirmed:[],attended:[],status:isPast(date)?'completed':'upcoming',rosterPosted:false,pug:false,raidGroups:Array.from({length:numGrp},()=>[])});
+  raidSchedule.push({id:genId(),name,date,start,end,max,extra,rl,notes,signedUp:[],confirmed:[],attended:[],status:isPast(date)?'completed':'upcoming',rosterPosted:false,pug:false,cleanup:false,raidGroups:Array.from({length:numGrp},()=>[])});
   renderCalendar();toast(`${name} raid created!`,'ok');
   document.getElementById('cr-notes').value='';
 }
@@ -5366,7 +5416,7 @@ function generateStandardWeek(){
     const d=new Date(now);const diff=(r.dow-d.getDay()+7)%7||7;d.setDate(d.getDate()+diff);
     const k=ikey(d);
     if(!raidSchedule.find(x=>x.date===k&&x.name===r.name)){
-      raidSchedule.push({id:genId(),name:r.name,date:k,start:r.start,end:r.end,max:25,extra:r.extra,rl:'Holsteinbeef',notes:r.notes,signedUp:[],confirmed:[],attended:[],status:'upcoming',rosterPosted:false,pug:false});
+      raidSchedule.push({id:genId(),name:r.name,date:k,start:r.start,end:r.end,max:25,extra:r.extra,rl:'Holsteinbeef',notes:r.notes,signedUp:[],confirmed:[],attended:[],status:'upcoming',rosterPosted:false,pug:false,cleanup:false});
       added++;
     }
   });
