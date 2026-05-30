@@ -47,7 +47,7 @@ body{font-family:Inter,sans-serif;font-size:13px;color:var(--t1);background:var(
 .mob-ham i{font-size:18px}
 .mob-title{font-family:Cinzel,serif;font-size:15px;font-weight:600;color:var(--t1);letter-spacing:.03em;flex:1}
 /* MOBILE BOTTOM NAV */
-.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:56px;background:var(--bg1);border-top:1px solid var(--border);align-items:stretch;z-index:300}
+.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:calc(56px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);background:var(--bg1);border-top:1px solid var(--border);align-items:stretch;z-index:9999}
 .mob-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;cursor:pointer;color:var(--t2);font-family:Inter,sans-serif;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:6px 0;transition:color .13s}
 .mob-nav-btn i{font-size:20px}
 .mob-nav-btn.active{color:var(--acc)}
@@ -55,13 +55,13 @@ body{font-family:Inter,sans-serif;font-size:13px;color:var(--t1);background:var(
 .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:199;backdrop-filter:blur(2px)}
 .sb-overlay.show{display:block}
 /* Mobile overrides */
-@media(max-width:640px){
+@media(max-width:768px){
   .mob-bar{display:flex}
   .mob-nav{display:flex}
   .sb-tab{display:none}
   .sb{position:fixed;top:0;left:0;bottom:0;z-index:200;transform:translateX(0);box-shadow:4px 0 24px rgba(0,0,0,.5)}
   .sb.collapsed{transform:translateX(-100%)}
-  .main{margin-left:0;padding-top:48px;padding-bottom:56px}
+  .main{margin-left:0;padding-top:48px;padding-bottom:calc(56px + env(safe-area-inset-bottom,0px))}
   .content{padding:14px 14px 40px}
   .ni{min-height:44px}
   .g2,.g3{grid-template-columns:1fr}
@@ -876,6 +876,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
 </div>
 
 </div></div><!-- end content/main -->
+</div><!-- end shell -->
 <div class="mob-nav" id="mob-nav">
   <button class="mob-nav-btn" id="mobn-profiles" onclick="mobNav('profiles')">
     <i class="ti ti-user-circle"></i>
@@ -890,7 +891,6 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <span>My POV</span>
   </button>
 </div>
-</div><!-- end shell -->
 <script>
 // ============================================================
 // BOOGALO — CORE DATA & ENGINE
@@ -2221,7 +2221,7 @@ function nav(el,page){
   el.classList.add('active');
   const mainEl=document.querySelector('.main');if(mainEl)mainEl.scrollTop=0;
   // On mobile: collapse sidebar after navigating
-  if(window.innerWidth<=640) collapseSidebar();
+  if(window.innerWidth<=768) collapseSidebar();
   updateMobTitle(page);
   updateMobNav(page);
   ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles,progression:renderProgression,buffs:renderBuffs})[page]?.();
@@ -5787,7 +5787,7 @@ function toggleSidebar(){
   const overlay=document.getElementById('sb-overlay');
   if(!sb) return;
   const collapsed=sb.classList.toggle('collapsed');
-  if(window.innerWidth<=640){
+  if(window.innerWidth<=768){
     if(overlay) overlay.classList.toggle('show', !collapsed);
     const ham=document.getElementById('mob-ham');
     if(ham) ham.querySelector('i').className=collapsed?'ti ti-menu-2':'ti ti-x';
@@ -5840,7 +5840,7 @@ function initSwipeGesture(){
   const EDGE=40,THRESHOLD=60;
   document.addEventListener('touchstart',e=>{startX=e.touches[0].clientX;startY=e.touches[0].clientY;},{passive:true});
   document.addEventListener('touchend',e=>{
-    if(window.innerWidth>640) return;
+    if(window.innerWidth>768) return;
     const dx=e.changedTouches[0].clientX-startX;
     const dy=e.changedTouches[0].clientY-startY;
     if(Math.abs(dy)>Math.abs(dx)) return;
@@ -5946,7 +5946,7 @@ window.onload=function(){
   try{const skl=localStorage.getItem('boogalo-killLog');if(skl){const k=JSON.parse(skl);if(k&&typeof k==='object')Object.assign(killLog,k);}}catch(e){}
   try{const scl=localStorage.getItem('boogalo-checklist');if(scl){const c=JSON.parse(scl);if(c&&typeof c==='object')Object.assign(checklistState,c);}}catch(e){}
   // Initialise app — Firebase SDK listeners fire within ~100ms and update all views
-  if(window.innerWidth<=640) collapseSidebar();
+  if(window.innerWidth<=768) collapseSidebar();
   initSwipeGesture();
   seedRaids();
   initFirebaseSync(); // connects via WebSocket; each key fires on('value') with live data
