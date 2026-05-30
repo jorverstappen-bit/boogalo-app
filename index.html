@@ -907,6 +907,12 @@ const SIGNUP_POOL_MAX=100; // sign-up queue cap; r.max is the raid roster limit 
 let calYear=new Date().getFullYear();let calMonth=new Date().getMonth();
 let reviewStars={};let selectedDay=null;
 let _editingReviewId=null;
+const SIGNUP_STATUS={
+  ready:    {label:'Signed up', icon:'ti-user-check', bg:'rgba(26,158,114,.12)', color:'#5DCAA5',  border:'rgba(26,158,114,.3)'},
+  tentative:{label:'Tentative', icon:'ti-help',       bg:'rgba(245,166,35,.12)', color:'#f5a623',  border:'rgba(245,166,35,.3)'},
+  bench:    {label:'Bench',     icon:'ti-armchair',   bg:'rgba(41,128,185,.12)', color:'#6ab4e8',  border:'rgba(41,128,185,.3)'},
+  absent:   {label:'Absent',    icon:'ti-user-x',     bg:'rgba(192,57,43,.12)',  color:'#e07b72',  border:'rgba(192,57,43,.3)'},
+};
 
 const CC={Warrior:'#C79C6E',Paladin:'#F58CBA',Hunter:'#ABD473',Rogue:'#FFF569',Priest:'#e8e8e8',Shaman:'#5ab4f8',Mage:'#69CCF0',Warlock:'#9482C9',Druid:'#FF7D0A'};
 const CB={Warrior:'rgba(199,156,110,.15)',Paladin:'rgba(245,140,186,.15)',Hunter:'rgba(171,212,115,.15)',Rogue:'rgba(255,245,105,.1)',Priest:'rgba(220,220,220,.1)',Shaman:'rgba(41,128,220,.18)',Mage:'rgba(105,204,240,.15)',Warlock:'rgba(148,130,201,.15)',Druid:'rgba(255,125,10,.15)'};
@@ -2135,6 +2141,7 @@ function renamePlayer(oldName){
   const ren=arr=>arr?arr.map(x=>x===oldName?n:x):arr;
   raidSchedule.forEach(r=>{
     r.signedUp=ren(r.signedUp);r.confirmed=ren(r.confirmed);r.attended=ren(r.attended);
+    if(r.signupStatus&&r.signupStatus[oldName]!==undefined){r.signupStatus[n]=r.signupStatus[oldName];delete r.signupStatus[oldName];}
     if(r.assignments){
       if(r.assignments.MT===oldName)r.assignments.MT=n;
       if(r.assignments.OT1===oldName)r.assignments.OT1=n;
@@ -2240,7 +2247,7 @@ function seedRaids(){
       if(raidSchedule.find(x=>x.date===k&&x.name===r.name))return;
       raidSchedule.push({id:genId(),name:r.name,date:k,start:r.start,end:r.end,extra:r.extra,
         max:r.name.includes('Kara')?10:25,rl:'Holsteinbeef',notes:r.notes,
-        signedUp:[],confirmed:[],attended:[],
+        signedUp:[],confirmed:[],attended:[],signupStatus:{},
         status:'upcoming',rosterPosted:false,pug:false,cleanup:false});
     });
   }
@@ -4794,9 +4801,15 @@ function compactRaidCard(r){
     <div class="rec-name">${r.name}${r.pug?'<span class="badge" style="background:rgba(192,57,43,.12);color:#e07b72;border:0.5px solid rgba(192,57,43,.3)">PUG</span>':''}${r.cleanup?'<span class="badge" style="background:rgba(41,128,185,.12);color:#6ab4e8;border:0.5px solid rgba(41,128,185,.3)"><i class="ti ti-broom"></i>Cleanup</span>':''}</div>
     <div class="rec-meta"><span><i class="ti ti-clock"></i>${r.start}–${r.end}${r.extra>0?' (+'+r.extra+'m)':''}</span><span><i class="ti ti-forms"></i>${r.signedUp.length} signed up</span><span><i class="ti ti-users"></i>${r.confirmed?.length||0}/${r.max} confirmed</span></div>
     <div class="pb"><div class="pf" style="width:${confirmedPct}%;background:${confirmedPct>=100?'var(--red)':'var(--gre)'}"></div></div>
-    <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">
-      ${!past&&canInteract()&&!(isNamed()&&r.signedUp.includes(CURRENT_USER.name))?`<button class="btn btn-s btn-sm" onclick="signUp('${r.id}')"><i class="ti ti-user-plus"></i>Sign up</button>`:''}
-      ${!past&&isNamed()&&r.signedUp.includes(CURRENT_USER.name)?`<button class="btn btn-w btn-sm" onclick="unSignUp('${r.id}')"><i class="ti ti-user-minus"></i>Unsign</button>`:''}
+    <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;align-items:center">${(()=>{
+      if(past||!canInteract()) return '';
+      const mn=isNamed()?CURRENT_USER.name:null;
+      const css=r.signupStatus||{};
+      if(mn&&r.confirmed.includes(mn)) return `<span class="badge" style="background:rgba(26,158,114,.18);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.35);font-size:11px"><i class="ti ti-check"></i> Confirmed</span>`;
+      if(mn&&css[mn]){const sc=SIGNUP_STATUS[css[mn]]||{};return `<span class="badge" style="background:${sc.bg};color:${sc.color};border:0.5px solid ${sc.border};font-size:11px"><i class="ti ${sc.icon}"></i> ${sc.label}</span><button class="btn btn-sm" style="font-size:11px;color:var(--t3);border-color:var(--borderl)" onclick="clearSignupStatus('${r.id}')"><i class="ti ti-x" style="font-size:10px"></i> Unsign</button>`;}
+      if(mn&&r.signedUp.includes(mn)) return `<span class="badge" style="background:rgba(26,158,114,.1);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.25);font-size:11px"><i class="ti ti-user-check"></i> Signed up</span><button class="btn btn-w btn-sm" style="font-size:11px" onclick="clearSignupStatus('${r.id}')"><i class="ti ti-x" style="font-size:10px"></i> Unsign</button>`;
+      return `<button class="btn btn-s btn-sm" onclick="signUpWithStatus('${r.id}','ready')"><i class="ti ti-user-plus"></i>Sign up</button><button class="btn btn-sm" style="border-color:rgba(245,166,35,.35);color:#f5a623" onclick="signUpWithStatus('${r.id}','tentative')"><i class="ti ti-help"></i>Tentative</button><button class="btn btn-sm" style="border-color:rgba(41,128,185,.35);color:#6ab4e8" onclick="signUpWithStatus('${r.id}','bench')"><i class="ti ti-armchair"></i>Bench</button><button class="btn btn-sm" style="border-color:rgba(192,57,43,.35);color:#e07b72" onclick="signUpWithStatus('${r.id}','absent')"><i class="ti ti-user-x"></i>Absent</button>`;
+    })()}
       <button class="btn btn-sm" onclick="addToICal('${r.id}')"><i class="ti ti-calendar-plus"></i>Add to calendar</button>
     </div>
   </div>`;
@@ -4826,9 +4839,10 @@ function fullRaidCard(r,highlight){
     (confByRole[role]||confByRole.Unknown).push(n);
   });
 
-  // Players NOT yet signed up
+  // Players NOT yet signed up (excludes those who've already given a non-ready status)
   const rosterNames=ROSTER.filter(p=>p.present).map(p=>p.name);
-  const notSignedUp=rosterNames.filter(n=>!r.signedUp.includes(n)&&!r.confirmed.includes(n));
+  const ss=r.signupStatus||{};
+  const notSignedUp=rosterNames.filter(n=>!r.signedUp.includes(n)&&!r.confirmed.includes(n)&&!ss[n]);
   const notConfirmed=r.signedUp.filter(n=>!r.confirmed.includes(n)&&r.confirmed.length>0);
 
   // Assignments
@@ -4937,12 +4951,22 @@ function fullRaidCard(r,highlight){
 
 
   // Sign-up management (RL/Officer only, upcoming raids)
+  const tentativePlayers=Object.entries(ss).filter(([,s])=>s==='tentative');
+  const benchPlayers=Object.entries(ss).filter(([,s])=>s==='bench');
+  const absentPlayers=Object.entries(ss).filter(([,s])=>s==='absent');
+  const nonReadySection=(tentativePlayers.length||benchPlayers.length||absentPlayers.length)?`
+    <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
+      <div style="font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Other responses</div>
+      ${tentativePlayers.length?`<div style="margin-bottom:5px"><span style="font-size:9px;font-weight:600;color:#f5a623;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:3px;margin-bottom:3px"><i class="ti ti-help" style="font-size:11px"></i> Tentative (${tentativePlayers.length})</span><div style="display:flex;flex-wrap:wrap;gap:3px">${tentativePlayers.map(([n])=>pill(n,false)).join('')}</div></div>`:''}
+      ${benchPlayers.length?`<div style="margin-bottom:5px"><span style="font-size:9px;font-weight:600;color:#6ab4e8;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:3px;margin-bottom:3px"><i class="ti ti-armchair" style="font-size:11px"></i> Bench (${benchPlayers.length})</span><div style="display:flex;flex-wrap:wrap;gap:3px">${benchPlayers.map(([n])=>pill(n,false)).join('')}</div></div>`:''}
+      ${absentPlayers.length?`<div><span style="font-size:9px;font-weight:600;color:#e07b72;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:3px;margin-bottom:3px"><i class="ti ti-user-x" style="font-size:11px"></i> Absent (${absentPlayers.length})</span><div style="display:flex;flex-wrap:wrap;gap:3px">${absentPlayers.map(([n])=>pill(n,false)).join('')}</div></div>`:''}
+    </div>`:'';
   const signupMgmt=canManageRaids()&&!past?`
     <hr class="rec-divider">
     <div style="margin-bottom:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
         <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em">
-          Sign-up Queue (${pendingSignups.length} pending)
+          Sign-up Queue (${pendingSignups.length} ready)
         </div>
         ${pendingSignups.length>0?`
         <div style="display:flex;gap:5px">
@@ -4961,27 +4985,30 @@ function fullRaidCard(r,highlight){
             <button class="btn btn-d btn-sm" onclick="declineSignup('${r.id}','${n}')"><i class="ti ti-x"></i></button>
           </div>
         </div>`;
-      }).join(''):`<div style="font-size:11px;color:var(--t3);padding:4px 0">${r.signedUp.length?'All sign-ups reviewed.':'No sign-ups yet.'}</div>`}
+      }).join(''):`<div style="font-size:11px;color:var(--t3);padding:4px 0">${r.signedUp.length?'All sign-ups reviewed.':'No one signed up as ready yet.'}</div>`}
+      ${nonReadySection}
     </div>`:
     // Participant sees sign-ups they submitted
-    !canManageRaids()&&r.signedUp.length?`
+    !canManageRaids()&&(r.signedUp.length||Object.keys(ss).length)?`
     <hr class="rec-divider">
     <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">
-      Sign-ups (${r.signedUp.length})
+      Sign-ups (${r.signedUp.length} ready${tentativePlayers.length?' · '+tentativePlayers.length+' tentative':''}${benchPlayers.length?' · '+benchPlayers.length+' bench':''}${absentPlayers.length?' · '+absentPlayers.length+' absent':''})
     </div>
-    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${r.signedUp.filter(n=>{const p=gp(n);return !p||p.present;}).map(n=>{
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${r.signedUp.filter(n=>{const p=gp(n);return !p||p.present;}).map(n=>{
       const isMe=isNamed()&&n===CURRENT_USER.name;
       const mp=gp(n);const mc=mp?CC[mp.cls]||'#aaa':'#aaa';const mb=mp?CB[mp.cls]||'rgba(100,100,100,.12)':'rgba(100,100,100,.12)';
       return isMe
         ?`<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 6px 2px 9px;border-radius:20px;font-size:11px;font-weight:700;background:${mb};color:${mc};border:1.5px solid ${mc};box-shadow:0 0 8px ${mc}66">
             <i class="ti ti-user" style="font-size:10px"></i>${n}
-            <span onclick="unSignUp('${r.id}')" title="Unsign from this raid"
+            <span onclick="clearSignupStatus('${r.id}')" title="Remove sign-up"
               style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:${mc}33;color:${mc};font-size:10px;font-weight:700;line-height:1;margin-left:1px"
               onmouseover="this.style.background='rgba(192,57,43,.4)';this.style.color='#e07b72'"
               onmouseout="this.style.background='${mc}33';this.style.color='${mc}'">×</span>
           </span>`
         :pill(n,false);
-    }).join('')}</div>`:'';
+    }).join('')}</div>
+    ${nonReadySection}`:'';
+
 
   // "Not signed up" section (RL only)
   // Show "not signed up" to everyone — each name is clickable to self-sign-up
@@ -5104,9 +5131,20 @@ function fullRaidCard(r,highlight){
     ${rosterPost}
     ${absentSection}
     <hr class="rec-divider">
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      ${!past&&!(isNamed()&&r.signedUp.includes(CURRENT_USER.name))?`<button class="btn btn-s btn-sm" onclick="signUp('${r.id}')"><i class="ti ti-user-plus"></i>Sign up</button>`:''}
-      ${!past&&isNamed()&&r.signedUp.includes(CURRENT_USER.name)?`<button class="btn btn-w btn-sm" onclick="unSignUp('${r.id}')"><i class="ti ti-user-minus"></i>Unsign</button>`:''}
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${(()=>{
+      if(past||!canInteract()) return '';
+      const myName=isNamed()?CURRENT_USER.name:null;
+      const isConfirmed=myName&&r.confirmed.includes(myName);
+      const isReady=myName&&r.signedUp.includes(myName);
+      const myStatus=myName&&ss[myName];
+      if(isConfirmed) return `<span class="badge" style="background:rgba(26,158,114,.18);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.35);font-size:11px"><i class="ti ti-check"></i> Confirmed</span>`;
+      if(myStatus){
+        const sc=SIGNUP_STATUS[myStatus]||{};
+        return `<span class="badge" style="background:${sc.bg};color:${sc.color};border:0.5px solid ${sc.border};font-size:11px"><i class="ti ${sc.icon}"></i> ${sc.label}</span><button class="btn btn-sm" style="font-size:11px;color:var(--t3);border-color:var(--borderl)" onclick="clearSignupStatus('${r.id}')"><i class="ti ti-x" style="font-size:10px"></i> Unsign</button>`;
+      }
+      if(isReady) return `<span class="badge" style="background:rgba(26,158,114,.1);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.25);font-size:11px"><i class="ti ti-user-check"></i> Signed up</span><button class="btn btn-w btn-sm" style="font-size:11px" onclick="clearSignupStatus('${r.id}')"><i class="ti ti-x" style="font-size:10px"></i> Unsign</button>`;
+      return `<button class="btn btn-s btn-sm" onclick="signUpWithStatus('${r.id}','ready')"><i class="ti ti-user-plus"></i>Sign up</button><button class="btn btn-sm" style="border-color:rgba(245,166,35,.35);color:#f5a623" onclick="signUpWithStatus('${r.id}','tentative')"><i class="ti ti-help"></i>Tentative</button><button class="btn btn-sm" style="border-color:rgba(41,128,185,.35);color:#6ab4e8" onclick="signUpWithStatus('${r.id}','bench')"><i class="ti ti-armchair"></i>Bench</button><button class="btn btn-sm" style="border-color:rgba(192,57,43,.35);color:#e07b72" onclick="signUpWithStatus('${r.id}','absent')"><i class="ti ti-user-x"></i>Absent</button>`;
+    })()}
       <button class="btn btn-sm" onclick="addToICal('${r.id}')"><i class="ti ti-calendar-plus"></i>Add to calendar</button>
       ${canManageRaids()&&!past?`<button class="btn btn-w btn-sm" onclick="postRoster('${r.id}')"><i class="ti ti-list"></i>${r.rosterPosted?'Update roster':'Post roster'}</button>`:''}
       ${canManageRaids()&&!past?`<button class="btn btn-sm" onclick="togglePUG('${r.id}')"><i class="ti ti-users"></i>${r.pug?'Remove PUG':'Mark PUG'}</button>`:''}
@@ -5125,39 +5163,49 @@ function buildRosterPost(r){
   const sugMT=tanks[0]||'—';
   return`=== ${r.name.toUpperCase()} ===\n${fmtKey(r.date)} · ${r.start}–${r.end}\nRL: ${r.rl}\nSuggested MT: ${sugMT}\nTANKS(${tanks.length}): ${tanks.join(', ')||'—'}\nHEALERS(${healers.length}): ${healers.join(', ')||'—'}\nDPS(${dps.length}): ${dps.join(', ')||'—'}\nActive: ${active.length}/${r.max}`;
 }
-function unSignUp(raidId){
-  const r=raidSchedule.find(x=>x.id===raidId);if(!r||!isNamed())return;
-  const name=CURRENT_USER.name;
-  if(!r.signedUp.includes(name)){toast('You are not signed up for this raid','err');return;}
-  r.signedUp=r.signedUp.filter(n=>n!==name);
+function _clearPlayerFromRaid(r, name){
+  r.signedUp=(r.signedUp||[]).filter(n=>n!==name);
+  if(r.signupStatus)delete r.signupStatus[name];
   if(r.confirmed)r.confirmed=r.confirmed.filter(n=>n!==name);
   if(r.raidGroups)r.raidGroups.forEach(g=>{const i=g.indexOf(name);if(i!==-1)g.splice(i,1);});
+}
+function clearSignupStatus(raidId){
+  const r=raidSchedule.find(x=>x.id===raidId);
+  const name=isNamed()?CURRENT_USER.name:null;
+  if(!r||!name)return;
+  _clearPlayerFromRaid(r,name);
   saveRaids();renderRaids();renderCalendar();
   toast('Removed from '+r.name,'ok');
 }
+function unSignUp(raidId){clearSignupStatus(raidId);}
+function signUpWithStatus(raidId, status){
+  let name;
+  if(isNamed()){name=CURRENT_USER.name;}
+  else{const n=prompt('Your in-game name:');if(!n||!n.trim())return;name=n.trim();}
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
+  if(!r.signupStatus)r.signupStatus={};
+  _clearPlayerFromRaid(r,name); // remove any prior status first
+  if(status==='ready'){
+    if(r.signedUp.length>=SIGNUP_POOL_MAX){toast('Sign-up queue is full','err');return;}
+    r.signedUp.push(name);
+    toast(name+' signed up for '+r.name+' — awaiting RL confirmation','ok');
+  } else {
+    r.signupStatus[name]=status;
+    const lbl=SIGNUP_STATUS[status]?.label||status;
+    toast('Marked as '+lbl+' for '+r.name,'ok');
+  }
+  saveRaids();renderRaids();renderCalendar();
+}
+function signUp(raidId){signUpWithStatus(raidId,'ready');}
 function quickSignUp(raidId, name){
   if(isNamed()&&name!==CURRENT_USER.name){toast('You can only sign up yourself','warn');return;}
-  const r=raidSchedule.find(x=>x.id===raidId);
-  if(!r) return;
-  if(r.signedUp.includes(name)){toast(name+' is already signed up!','err');return;}
-  if(r.signedUp.length>=SIGNUP_POOL_MAX){toast('Sign-up queue is full ('+SIGNUP_POOL_MAX+' max)','err');return;}
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
+  if(r.signedUp.includes(name)||(r.signupStatus&&r.signupStatus[name])){toast(name+' already responded to this raid','err');return;}
+  if(r.signedUp.length>=SIGNUP_POOL_MAX){toast('Sign-up queue is full','err');return;}
+  if(!r.signupStatus)r.signupStatus={};
   r.signedUp.push(name);
   saveRaids();renderRaids();renderCalendar();
   toast(name+' signed up for '+r.name+'!','ok');
-}
-
-function signUp(raidId){
-  let n;
-  if(isNamed()){n=CURRENT_USER.name;}
-  else{const name=prompt('Your in-game name to sign up:');if(!name||!name.trim())return;n=name.trim();}
-  const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
-  if(r.signedUp.includes(n)){toast('Already signed up!','err');return;}
-  if(r.signedUp.length>=SIGNUP_POOL_MAX){toast('Sign-up queue is full ('+SIGNUP_POOL_MAX+' max)','err');return;}
-  r.signedUp.push(n);
-  if(!r.confirmed) r.confirmed=[];
-  // Roster members get auto-queued (RL still confirms); external players need manual review
-  saveRaids();renderRaids();renderCalendar();
-  toast(n+' signed up for '+r.name+' — awaiting RL confirmation','ok');
 }
 function toggleRaidEdit(raidId){
   const form=document.getElementById('raid-edit-'+raidId);
@@ -5223,7 +5271,7 @@ function createCleanupRaid(raidId){
     id:genId(),name:src.name,date:dateInput,
     start:src.start,end:src.end,max:src.max,extra:src.extra,
     rl:src.rl,notes:src.notes||'',
-    signedUp:[],confirmed:[],attended:[],
+    signedUp:[],confirmed:[],attended:[],signupStatus:{},
     status:isPast(dateInput)?'completed':'upcoming',
     rosterPosted:false,pug:false,cleanup:true,
     raidGroups:Array.from({length:src.max<=10?2:5},()=>[])
@@ -5401,7 +5449,7 @@ function createRaid(){
   if(date<todayKey()){toast('Cannot create a raid in the past','err');return;}
   if(!canManageRaids()){toast('Raid Leaders only','err');return;}
   const numGrp=max<=10?2:5;
-  raidSchedule.push({id:genId(),name,date,start,end,max,extra,rl,notes,signedUp:[],confirmed:[],attended:[],status:isPast(date)?'completed':'upcoming',rosterPosted:false,pug:false,cleanup:false,raidGroups:Array.from({length:numGrp},()=>[])});
+  raidSchedule.push({id:genId(),name,date,start,end,max,extra,rl,notes,signedUp:[],confirmed:[],attended:[],signupStatus:{},status:isPast(date)?'completed':'upcoming',rosterPosted:false,pug:false,cleanup:false,raidGroups:Array.from({length:numGrp},()=>[])});
   renderCalendar();toast(`${name} raid created!`,'ok');
   document.getElementById('cr-notes').value='';
 }
@@ -5416,7 +5464,7 @@ function generateStandardWeek(){
     const d=new Date(now);const diff=(r.dow-d.getDay()+7)%7||7;d.setDate(d.getDate()+diff);
     const k=ikey(d);
     if(!raidSchedule.find(x=>x.date===k&&x.name===r.name)){
-      raidSchedule.push({id:genId(),name:r.name,date:k,start:r.start,end:r.end,max:25,extra:r.extra,rl:'Holsteinbeef',notes:r.notes,signedUp:[],confirmed:[],attended:[],status:'upcoming',rosterPosted:false,pug:false,cleanup:false});
+      raidSchedule.push({id:genId(),name:r.name,date:k,start:r.start,end:r.end,max:25,extra:r.extra,rl:'Holsteinbeef',notes:r.notes,signedUp:[],confirmed:[],attended:[],signupStatus:{},status:'upcoming',rosterPosted:false,pug:false,cleanup:false});
       added++;
     }
   });
@@ -5840,7 +5888,7 @@ function _fbSync(arr,data){arr.length=0;data.forEach(x=>arr.push(x));}
 function applyFirebaseKey(key,data){
   _fbIgnore=true;
   try{
-    if(key==='raids'){if(data&&typeof data==='object'){const d=_fbArr(data).map(r=>r?({...r,signedUp:r.signedUp?_fbArr(r.signedUp):[],confirmed:r.confirmed?_fbArr(r.confirmed):[],attended:r.attended?_fbArr(r.attended):[],raidGroups:(()=>{const ng=r.max<=10?2:5;return Array.from({length:ng},(_,i)=>{const g=(r.raidGroups||{})[i];return g?_fbArr(g):[];});})()} ):null).filter(Boolean);raidSchedule=d;normalizeRaidStatuses();try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();}
+    if(key==='raids'){if(data&&typeof data==='object'){const d=_fbArr(data).map(r=>r?({...r,signedUp:r.signedUp?_fbArr(r.signedUp):[],confirmed:r.confirmed?_fbArr(r.confirmed):[],attended:r.attended?_fbArr(r.attended):[],signupStatus:r.signupStatus&&typeof r.signupStatus==='object'?{...r.signupStatus}:{},raidGroups:(()=>{const ng=r.max<=10?2:5;return Array.from({length:ng},(_,i)=>{const g=(r.raidGroups||{})[i];return g?_fbArr(g):[];});})()} ):null).filter(Boolean);raidSchedule=d;normalizeRaidStatuses();try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();}
     else if(key==='roster'){if(data&&typeof data==='object'){const d=_fbArr(data).map(p=>p?({...p,dispel:p.dispel?_fbArr(p.dispel):[]}):null).filter(Boolean);_fbSync(ROSTER,d);normalizeRosterRoles();try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}}renderRoster?.();renderAttendance?.();renderRoles?.();renderRes?.();renderProfiles?.();}
     else if(key==='vortex'){if(data&&typeof data==='object'){Object.assign(vortexCounts,data);try{localStorage.setItem('boogalo-vortex',JSON.stringify(vortexCounts));}catch(e){}}renderVortex?.();}
     else if(key==='weights'){if(data&&typeof data==='object'){Object.keys(playerWeights).forEach(k=>delete playerWeights[k]);Object.assign(playerWeights,data);try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}}}
