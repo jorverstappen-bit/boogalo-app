@@ -913,6 +913,16 @@ const SIGNUP_STATUS={
   bench:    {label:'Bench',     icon:'ti-armchair',   bg:'rgba(41,128,185,.12)', color:'#6ab4e8',  border:'rgba(41,128,185,.3)'},
   absent:   {label:'Absent',    icon:'ti-user-x',     bg:'rgba(192,57,43,.12)',  color:'#e07b72',  border:'rgba(192,57,43,.3)'},
 };
+// Preferred player assignments per raid group (G1–G5).
+// Auto-assign tries to place these players in their group first, then falls
+// back to class/spec matching for any unfilled or unrepresented slots.
+const PREFERRED_RAID_GROUPS=[
+  ['Holsteinbeef','Cakemon','Harryshotter','Wolvke','Shamoils'],      // G1
+  ['Frostor','Xullue','Silvervirgo','Ronoidd','Qhan'],                // G2
+  ['Noonii','Mantine','Moondoggo','Disloyal','Swagmon'],              // G3
+  ['Macknetron','Brudersilik','Dethclok','Zyuu','Kalaveijo'],         // G4
+  ['Cadbaladin','Sappheal','Vvambull','Pallistuff','Restosparkz'],    // G5
+];
 
 const CC={Warrior:'#C79C6E',Paladin:'#F58CBA',Hunter:'#ABD473',Rogue:'#FFF569',Priest:'#e8e8e8',Shaman:'#5ab4f8',Mage:'#69CCF0',Warlock:'#9482C9',Druid:'#FF7D0A'};
 const CB={Warrior:'rgba(199,156,110,.15)',Paladin:'rgba(245,140,186,.15)',Hunter:'rgba(171,212,115,.15)',Rogue:'rgba(255,245,105,.1)',Priest:'rgba(220,220,220,.1)',Shaman:'rgba(41,128,220,.18)',Mage:'rgba(105,204,240,.15)',Warlock:'rgba(148,130,201,.15)',Druid:'rgba(255,125,10,.15)'};
@@ -1167,33 +1177,68 @@ function autoAssignRaidGroups(raidId){
     // Fill rest (melee first, then ranged)
     [...melee,...ranged].forEach(p=>tryIn(p,0,1));
   } else {
-    // 25-man TBC composition
-    const warDruidTanks=tanks.filter(p=>p.cls==='Warrior'||(p.cls==='Druid'&&p.spec==='Guardian'));
-    const palTanks=tanks.filter(p=>p.cls==='Paladin');
-    const otherTanks=tanks.filter(p=>!warDruidTanks.includes(p)&&!palTanks.includes(p));
-    const enhShamans=melee.filter(p=>p.spec==='Enhancement');
-    const otherMelee=melee.filter(p=>p.spec!=='Enhancement');
-    const hunters=ranged.filter(p=>p.cls==='Hunter');
-    const casters=ranged.filter(p=>p.cls!=='Hunter');
-    // G4: Balance Druid, Shadow Priest, Mages
-    const g4Casters=casters.filter(p=>(p.cls==='Druid'&&p.spec==='Balance')||(p.cls==='Priest'&&p.spec==='Shadow')||p.cls==='Mage');
-    // G3: Warlocks + other ranged
-    const g3Casters=casters.filter(p=>!g4Casters.includes(p));
-    // G5 — Healers
-    healers.forEach(p=>tryIn(p,4,3,2,1,0));
-    // G1 — Warrior/Druid tanks + other tanks
-    warDruidTanks.forEach(p=>place(p,0));
-    otherTanks.forEach(p=>place(p,0));
-    // Enh Shamans: one per group in order, waterfall on full
-    enhShamans.forEach((p,i)=>{
-      const preferred=Math.min(i,4);
-      if(!place(p,preferred)) tryIn(p,...[0,1,2,3,4].filter(x=>x!==preferred));
+    // 25-man preferred composition
+
+    // Pre-pass: slot preferred named players into their preferred groups first
+    PREFERRED_RAID_GROUPS.slice(0,numGroups).forEach((names,gi)=>{
+      names.forEach(name=>{
+        const p=conf.find(q=>!placed.has(q.name)&&q.name.toLowerCase()===name.toLowerCase());
+        if(p) place(p,gi);
+      });
     });
-    otherMelee.forEach(p=>tryIn(p,0,1,2,3,4));
-    hunters.forEach(p=>tryIn(p,1,0,2,3,4));
-    g4Casters.forEach(p=>tryIn(p,3,2,4,1,0));
-    palTanks.forEach(p=>tryIn(p,2,3,1,0,4));
-    g3Casters.forEach(p=>tryIn(p,2,3,4,1,0));
+
+    // pick(): returns first unplaced player matching any of the given filter fns (tried in order)
+    const pick=(...fns)=>{for(const fn of fns){const p=conf.find(q=>!placed.has(q.name)&&fn(q));if(p)return p;}return null;};
+    // fillGroup(): keeps placing best-fit players into gi until full or no eligible players remain
+    const fillGroup=(gi,...fns)=>{while(g[gi].length<maxPerGrp){const p=pick(...fns);if(!p)break;place(p,gi);}};
+
+    // ── G1 — physical/melee: enh shaman · tanks · rogues · melee warriors · melee · hunters ──
+    fillGroup(0,
+      p=>p.cls==='Shaman'&&p.spec==='Enhancement',
+      p=>p.cls==='Druid'&&p.type==='Tank',
+      p=>p.type==='Tank',
+      p=>p.cls==='Rogue',
+      p=>p.cls==='Warrior'&&p.type==='Melee',
+      p=>p.type==='Melee',
+      p=>p.cls==='Hunter'
+    );
+
+    // ── G2 — melee/tank: tanks · fury/arms war · ret paladin · hunters · enh shaman · melee ──
+    fillGroup(1,
+      p=>p.type==='Tank',
+      p=>p.cls==='Warrior'&&(p.spec==='Fury'||p.spec==='Arms'),
+      p=>p.cls==='Paladin'&&p.spec==='Retribution',
+      p=>p.cls==='Hunter',
+      p=>p.cls==='Shaman'&&p.spec==='Enhancement',
+      p=>p.type==='Melee'
+    );
+
+    // ── G3 — caster DPS: mages · shadow priest · ranged · resto shaman ──
+    fillGroup(2,
+      p=>p.cls==='Mage',
+      p=>p.cls==='Priest'&&p.spec==='Shadow',
+      p=>p.type==='Ranged',
+      p=>p.cls==='Shaman'&&p.spec==='Restoration'
+    );
+
+    // ── G4 — caster DPS: warlocks · balance druid · elemental shaman · ranged ──
+    fillGroup(3,
+      p=>p.cls==='Warlock',
+      p=>p.cls==='Druid'&&p.spec==='Balance',
+      p=>p.cls==='Shaman'&&p.spec==='Elemental',
+      p=>p.type==='Ranged'
+    );
+
+    // ── G5 — healers: prot paladin · priests · shamans · paladins · druids · any healer · tanks ──
+    fillGroup(4,
+      p=>p.cls==='Paladin'&&p.type==='Tank',
+      p=>p.cls==='Priest'&&p.type==='Healer',
+      p=>p.cls==='Shaman'&&p.type==='Healer',
+      p=>p.cls==='Paladin'&&p.type==='Healer',
+      p=>p.cls==='Druid'&&p.type==='Healer',
+      p=>p.type==='Healer',
+      p=>p.type==='Tank'
+    );
   }
 
   // Safety: any unplaced → smallest group
@@ -1202,6 +1247,18 @@ function autoAssignRaidGroups(raidId){
       const minGi=g.reduce((m,gr,i)=>gr.length<g[m].length?i:m,0);
       g[minGi].push(p.name);placed.add(p.name);
     }
+  });
+
+  // Auto-set healer targets: Priest/Paladin → MT, Shaman/Druid → Raid heal
+  if(!r.assignments) r.assignments={MT:'',OT1:'',OT2:'',healerTargets:{}};
+  if(!r.assignments.healerTargets) r.assignments.healerTargets={};
+  const _cTanks=r.confirmed.filter(n=>{const p=gp(n);return p?.type==='Tank'||p?.type==='Mage Tank';});
+  const _mt=r.assignments.MT||_cTanks[0]||'';
+  r.confirmed.forEach(n=>{
+    const p=gp(n);if(!p||p.type!=='Healer')return;
+    r.assignments.healerTargets[n]=(p.cls==='Priest'||p.cls==='Paladin')
+      ?(_mt||'Raid')
+      :'Raid';
   });
 
   r.raidGroups=g;
@@ -4849,19 +4906,33 @@ function fullRaidCard(r,highlight){
   const asgn=r.assignments||{MT:'',OT1:'',OT2:'',healerTargets:{}};
   const confirmedTanks=r.confirmed.filter(n=>{const p=gp(n);return p?.type==='Tank'||p?.type==='Mage Tank';});
   const confirmedHealers=r.confirmed.filter(n=>{const p=gp(n);return p?.type==='Healer';});
+  // Build tank list: prefer stored tankList, fall back to legacy MT/OT1/OT2
+  const tankList=asgn.tankList?.length?asgn.tankList:[asgn.MT,asgn.OT1,asgn.OT2].filter(Boolean);
+  const tanksNotInList=confirmedTanks.filter(n=>!tankList.includes(n));
   const assignPanel=canManageRaids()&&!past&&r.confirmed.length?`
     <hr class="rec-divider">
     <div style="margin-bottom:10px">
       <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px"><i class="ti ti-shield-check" style="margin-right:4px"></i>Role Assignments</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-        ${['MT','OT1','OT2'].map((role,i)=>`
-        <div class="fg" style="min-width:120px;flex:1;margin-bottom:0">
-          <span class="fl">${['Main Tank','Off-Tank 1','Off-Tank 2'][i]}</span>
-          <select onchange="setRaidRole('${r.id}','${role}',this.value)" style="width:100%">
-            <option value="">— None —</option>
-            ${confirmedTanks.map(n=>`<option value="${n}" ${asgn[role]===n?'selected':''}>${n}</option>`).join('')}
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;color:var(--t3);margin-bottom:5px;display:flex;align-items:center;gap:5px"><i class="ti ti-shield"></i> Tank priority <span style="font-size:9px;opacity:.6">#1 = Main Tank</span></div>
+        ${tankList.length?tankList.map((name,i)=>`
+        <div style="display:flex;align-items:center;gap:6px;padding:3px 0">
+          <span style="min-width:20px;height:20px;border-radius:50%;background:rgba(200,80,60,.18);color:#e07060;border:0.5px solid rgba(200,80,60,.35);display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0">#${i+1}</span>
+          <span style="font-size:12px;font-weight:600;color:var(--t1);flex:1">${name}</span>
+          <div style="display:flex;gap:1px">
+            ${i>0?`<button onclick="moveTankInList('${r.id}',${i},-1)" style="background:none;border:none;cursor:pointer;color:var(--t3);padding:2px 5px;font-size:11px;line-height:1" title="Move up" onmouseover="this.style.color='var(--t1)'" onmouseout="this.style.color='var(--t3)'"><i class="ti ti-chevron-up"></i></button>`:'<span style="width:22px"></span>'}
+            ${i<tankList.length-1?`<button onclick="moveTankInList('${r.id}',${i},1)" style="background:none;border:none;cursor:pointer;color:var(--t3);padding:2px 5px;font-size:11px;line-height:1" title="Move down" onmouseover="this.style.color='var(--t1)'" onmouseout="this.style.color='var(--t3)'"><i class="ti ti-chevron-down"></i></button>`:'<span style="width:22px"></span>'}
+            <button onclick="removeTankFromList('${r.id}',${i})" style="background:none;border:none;cursor:pointer;color:var(--t3);padding:2px 5px;font-size:13px;line-height:1" title="Remove" onmouseover="this.style.color='#e07b72'" onmouseout="this.style.color='var(--t3)'">×</button>
+          </div>
+        </div>`).join(''):'<div style="font-size:11px;color:var(--t3);padding:2px 0">No tanks assigned yet.</div>'}
+        ${tanksNotInList.length?`
+        <div style="display:flex;gap:5px;margin-top:6px;align-items:center">
+          <select id="tank-add-${r.id}" style="flex:1;font-size:11px;background:var(--bg3);border:1px solid var(--borderl);border-radius:var(--r);padding:3px 6px;color:var(--t2)">
+            <option value="">＋ Add tank…</option>
+            ${tanksNotInList.map(n=>`<option value="${n}">${n}</option>`).join('')}
           </select>
-        </div>`).join('')}
+          <button class="btn btn-s btn-sm" onclick="addTankFromSelect('${r.id}')"><i class="ti ti-check"></i></button>
+        </div>`:tanksNotInList.length===0&&confirmedTanks.length>0?'':''}
       </div>
       ${confirmedHealers.length?`
       <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px"><i class="ti ti-heart" style="margin-right:4px"></i>Healer Assignments</div>
@@ -4870,23 +4941,28 @@ function fullRaidCard(r,highlight){
         <div style="display:flex;align-items:center;gap:8px">
           ${pill(n,false)}
           <span style="font-size:11px;color:var(--t3)">→</span>
-          <select onchange="setHealerTarget('${r.id}','${n}',this.value)" style="font-size:11px;flex:1;max-width:160px">
-            <option value="Raid" ${(!asgn.healerTargets?.[n]||asgn.healerTargets?.[n]==='Raid')?'selected':''}>Raid heal</option>
-            ${confirmedTanks.map(t=>`<option value="${t}" ${asgn.healerTargets?.[n]===t?'selected':''}>${t}</option>`).join('')}
-          </select>
+          <select onchange="setHealerTarget('${r.id}','${n}',this.value)" style="font-size:11px;flex:1;max-width:160px">${(()=>{
+            const _hp=gp(n);
+            const _stored=asgn.healerTargets?.[n];
+            const _def=(_hp?.cls==='Priest'||_hp?.cls==='Paladin')
+              ?(asgn.MT||confirmedTanks[0]||'Raid')
+              :'Raid';
+            const _eff=_stored!==undefined?_stored:_def;
+            return `<option value="Raid" ${_eff==='Raid'?'selected':''}>Raid heal</option>`
+              +confirmedTanks.map(t=>`<option value="${t}" ${_eff===t?'selected':''}>${t}</option>`).join('');
+          })()}</select>
         </div>`).join('')}
       </div>`:''}
     </div>`:'';
 
   // Assignments read-only display for non-manager (shown when assignments exist)
-  const assignDisplay=!canManageRaids()&&r.confirmed.length&&(asgn.MT||asgn.OT1||Object.keys(asgn.healerTargets||{}).length)?`
+  const tankListDisplay=tankList.length?tankList:[asgn.MT,asgn.OT1,asgn.OT2].filter(Boolean);
+  const assignDisplay=!canManageRaids()&&r.confirmed.length&&(tankListDisplay.length||Object.keys(asgn.healerTargets||{}).length)?`
     <hr class="rec-divider">
     <div style="margin-bottom:8px">
       <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px"><i class="ti ti-shield-check"></i> Assignments</div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px">
-        ${asgn.MT?`<span class="badge" style="background:rgba(200,80,60,.12);color:#e07060;border:0.5px solid rgba(200,80,60,.3)"><i class="ti ti-shield"></i> MT: ${asgn.MT}</span>`:''}
-        ${asgn.OT1?`<span class="badge" style="background:rgba(200,80,60,.08);color:#e07060;border:0.5px solid rgba(200,80,60,.2)"><i class="ti ti-shield-half"></i> OT1: ${asgn.OT1}</span>`:''}
-        ${asgn.OT2?`<span class="badge" style="background:rgba(200,80,60,.08);color:#e07060;border:0.5px solid rgba(200,80,60,.2)"><i class="ti ti-shield-half"></i> OT2: ${asgn.OT2}</span>`:''}
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">
+        ${tankListDisplay.map((n,i)=>`<span class="badge" style="background:rgba(200,80,60,${i===0?'.15':'.08'});color:#e07060;border:0.5px solid rgba(200,80,60,${i===0?'.35':'.2'})"><span style="background:rgba(200,80,60,.25);border-radius:50%;width:13px;height:13px;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;margin-right:3px">${i+1}</span>${n}</span>`).join('')}
       </div>
       ${Object.entries(asgn.healerTargets||{}).length?`
       <div style="display:flex;flex-wrap:wrap;gap:4px">
@@ -5403,9 +5479,47 @@ function setRaidRole(raidId, role, name){
 }
 function setHealerTarget(raidId, healer, target){
   const r=raidSchedule.find(x=>x.id===raidId);if(!r||!canManageRaids())return;
-  if(!r.assignments)r.assignments={MT:'',OT1:'',OT2:'',healerTargets:{}};
+  if(!r.assignments)r.assignments={MT:'',OT1:'',OT2:'',tankList:[],healerTargets:{}};
   if(!r.assignments.healerTargets)r.assignments.healerTargets={};
   r.assignments.healerTargets[healer]=target;
+  saveRaids();renderRaids();
+}
+// Keep legacy MT/OT1/OT2 fields in sync with the ordered tankList
+function _syncTankList(r){
+  const tl=r.assignments.tankList||[];
+  r.assignments.MT=tl[0]||'';
+  r.assignments.OT1=tl[1]||'';
+  r.assignments.OT2=tl[2]||'';
+}
+function addTankToList(raidId,name){
+  if(!name||!canManageRaids()) return;
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
+  if(!r.assignments)r.assignments={MT:'',OT1:'',OT2:'',tankList:[],healerTargets:{}};
+  if(!r.assignments.tankList)r.assignments.tankList=[];
+  if(r.assignments.tankList.includes(name))return;
+  r.assignments.tankList.push(name);
+  _syncTankList(r);
+  saveRaids();renderRaids();
+}
+function addTankFromSelect(raidId){
+  const sel=document.getElementById('tank-add-'+raidId);
+  if(sel&&sel.value)addTankToList(raidId,sel.value);
+}
+function removeTankFromList(raidId,idx){
+  if(!canManageRaids()) return;
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r||!r.assignments?.tankList)return;
+  r.assignments.tankList.splice(idx,1);
+  _syncTankList(r);
+  saveRaids();renderRaids();
+}
+function moveTankInList(raidId,idx,dir){
+  if(!canManageRaids()) return;
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r||!r.assignments?.tankList)return;
+  const tl=r.assignments.tankList;
+  const ni=idx+dir;
+  if(ni<0||ni>=tl.length)return;
+  [tl[idx],tl[ni]]=[tl[ni],tl[idx]];
+  _syncTankList(r);
   saveRaids();renderRaids();
 }
 function addToICal(raidId){
@@ -5888,7 +6002,7 @@ function _fbSync(arr,data){arr.length=0;data.forEach(x=>arr.push(x));}
 function applyFirebaseKey(key,data){
   _fbIgnore=true;
   try{
-    if(key==='raids'){if(data&&typeof data==='object'){const d=_fbArr(data).map(r=>r?({...r,signedUp:r.signedUp?_fbArr(r.signedUp):[],confirmed:r.confirmed?_fbArr(r.confirmed):[],attended:r.attended?_fbArr(r.attended):[],signupStatus:r.signupStatus&&typeof r.signupStatus==='object'?{...r.signupStatus}:{},raidGroups:(()=>{const ng=r.max<=10?2:5;return Array.from({length:ng},(_,i)=>{const g=(r.raidGroups||{})[i];return g?_fbArr(g):[];});})()} ):null).filter(Boolean);raidSchedule=d;normalizeRaidStatuses();try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();}
+    if(key==='raids'){if(data&&typeof data==='object'){const d=_fbArr(data).map(r=>r?({...r,signedUp:r.signedUp?_fbArr(r.signedUp):[],confirmed:r.confirmed?_fbArr(r.confirmed):[],attended:r.attended?_fbArr(r.attended):[],signupStatus:r.signupStatus&&typeof r.signupStatus==='object'?{...r.signupStatus}:{},assignments:(()=>{const a=r.assignments||{};const tl=a.tankList?_fbArr(a.tankList):[a.MT,a.OT1,a.OT2].filter(Boolean);return{...a,tankList:tl,healerTargets:a.healerTargets||{}};})(),raidGroups:(()=>{const ng=r.max<=10?2:5;return Array.from({length:ng},(_,i)=>{const g=(r.raidGroups||{})[i];return g?_fbArr(g):[];});})()} ):null).filter(Boolean);raidSchedule=d;normalizeRaidStatuses();try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();}
     else if(key==='roster'){if(data&&typeof data==='object'){const d=_fbArr(data).map(p=>p?({...p,dispel:p.dispel?_fbArr(p.dispel):[]}):null).filter(Boolean);_fbSync(ROSTER,d);normalizeRosterRoles();try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}}renderRoster?.();renderAttendance?.();renderRoles?.();renderRes?.();renderProfiles?.();}
     else if(key==='vortex'){if(data&&typeof data==='object'){Object.assign(vortexCounts,data);try{localStorage.setItem('boogalo-vortex',JSON.stringify(vortexCounts));}catch(e){}}renderVortex?.();}
     else if(key==='weights'){if(data&&typeof data==='object'){Object.keys(playerWeights).forEach(k=>delete playerWeights[k]);Object.assign(playerWeights,data);try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}}}
