@@ -1833,30 +1833,58 @@ function initTheme(){
 // ============================================================
 // TIMEZONE HELPERS
 // ============================================================
-const SERVER_TZ='Europe/Amsterdam'; // Thunderstrike EU server timezone
+// ============================================================
+// TIMEZONE
+// ============================================================
+const SERVER_TZ='Europe/Amsterdam';
+const TIMEZONES=[
+  {v:'Europe/London',       l:'London (GMT/BST)'},
+  {v:'Europe/Amsterdam',    l:'Amsterdam / Berlin / Paris (CET/CEST)'},
+  {v:'Europe/Helsinki',     l:'Helsinki / Tallinn / Kyiv (EET/EEST)'},
+  {v:'Europe/Moscow',       l:'Moscow (MSK, UTC+3)'},
+  {v:'Asia/Dubai',          l:'Dubai (GST, UTC+4)'},
+  {v:'Asia/Kolkata',        l:'India (IST, UTC+5:30)'},
+  {v:'Asia/Singapore',      l:'Singapore / KL (UTC+8)'},
+  {v:'Asia/Tokyo',          l:'Tokyo / Seoul (UTC+9)'},
+  {v:'Australia/Sydney',    l:'Sydney (AEST/AEDT)'},
+  {v:'America/New_York',    l:'New York (ET, UTC−5/−4)'},
+  {v:'America/Chicago',     l:'Chicago (CT, UTC−6/−5)'},
+  {v:'America/Los_Angeles', l:'Los Angeles (PT, UTC−8/−7)'},
+  {v:'UTC',                 l:'UTC (no DST)'},
+];
 
-// Convert a raid's stored date+time (Amsterdam/CET server time) to a UTC Date object.
-// This ensures countdowns and displays are correct for any browser timezone.
-function raidDateTime(dateStr,timeStr){
+// Convert a stored raid time (Amsterdam server time) to a UTC Date object
+function serverToUTC(dateStr,timeStr){
   try{
-    const [y,mo,d]=dateStr.split('-').map(Number);
-    const [h,m]=timeStr.split(':').map(Number);
-    // Guess UTC = stored time verbatim, then find what Amsterdam shows for that guess
+    const[y,mo,d]=dateStr.split('-').map(Number);
+    const[h,m]=timeStr.split(':').map(Number);
     const guess=new Date(Date.UTC(y,mo-1,d,h,m));
     const parts=new Intl.DateTimeFormat('en',{timeZone:SERVER_TZ,hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(guess);
     const amsH=parseInt(parts.find(p=>p.type==='hour').value);
     const amsM=parseInt(parts.find(p=>p.type==='minute').value);
-    // Adjust: stored time is Amsterdam, so shift UTC so Amsterdam shows h:m
     let diff=(amsH*60+amsM)-(h*60+m);
     if(diff>720)diff-=1440;if(diff<-720)diff+=1440;
     return new Date(guess.getTime()-diff*60000);
-  }catch(e){
-    return new Date(`${dateStr}T${timeStr}:00`);
-  }
+  }catch(e){return new Date(`${dateStr}T${timeStr}:00`);}
 }
-// Return the local-timezone HH:MM string for a stored raid time
+
+// Format a stored raid time in the viewer's personal timezone (if set), else return as-is
 function raidLocalTime(dateStr,timeStr){
-  return raidDateTime(dateStr,timeStr).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:false});
+  const tz=CURRENT_USER?.timezone;
+  if(!tz) return timeStr;
+  try{
+    const utc=serverToUTC(dateStr,timeStr);
+    return utc.toLocaleTimeString([],{timeZone:tz,hour:'2-digit',minute:'2-digit',hour12:false});
+  }catch(e){return timeStr;}
+}
+
+function saveTimezone(name,tz){
+  const p=gp(name);if(!p)return;
+  p.timezone=tz||'';
+  if(CURRENT_USER&&CURRENT_USER.name===name) CURRENT_USER.timezone=tz||'';
+  saveRoster();
+  renderRaids?.();startRaidTimer?.();
+  toast(tz?'Timezone set to '+tz:'Reset to server time (CET/CEST)','ok');
 }
 
 // ============================================================
@@ -1872,11 +1900,15 @@ function startRaidTimer(){
       .sort((a,b)=>a.date.localeCompare(b.date)||a.start.localeCompare(b.start));
     const el=document.getElementById('raid-timer');
     if(!upcoming.length||!el){if(el)el.style.display='none';return;}
-    // All raids on the earliest upcoming date
-    const nextDate=upcoming[0].date;
+    // Find the first raid that is live or still upcoming (skip ended raids)
+    const first=upcoming.find(r=>{
+      const t=CURRENT_USER?.timezone?serverToUTC(r.date,r.start):new Date(r.date+'T'+r.start+':00');
+      return(now-t)<3600000; // not ended more than 1 hour ago
+    });
+    if(!first){el.style.display='none';return;}
+    const nextDate=first.date;
     const dayRaids=upcoming.filter(r=>r.date===nextDate);
-    const first=dayRaids[0]; // earliest start time on that day (for countdown)
-    const target=raidDateTime(first.date,first.start);
+    const target=CURRENT_USER?.timezone?serverToUTC(first.date,first.start):new Date(first.date+'T'+first.start+':00');
     const diff=target-now;
     if(diff<0&&diff>-3600000){
       // Raid is live
@@ -2102,6 +2134,17 @@ function openProfile(name){
             </div>`).join('')}
             <button class="btn btn-s btn-sm" style="margin-top:4px" onclick="saveProfessions('${name}')"><i class="ti ti-check"></i> Save</button>
           </div>
+
+          <div class="ct" style="margin:14px 0 8px"><i class="ti ti-clock" style="color:var(--acc)"></i>Timezone
+            ${isNamed()&&CURRENT_USER?.name===name?'<span style="font-size:9px;color:var(--t3);margin-left:4px">auto-saves</span>':''}
+          </div>
+          ${isNamed()&&CURRENT_USER?.name===name?`
+          <select onchange="saveTimezone('${name}',this.value)" style="font-size:11px;width:100%;margin-bottom:4px">
+            <option value="">— Server time (CET/CEST) —</option>
+            ${TIMEZONES.map(t=>`<option value="${t.v}" ${p.timezone===t.v?'selected':''}>${t.l}</option>`).join('')}
+          </select>
+          <div style="font-size:10px;color:var(--t3)">Raid times will display in your local timezone.</div>
+          `:`<div style="font-size:11px;color:var(--t2)">${p.timezone?(TIMEZONES.find(t=>t.v===p.timezone)?.l||p.timezone):'Server time (CET/CEST)'}</div>`}
 
           <div class="ct" style="margin:14px 0 8px"><i class="ti ti-star" style="color:var(--acc)"></i>Assignment Weights</div>
           ${weightRows||'<div style="font-size:11px;color:var(--t3)">No eligible roles</div>'}
