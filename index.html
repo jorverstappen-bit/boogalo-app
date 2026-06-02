@@ -5226,7 +5226,7 @@ function fullRaidCard(r,highlight){
       ${canManageRaids()&&!past?`<button class="btn btn-sm" onclick="togglePUG('${r.id}')"><i class="ti ti-users"></i>${r.pug?'Remove PUG':'Mark PUG'}</button>`:''}
       ${canManageRaids()&&!past?`<button class="btn btn-sm" onclick="toggleCleanup('${r.id}')" style="${r.cleanup?'background:rgba(41,128,185,.15);border-color:rgba(41,128,185,.35);color:#6ab4e8':''}"><i class="ti ti-broom"></i>${r.cleanup?'Remove Cleanup':'Mark Cleanup'}</button>`:''}
       ${canManageRaids()&&past?`<button class="btn btn-sm btn-s" onclick="createCleanupRaid('${r.id}')" style="background:rgba(41,128,185,.12);border-color:rgba(41,128,185,.35);color:#6ab4e8"><i class="ti ti-broom"></i>Create cleanup raid</button>`:''}
-      ${(canManageRaids()||isNamed())&&past&&!reviews.find(rv=>rv.raidId===r.id)?`<button class="btn btn-g btn-sm" onclick="openReviewForm('${r.id}')"><i class="ti ti-star"></i>Write review</button>`:''}
+      ${(canManageRaids()||isNamed())&&past&&!isKaraRaid(r)&&!reviews.find(rv=>rv.raidId===r.id)?`<button class="btn btn-g btn-sm" onclick="openReviewForm('${r.id}')"><i class="ti ti-star"></i>Write review</button>`:''}
     </div>
   </div>`;
 }
@@ -5625,12 +5625,13 @@ function renderStatsRaids(){
 // ============================================================
 // REVIEWS
 // ============================================================
-function updateRevBadge(){const n=raidSchedule.filter(r=>r.status==='completed'&&!reviews.find(rv=>rv.raidId===r.id)).length;const b=document.getElementById('rev-badge');if(b){b.textContent=n;b.style.display=n>0?'inline':'none';}}
+function isKaraRaid(r){return r.name.toLowerCase().includes('kara')||r.max<=10;}
+function updateRevBadge(){const n=raidSchedule.filter(r=>r.status==='completed'&&!isKaraRaid(r)&&!reviews.find(rv=>rv.raidId===r.id)).length;const b=document.getElementById('rev-badge');if(b){b.textContent=n;b.style.display=n>0?'inline':'none';}}
 function renderReviews(){
   updateRevBadge();
   // Ensure all reviews have an id (migration for old entries)
   reviews.forEach(rv=>{if(!rv.id)rv.id=genId();});
-  const needsReview=raidSchedule.filter(r=>r.status==='completed'&&!reviews.find(rv=>rv.raidId===r.id));
+  const needsReview=raidSchedule.filter(r=>r.status==='completed'&&!isKaraRaid(r)&&!reviews.find(rv=>rv.raidId===r.id));
   const el=document.getElementById('reviews-content');
   let html='';
   if(needsReview.length){html+=`<div class="card ab" style="margin-bottom:12px"><div class="ct"><i class="ti ti-edit" style="color:var(--acc)"></i>Raids awaiting review (${needsReview.length})</div>${needsReview.map(r=>`<div class="rrow"><div><div style="font-size:12px;font-weight:600">${r.name}</div><div style="font-size:10px;color:var(--t3)">${fmtKey(r.date)}</div></div><button class="btn btn-g btn-sm" style="margin-left:auto" onclick="openReviewForm('${r.id}')"><i class="ti ti-star"></i>Review</button></div>`).join('')}</div>`;}
