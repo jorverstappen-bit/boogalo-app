@@ -924,8 +924,8 @@ const PREFERRED_RAID_GROUPS=[
   ['Cadbaladin','Sappheal','Vvambull','Pallistuff','Restosparkz'],    // G5
 ];
 
-const CC={Warrior:'#C79C6E',Paladin:'#F58CBA',Hunter:'#ABD473',Rogue:'#FFF569',Priest:'#e8e8e8',Shaman:'#5ab4f8',Mage:'#69CCF0',Warlock:'#9482C9',Druid:'#FF7D0A'};
-const CB={Warrior:'rgba(199,156,110,.15)',Paladin:'rgba(245,140,186,.15)',Hunter:'rgba(171,212,115,.15)',Rogue:'rgba(255,245,105,.1)',Priest:'rgba(220,220,220,.1)',Shaman:'rgba(41,128,220,.18)',Mage:'rgba(105,204,240,.15)',Warlock:'rgba(148,130,201,.15)',Druid:'rgba(255,125,10,.15)'};
+const CC={Warrior:'#C79C6E',Paladin:'#F58CBA',Hunter:'#ABD473',Rogue:'#FFF569',Priest:'#e8e8e8',Shaman:'#1A72B8',Mage:'#A0DFF5',Warlock:'#9482C9',Druid:'#FF7D0A'};
+const CB={Warrior:'rgba(199,156,110,.15)',Paladin:'rgba(245,140,186,.15)',Hunter:'rgba(171,212,115,.15)',Rogue:'rgba(255,245,105,.1)',Priest:'rgba(220,220,220,.1)',Shaman:'rgba(26,114,184,.18)',Mage:'rgba(160,223,245,.15)',Warlock:'rgba(148,130,201,.15)',Druid:'rgba(255,125,10,.15)'};
 const RC={Tank:'#e07060',Healer:'#5DCAA5',Melee:'#e09a65',Ranged:'#6ab4e8'};
 const RB={Tank:'rgba(200,80,60,.12)',Healer:'rgba(26,158,114,.12)',Melee:'rgba(200,120,65,.12)',Ranged:'rgba(41,128,185,.12)'};
 const CLASS_ROLES={
@@ -1831,6 +1831,35 @@ function initTheme(){
 }
 
 // ============================================================
+// TIMEZONE HELPERS
+// ============================================================
+const SERVER_TZ='Europe/Amsterdam'; // Thunderstrike EU server timezone
+
+// Convert a raid's stored date+time (Amsterdam/CET server time) to a UTC Date object.
+// This ensures countdowns and displays are correct for any browser timezone.
+function raidDateTime(dateStr,timeStr){
+  try{
+    const [y,mo,d]=dateStr.split('-').map(Number);
+    const [h,m]=timeStr.split(':').map(Number);
+    // Guess UTC = stored time verbatim, then find what Amsterdam shows for that guess
+    const guess=new Date(Date.UTC(y,mo-1,d,h,m));
+    const parts=new Intl.DateTimeFormat('en',{timeZone:SERVER_TZ,hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(guess);
+    const amsH=parseInt(parts.find(p=>p.type==='hour').value);
+    const amsM=parseInt(parts.find(p=>p.type==='minute').value);
+    // Adjust: stored time is Amsterdam, so shift UTC so Amsterdam shows h:m
+    let diff=(amsH*60+amsM)-(h*60+m);
+    if(diff>720)diff-=1440;if(diff<-720)diff+=1440;
+    return new Date(guess.getTime()-diff*60000);
+  }catch(e){
+    return new Date(`${dateStr}T${timeStr}:00`);
+  }
+}
+// Return the local-timezone HH:MM string for a stored raid time
+function raidLocalTime(dateStr,timeStr){
+  return raidDateTime(dateStr,timeStr).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:false});
+}
+
+// ============================================================
 // RAID COUNTDOWN TIMER
 // ============================================================
 let timerInterval=null;
@@ -1847,7 +1876,7 @@ function startRaidTimer(){
     const nextDate=upcoming[0].date;
     const dayRaids=upcoming.filter(r=>r.date===nextDate);
     const first=dayRaids[0]; // earliest start time on that day (for countdown)
-    const target=new Date(first.date+'T'+first.start+':00');
+    const target=raidDateTime(first.date,first.start);
     const diff=target-now;
     if(diff<0&&diff>-3600000){
       // Raid is live
@@ -1872,7 +1901,7 @@ function startRaidTimer(){
     else label=secs+'s';
     document.getElementById('timer-label').textContent=label;
     document.getElementById('timer-name').textContent=dayRaids.map(r=>r.name).join(' · ');
-    document.getElementById('timer-date').textContent=fmtKey(nextDate)+(dayRaids.length===1?' · '+first.start:'');
+    document.getElementById('timer-date').textContent=fmtKey(nextDate)+(dayRaids.length===1?' · '+raidLocalTime(first.date,first.start):'');
   }
   tick();
   timerInterval=setInterval(tick,1000);
@@ -4856,7 +4885,7 @@ function compactRaidCard(r){
   const bgStyle=bg?`background-image:linear-gradient(rgba(10,12,17,.75),rgba(10,12,17,.75)),url('${bg}');background-size:cover;background-position:center top;`:'';
   return`<div class="rec ${past?'pst':isT?'ton':'upc'}" style="margin-bottom:8px;${bgStyle}">
     <div class="rec-name">${r.name}${r.pug?'<span class="badge" style="background:rgba(192,57,43,.12);color:#e07b72;border:0.5px solid rgba(192,57,43,.3)">PUG</span>':''}${r.cleanup?'<span class="badge" style="background:rgba(41,128,185,.12);color:#6ab4e8;border:0.5px solid rgba(41,128,185,.3)"><i class="ti ti-broom"></i>Cleanup</span>':''}</div>
-    <div class="rec-meta"><span><i class="ti ti-clock"></i>${r.start}–${r.end}${r.extra>0?' (+'+r.extra+'m)':''}</span><span><i class="ti ti-forms"></i>${r.signedUp.length} signed up</span><span><i class="ti ti-users"></i>${r.confirmed?.length||0}/${r.max} confirmed</span></div>
+    <div class="rec-meta"><span><i class="ti ti-clock"></i>${raidLocalTime(r.date,r.start)}–${raidLocalTime(r.date,r.end)}${r.extra>0?' (+'+r.extra+'m)':''}</span><span><i class="ti ti-forms"></i>${r.signedUp.length} signed up</span><span><i class="ti ti-users"></i>${r.confirmed?.length||0}/${r.max} confirmed</span></div>
     <div class="pb"><div class="pf" style="width:${confirmedPct}%;background:${confirmedPct>=100?'var(--red)':'var(--gre)'}"></div></div>
     <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;align-items:center">${(()=>{
       if(past||!canInteract()) return '';
@@ -5194,7 +5223,7 @@ function fullRaidCard(r,highlight){
     </div>
     <div class="rec-meta">
       <span><i class="ti ti-calendar"></i>${fmtKey(r.date)}</span>
-      <span><i class="ti ti-clock"></i>${r.start} – ${r.end}${r.extra>0?' (+'+r.extra+' min)':''}</span>
+      <span><i class="ti ti-clock"></i>${raidLocalTime(r.date,r.start)} – ${raidLocalTime(r.date,r.end)}${r.extra>0?' (+'+r.extra+' min)':''}</span>
       <span><i class="ti ti-user-check"></i>RL: ${r.rl||'TBD'}</span>
       <span><i class="ti ti-users"></i>${r.signedUp.length} signed up</span>
     </div>
