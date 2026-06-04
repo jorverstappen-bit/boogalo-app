@@ -1933,7 +1933,7 @@ function startRaidTimer(){
     else label=secs+'s';
     document.getElementById('timer-label').textContent=label;
     document.getElementById('timer-name').textContent=dayRaids.map(r=>r.name).join(' · ');
-    document.getElementById('timer-date').textContent=fmtKey(nextDate)+(dayRaids.length===1?' · '+raidLocalTime(first.date,first.start):'');
+    document.getElementById('timer-date').textContent=fmtKey(nextDate)+' · '+raidLocalTime(first.date,first.start);
   }
   tick();
   timerInterval=setInterval(tick,1000);
@@ -5733,6 +5733,15 @@ function renderReviews(){
   if(!needsReview.length&&!reviews.length)html='<div class="empty"><i class="ti ti-star"></i><p>No reviews yet. Complete a raid to write one.</p></div>';
   el.innerHTML=html;
 }
+// Build MVP <option> list from everyone who was part of the raid, always
+// including the currently-saved MVP (survives renames / roster drift).
+function mvpOptionsHTML(r, currentMvp){
+  const pool=[...new Set([...(r.confirmed||[]),...(r.attended||[]),...(r.signedUp||[])])];
+  if(currentMvp && !pool.includes(currentMvp)) pool.push(currentMvp);
+  pool.sort((a,b)=>a.localeCompare(b));
+  return '<option value="">— select —</option>'+
+    pool.map(n=>`<option value="${n}" ${currentMvp===n?'selected':''}>${n}</option>`).join('');
+}
 function openReviewForm(raidId){
   const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
   _editingReviewId=null;
@@ -5744,7 +5753,7 @@ function openReviewForm(raidId){
       ${['o:Overall rating','c:Coordination','a:Atmosphere'].map(sf=>{const[f,l]=sf.split(':');return`<div style="margin-bottom:14px"><div class="fl" style="margin-bottom:6px">${l}</div><div id="stars-${raidId}-${f}" style="display:flex;align-items:center;gap:4px">${[1,2,3,4,5].map(i=>`<span onclick="setStar('${raidId}','${f}',${i})" onmouseover="hoverStar('${raidId}','${f}',${i})" onmouseout="hoverStar('${raidId}','${f}',0)" style="font-size:26px;cursor:pointer;color:rgba(255,255,255,.15);transition:color .1s;line-height:1;padding:0 1px">★</span>`).join('')}<span id="star-val-${raidId}-${f}" style="font-size:11px;color:var(--t3);margin-left:6px">0/5</span></div></div>`;}).join('')}
       <div class="fg"><span class="fl">Notes / Observations</span><textarea id="rv-notes-${raidId}" placeholder="What went well? What needs improvement?" style="min-height:70px;resize:vertical"></textarea></div>
       <div class="g2">
-        <div class="fg" style="margin-bottom:0"><span class="fl">MVP of the Raid</span><select id="rv-mvp-${raidId}"><option value="">— select —</option>${r.signedUp.map(n=>`<option>${n}</option>`).join('')}</select></div>
+        <div class="fg" style="margin-bottom:0"><span class="fl">MVP of the Raid</span><select id="rv-mvp-${raidId}">${mvpOptionsHTML(r,'')}</select></div>
         <div class="fg" style="margin-bottom:0"><span class="fl">Main Improvement Area</span><input id="rv-improve-${raidId}" placeholder="e.g. Interrupt rotation"></div>
       </div>
       <div class="fg" style="margin-top:10px"><span class="fl"><i class="ti ti-external-link" style="font-size:11px;margin-right:3px"></i>Warcraft Logs URL <span style="font-size:9px;color:var(--t3)">(optional)</span></span><input type="url" id="rv-wcl-${raidId}" placeholder="https://classic.warcraftlogs.com/reports/…"></div>
@@ -5766,7 +5775,7 @@ function editReview(rvId){
       ${['o:Overall rating','c:Coordination','a:Atmosphere'].map(sf=>{const[f,l]=sf.split(':');return`<div style="margin-bottom:14px"><div class="fl" style="margin-bottom:6px">${l}</div><div id="stars-${rv.raidId}-${f}" style="display:flex;align-items:center;gap:4px">${[1,2,3,4,5].map(i=>`<span onclick="setStar('${rv.raidId}','${f}',${i})" onmouseover="hoverStar('${rv.raidId}','${f}',${i})" onmouseout="hoverStar('${rv.raidId}','${f}',0)" style="font-size:26px;cursor:pointer;color:rgba(255,255,255,.15);transition:color .1s;line-height:1;padding:0 1px">★</span>`).join('')}<span id="star-val-${rv.raidId}-${f}" style="font-size:11px;color:var(--t3);margin-left:6px">0/5</span></div></div>`;}).join('')}
       <div class="fg"><span class="fl">Notes / Observations</span><textarea id="rv-notes-${rv.raidId}" placeholder="What went well? What needs improvement?" style="min-height:70px;resize:vertical">${rv.notes||''}</textarea></div>
       <div class="g2">
-        <div class="fg" style="margin-bottom:0"><span class="fl">MVP of the Raid</span><select id="rv-mvp-${rv.raidId}"><option value="">— select —</option>${(r.signedUp||[]).map(n=>`<option ${rv.mvp===n?'selected':''}>${n}</option>`).join('')}</select></div>
+        <div class="fg" style="margin-bottom:0"><span class="fl">MVP of the Raid</span><select id="rv-mvp-${rv.raidId}">${mvpOptionsHTML(r,rv.mvp||'')}</select></div>
         <div class="fg" style="margin-bottom:0"><span class="fl">Main Improvement Area</span><input id="rv-improve-${rv.raidId}" value="${rv.improvements||''}" placeholder="e.g. Interrupt rotation"></div>
       </div>
       <div class="fg" style="margin-top:10px"><span class="fl"><i class="ti ti-external-link" style="font-size:11px;margin-right:3px"></i>Warcraft Logs URL <span style="font-size:9px;color:var(--t3)">(optional)</span></span><input type="url" id="rv-wcl-${rv.raidId}" placeholder="https://classic.warcraftlogs.com/reports/…" value="${rv.wclUrl||''}"></div>
