@@ -1716,27 +1716,25 @@ function setView(v, user){
   // Navigate to first relevant page
   if(v==='rl'){
     document.querySelector('#nav-rl .ni')?.click();
-    // Push ALL local data to Firebase — seeds the DB for every other client
-    setTimeout(()=>{
-      saveRoster(); saveRaids(); saveVortex(); saveWeights(); saveAlts(); saveRoleOverrides(); saveHealerTanks(); saveGroups();
-      if(applications.length) saveApplications();
-      if(specRequests.length) saveSpecRequests();
-      if(reviews.length) saveReviews();
-      if(vortexRequests.length) saveVortexRequests();
-    }, 500);
+    // Seed ONLY keys that are empty in Firebase — never overwrite existing data
+    seedIfEmpty('roster',saveRoster); seedIfEmpty('raids',saveRaids); seedIfEmpty('vortex',saveVortex);
+    seedIfEmpty('weights',saveWeights); seedIfEmpty('alts',saveAlts); seedIfEmpty('roleOverrides',saveRoleOverrides);
+    seedIfEmpty('healerTanks',saveHealerTanks); seedIfEmpty('groups',saveGroups);
+    if(applications.length) seedIfEmpty('applications',saveApplications);
+    if(specRequests.length) seedIfEmpty('specRequests',saveSpecRequests);
+    if(reviews.length) seedIfEmpty('reviews',saveReviews);
+    if(vortexRequests.length) seedIfEmpty('vortexRequests',saveVortexRequests);
   }
   else if(v==='officer'){
     document.querySelector('#nav-officer .ni')?.click();
   }
   else if(v==='participant'){
     document.querySelector('#nav-par .ni[onclick*="pov"]')?.click();
-    // Push any participant-authored data that's stored locally but may not be in Firebase yet
-    setTimeout(()=>{
-      if(applications.length) saveApplications();
-      if(specRequests.length) saveSpecRequests();
-      if(reviews.length) saveReviews();
-      if(vortexRequests.length) saveVortexRequests();
-    }, 500);
+    // Seed only empty keys (never clobber newer data on Firebase)
+    if(applications.length) seedIfEmpty('applications',saveApplications);
+    if(specRequests.length) seedIfEmpty('specRequests',saveSpecRequests);
+    if(reviews.length) seedIfEmpty('reviews',saveReviews);
+    if(vortexRequests.length) seedIfEmpty('vortexRequests',saveVortexRequests);
   }
   else if(v==='guest') document.querySelector('#nav-guest .ni[onclick*="roster"]')?.click();
   else document.querySelector('#nav-par .ni')?.click();
@@ -5636,7 +5634,7 @@ function createRaid(){
   if(!canManageRaids()){toast('Raid Leaders only','err');return;}
   const numGrp=max<=10?2:5;
   raidSchedule.push({id:genId(),name,date,start,end,max,extra,rl,notes,signedUp:[],confirmed:[],attended:[],signupStatus:{},status:isPast(date)?'completed':'upcoming',rosterPosted:false,pug:false,cleanup:false,raidGroups:Array.from({length:numGrp},()=>[])});
-  renderCalendar();toast(`${name} raid created!`,'ok');
+  saveRaids();renderRaids();renderCalendar();toast(`${name} raid created!`,'ok');
   document.getElementById('cr-notes').value='';
 }
 function generateStandardWeek(){
@@ -5654,6 +5652,7 @@ function generateStandardWeek(){
       added++;
     }
   });
+  if(added>0){saveRaids();renderRaids();}
   renderCalendar();toast(added>0?`Generated ${added} raid(s) for this week!`:'This week\'s raids already exist.','ok');
 }
 
@@ -5708,7 +5707,7 @@ function renderReviews(){
   let html='';
   if(needsReview.length){html+=`<div class="card ab" style="margin-bottom:12px"><div class="ct"><i class="ti ti-edit" style="color:var(--acc)"></i>Raids awaiting review (${needsReview.length})</div>${needsReview.map(r=>`<div class="rrow"><div><div style="font-size:12px;font-weight:600">${r.name}</div><div style="font-size:10px;color:var(--t3)">${fmtKey(r.date)}</div></div><button class="btn btn-g btn-sm" style="margin-left:auto" onclick="openReviewForm('${r.id}')"><i class="ti ti-star"></i>Review</button></div>`).join('')}</div>`;}
   html+=reviews.slice().reverse().map(rv=>{
-    const canEdit=isRL()||(CURRENT_USER&&CURRENT_USER.name.toLowerCase()===(rv.submittedBy||'').toLowerCase());
+    const canEdit=canManageRaids()||(CURRENT_USER&&CURRENT_USER.name.toLowerCase()===(rv.submittedBy||'').toLowerCase());
     return`<div class="rv-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:5px">
         <div><div style="font-size:13px;font-weight:600">${rv.raidName}</div><div style="font-size:10px;color:var(--t3)">${fmtKey(rv.raidDate)} · by ${rv.submittedBy||'Anonymous'}</div></div>
@@ -6106,6 +6105,15 @@ function setSyncDot(state){
   if(!d) return;
   d.className='sync-dot '+state;
   d.title={syncing:'Syncing…',synced:'Synced',offline:'Offline — using cached data'}[state]||'';
+}
+// Seed a Firebase key from local data ONLY when Firebase has no value for it yet.
+// Prevents a logging-in client from clobbering newer data created by other clients.
+function seedIfEmpty(key, saveFn){
+  if(!_fbDB){ try{saveFn();}catch(e){} return; } // offline: persist locally only
+  _fbDB.ref(key).once('value').then(snap=>{
+    const v=snap.val();
+    if(v===null||v===undefined||(typeof v==='object'&&Object.keys(v).length===0)) saveFn();
+  }).catch(()=>{});
 }
 function initFirebaseSync(){
   if(!_fbDB){setSyncDot('offline');return;}
