@@ -1639,7 +1639,9 @@ function gp(n){return ROSTER.find(x=>x.name===n);}
 function pill(name,dim){
   const p=gp(name)||{cls:'',type:''};
   const c=CC[p.cls]||'#aaa';const b=CB[p.cls]||'rgba(100,100,100,.12)';
-  return`<span class="pill" style="background:${b};color:${c};border-color:${c}40;${dim?'opacity:.4':''}">${name}</span>`;
+  const linkable=!!gp(name); // only roster members have a profile to open
+  const clk=linkable?` onclick="event.stopPropagation();gotoProfile('${name}')" title="View ${name}'s profile"`:'';
+  return`<span class="pill" style="background:${b};color:${c};border-color:${c}40;${dim?'opacity:.4':''}${linkable?';cursor:pointer':''}"${clk}>${name}</span>`;
 }
 function rtag(type){return`<span class="badge" style="background:${RB[type]||'#111'};color:${RC[type]||'#aaa'};border:0.5px solid ${(RC[type]||'#aaa')}30">${type}</span>`;}
 function ctag(cls){const c=CC[cls]||'#aaa';return`<span class="badge" style="background:${CB[cls]||'rgba(100,100,100,.12)'};color:${c};border:0.5px solid ${c}30">${cls}</span>`;}
@@ -1744,9 +1746,23 @@ function setView(v, user){
 
 function goMyProfile(){
   if(!CURRENT_USER) return;
-  // Navigate to profiles page and open the player's profile directly
-  nav(document.querySelector('#nav-par .ni[onclick*="profiles"], #nav-rl .ni[onclick*="profiles"]'), 'profiles');
-  setTimeout(()=>openProfile(CURRENT_USER.name), 50);
+  gotoProfile(CURRENT_USER.name);
+}
+// Open any roster member's profile from anywhere (clicking their name).
+// Works for every view — switches to the profiles page directly since some
+// navs (participant/guest) have no Profiles menu item.
+function gotoProfile(name){
+  if(!gp(name)) return; // external/unknown names have no profile
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById('page-profiles');
+  if(pg) pg.classList.add('active');
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  const link=document.querySelector('#nav-rl .ni[onclick*="profiles"], #nav-officer .ni[onclick*="profiles"]');
+  if(link) link.classList.add('active');
+  const m=document.querySelector('.main'); if(m)m.scrollTop=0;
+  if(window.innerWidth<=768) collapseSidebar?.();
+  updateMobTitle?.('profiles'); updateMobNav?.('profiles');
+  openProfile(name);
 }
 
 function showRLForm(){
@@ -2211,6 +2227,14 @@ function saveProfessions(name){
 }
 function getMainOf(name){
   return Object.keys(playerAlts).find(main=>playerAlts[main]?.includes(name))||null;
+}
+// All characters belonging to the logged-in user: their main + every linked alt,
+// regardless of whether they signed in on the main or an alt.
+function getMyChars(){
+  if(!isNamed()||!CURRENT_USER) return [];
+  const me=CURRENT_USER.name;
+  const main=getMainOf(me)||me;
+  return [...new Set([main,...(playerAlts[main]||[])])];
 }
 function canManageAlts(name){
   if(isRL()) return true;
@@ -4917,6 +4941,94 @@ function renderRaids(){
       (raidsTab==='upcoming'?'No upcoming raids.':'No archived raids.')+
       '</p></div>';
 }
+// ── Per-raid role indicators ────────────────────────────────────────────────
+// Each signed-up/confirmed player shows a role emoji. RL/officers click it to
+// reassign that player's role *for this raid* (stored in r.roleAssign, an
+// override that doesn't touch the global roster type).
+const RAID_ROLES=['Tank','Melee','Ranged','Healer'];
+function roleEmojiRaw(role){
+  return role==='Healer'?'<span style="color:#43c46f;font-weight:900">✚</span>'
+    : role==='Tank'?'🛡️' : role==='Melee'?'⚔️' : role==='Ranged'?'🏹' : '<span style="opacity:.45">❔</span>';
+}
+function raidRole(r,name){
+  const o=r.roleAssign&&r.roleAssign[name];
+  if(o) return o;
+  const t=gp(name)?.type;
+  if(t==='Tank'||t==='Mage Tank') return 'Tank';
+  if(t==='Healer') return 'Healer';
+  if(t==='Melee') return 'Melee';
+  if(t==='Ranged') return 'Ranged';
+  return null;
+}
+function roleBadge(r,name){
+  const role=raidRole(r,name);
+  const glyph=roleEmojiRaw(role);
+  if(canManageRaids()){
+    return `<span onclick="roleMenu('${r.id}','${name}',event)" title="${role?('Role: '+role+' — click to change'):'Set raid role'}" style="cursor:pointer;display:inline-flex;align-items:center;line-height:1;padding:1px 3px;border-radius:5px;font-size:13px;user-select:none" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background=''">${glyph}</span>`;
+  }
+  return `<span title="${role||'Role'}" style="display:inline-flex;align-items:center;line-height:1;padding:0 2px;font-size:13px">${glyph}</span>`;
+}
+function closeRoleMenu(){const m=document.getElementById('role-menu');if(m)m.remove();}
+function roleMenu(raidId,name,ev){
+  if(ev){ev.stopPropagation();ev.preventDefault();}
+  closeRoleMenu();
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r||!canManageRaids())return;
+  const cur=raidRole(r,name);
+  const menu=document.createElement('div');
+  menu.id='role-menu';
+  menu.style.cssText='position:fixed;z-index:9999;background:var(--bg2);border:1px solid var(--borderl);border-radius:9px;padding:5px;box-shadow:0 8px 24px rgba(0,0,0,.45);display:flex;gap:3px';
+  menu.innerHTML=RAID_ROLES.map(role=>`<span onclick="event.stopPropagation();setRaidRoleAssign('${raidId}','${name}','${role}')" title="${role}" style="cursor:pointer;padding:5px 7px;border-radius:6px;font-size:16px;line-height:1;${role===cur?'background:var(--accg);box-shadow:0 0 0 1px var(--acc) inset':''}" onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='${role===cur?'var(--accg)':''}'">${roleEmojiRaw(role)}</span>`).join('');
+  document.body.appendChild(menu);
+  const rect=(ev&&ev.target?ev.target:document.body).getBoundingClientRect();
+  menu.style.left=Math.max(8,Math.min(rect.left, window.innerWidth-menu.offsetWidth-8))+'px';
+  menu.style.top=(rect.bottom+5)+'px';
+  setTimeout(()=>document.addEventListener('click',closeRoleMenu,{once:true}),0);
+}
+function setRaidRoleAssign(raidId,name,role){
+  if(!canManageRaids())return;
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
+  if(!r.roleAssign)r.roleAssign={};
+  r.roleAssign[name]=role;
+  closeRoleMenu();
+  saveRaids();renderRaids();
+  toast(name+' → '+role,'ok');
+}
+// Per-character sign-up controls. Named users get one row per linked character
+// (main + alts), so they can sign up any of their toons from any account.
+function signupControlsHTML(r){
+  const past=isPast(r.date)&&r.date!==todayKey();
+  if(past||!canInteract()) return '';
+  const ss=r.signupStatus||{};
+  const btns=(cn)=>{
+    const sfx=cn?`,'${cn}'`:'';
+    return `<button class="btn btn-s btn-sm" onclick="signUpWithStatus('${r.id}','ready'${sfx})"><i class="ti ti-user-plus"></i>Sign up</button>`
+      +`<button class="btn btn-sm" style="border-color:rgba(245,166,35,.35);color:#f5a623" onclick="signUpWithStatus('${r.id}','tentative'${sfx})"><i class="ti ti-help"></i>Tentative</button>`
+      +`<button class="btn btn-sm" style="border-color:rgba(41,128,185,.35);color:#6ab4e8" onclick="signUpWithStatus('${r.id}','bench'${sfx})"><i class="ti ti-armchair"></i>Bench</button>`
+      +`<button class="btn btn-sm" style="border-color:rgba(192,57,43,.35);color:#e07b72" onclick="signUpWithStatus('${r.id}','absent'${sfx})"><i class="ti ti-user-x"></i>Absent</button>`;
+  };
+  // Guest / not signed in by name: single prompt-based row
+  if(!isNamed()) return `<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">${btns('')}</div>`;
+  const chars=getMyChars();
+  const multi=chars.length>1;
+  const row=(cn)=>{
+    const isConfirmed=r.confirmed.includes(cn);
+    const st=ss[cn];
+    const isReady=r.signedUp.includes(cn);
+    const cc=CC[gp(cn)?.cls]||'#aaa';
+    const label=multi?`<span style="min-width:88px;font-size:11px;font-weight:700;color:${cc}">${cn}</span>`:'';
+    let controls;
+    if(isConfirmed) controls=`<span class="badge" style="background:rgba(26,158,114,.18);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.35);font-size:11px"><i class="ti ti-check"></i> Confirmed</span>`;
+    else if(st){const sc=SIGNUP_STATUS[st]||{};controls=`<span class="badge" style="background:${sc.bg};color:${sc.color};border:0.5px solid ${sc.border};font-size:11px"><i class="ti ${sc.icon}"></i> ${sc.label}</span><button class="btn btn-sm" style="font-size:11px;color:var(--t3);border-color:var(--borderl)" onclick="clearSignupStatus('${r.id}','${cn}')"><i class="ti ti-x" style="font-size:10px"></i> Unsign</button>`;}
+    else if(isReady) controls=`<span class="badge" style="background:rgba(26,158,114,.1);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.25);font-size:11px"><i class="ti ti-user-check"></i> Signed up</span><button class="btn btn-w btn-sm" style="font-size:11px" onclick="clearSignupStatus('${r.id}','${cn}')"><i class="ti ti-x" style="font-size:10px"></i> Unsign</button>`;
+    else controls=btns(cn);
+    return `<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">${label}${controls}</div>`;
+  };
+  if(!multi) return row(chars[0]);
+  return `<div style="display:flex;flex-direction:column;gap:5px">
+    <div style="font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em"><i class="ti ti-users" style="margin-right:3px"></i>Sign up your characters</div>
+    ${chars.map(row).join('')}
+  </div>`;
+}
 function compactRaidCard(r){
   if(!r.confirmed) r.confirmed=[];
   if(!r.signedUp)  r.signedUp=[];
@@ -4928,15 +5040,8 @@ function compactRaidCard(r){
     <div class="rec-name">${r.name}${r.pug?'<span class="badge" style="background:rgba(192,57,43,.12);color:#e07b72;border:0.5px solid rgba(192,57,43,.3)">PUG</span>':''}${r.cleanup?'<span class="badge" style="background:rgba(41,128,185,.12);color:#6ab4e8;border:0.5px solid rgba(41,128,185,.3)"><i class="ti ti-broom"></i>Cleanup</span>':''}</div>
     <div class="rec-meta"><span><i class="ti ti-clock"></i>${raidLocalTime(r.date,r.start)}–${raidLocalTime(r.date,r.end)}${r.extra>0?' (+'+r.extra+'m)':''}</span><span><i class="ti ti-forms"></i>${r.signedUp.length} signed up</span><span><i class="ti ti-users"></i>${r.confirmed?.length||0}/${r.max} confirmed</span></div>
     <div class="pb"><div class="pf" style="width:${confirmedPct}%;background:${confirmedPct>=100?'var(--red)':'var(--gre)'}"></div></div>
-    <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;align-items:center">${(()=>{
-      if(past||!canInteract()) return '';
-      const mn=isNamed()?CURRENT_USER.name:null;
-      const css=r.signupStatus||{};
-      if(mn&&r.confirmed.includes(mn)) return `<span class="badge" style="background:rgba(26,158,114,.18);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.35);font-size:11px"><i class="ti ti-check"></i> Confirmed</span>`;
-      if(mn&&css[mn]){const sc=SIGNUP_STATUS[css[mn]]||{};return `<span class="badge" style="background:${sc.bg};color:${sc.color};border:0.5px solid ${sc.border};font-size:11px"><i class="ti ${sc.icon}"></i> ${sc.label}</span><button class="btn btn-sm" style="font-size:11px;color:var(--t3);border-color:var(--borderl)" onclick="clearSignupStatus('${r.id}')"><i class="ti ti-x" style="font-size:10px"></i> Unsign</button>`;}
-      if(mn&&r.signedUp.includes(mn)) return `<span class="badge" style="background:rgba(26,158,114,.1);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.25);font-size:11px"><i class="ti ti-user-check"></i> Signed up</span><button class="btn btn-w btn-sm" style="font-size:11px" onclick="clearSignupStatus('${r.id}')"><i class="ti ti-x" style="font-size:10px"></i> Unsign</button>`;
-      return `<button class="btn btn-s btn-sm" onclick="signUpWithStatus('${r.id}','ready')"><i class="ti ti-user-plus"></i>Sign up</button><button class="btn btn-sm" style="border-color:rgba(245,166,35,.35);color:#f5a623" onclick="signUpWithStatus('${r.id}','tentative')"><i class="ti ti-help"></i>Tentative</button><button class="btn btn-sm" style="border-color:rgba(41,128,185,.35);color:#6ab4e8" onclick="signUpWithStatus('${r.id}','bench')"><i class="ti ti-armchair"></i>Bench</button><button class="btn btn-sm" style="border-color:rgba(192,57,43,.35);color:#e07b72" onclick="signUpWithStatus('${r.id}','absent')"><i class="ti ti-user-x"></i>Absent</button>`;
-    })()}
+    ${(()=>{const c=signupControlsHTML(r);return c?`<div style="margin-top:8px">${c}</div>`:'';})()}
+    <div style="display:flex;gap:5px;margin-top:8px;flex-wrap:wrap;align-items:center">
       <button class="btn btn-sm" onclick="addToICal('${r.id}')"><i class="ti ti-calendar-plus"></i>Add to calendar</button>
     </div>
   </div>`;
@@ -5061,6 +5166,7 @@ function fullRaidCard(r,highlight){
           <div style="font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Group ${gi+1}</div>
           ${g.map(n=>`<div style="display:flex;align-items:center;gap:1px;padding:1px 0">
             ${pill(n,!gp(n)?.present)}
+            ${roleBadge(r,n)}
             ${canManageRaids()&&!past?`<button onclick="removeFromRaidGroup('${r.id}',${gi},'${n}')" style="background:none;border:none;color:var(--t3);cursor:pointer;padding:0 2px;font-size:12px;line-height:1;opacity:.6" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.6">×</button>`:''}
           </div>`).join('')}
           ${canManageRaids()&&!past&&g.length<maxPerGrp?`<select onchange="addToRaidGroup('${r.id}',${gi},this.value);this.value=''" style="margin-top:3px;font-size:10px;width:100%;background:var(--bg3);border:1px solid var(--borderl);border-radius:4px;padding:2px 4px;color:var(--t2)">
@@ -5069,7 +5175,7 @@ function fullRaidCard(r,highlight){
           </select>`:canManageRaids()&&!past&&g.length>=maxPerGrp?`<div style="font-size:9px;color:var(--t3);text-align:center;padding:3px 0;opacity:.6">Full</div>`:''}
         </div>`).join('')}
       </div>
-      ${rgUnassigned.length?`<div style="font-size:10px;color:var(--ora);display:flex;align-items:center;gap:5px;flex-wrap:wrap"><i class="ti ti-alert-triangle"></i> Not in any group: ${rgUnassigned.map(n=>pill(n,!gp(n)?.present)+(canManageRaids()&&!past?`<button onclick="removeFromRaid('${r.id}','${n}')" title="Remove from raid" style="background:none;border:none;cursor:pointer;color:var(--t3);padding:0 2px;font-size:11px;margin-left:-3px" onmouseover="this.style.color='#e07b72'" onmouseout="this.style.color='var(--t3)'">✕</button>`:'') ).join(' ')}</div>`:'<div style="font-size:10px;color:#5DCAA5"><i class="ti ti-check"></i> All players assigned to groups</div>'}
+      ${rgUnassigned.length?`<div style="font-size:10px;color:var(--ora);display:flex;align-items:center;gap:5px;flex-wrap:wrap"><i class="ti ti-alert-triangle"></i> Not in any group: ${rgUnassigned.map(n=>pill(n,!gp(n)?.present)+roleBadge(r,n)+(canManageRaids()&&!past?`<button onclick="removeFromRaid('${r.id}','${n}')" title="Remove from raid" style="background:none;border:none;cursor:pointer;color:var(--t3);padding:0 2px;font-size:11px;margin-left:-3px" onmouseover="this.style.color='#e07b72'" onmouseout="this.style.color='var(--t3)'">✕</button>`:'') ).join(' ')}</div>`:'<div style="font-size:10px;color:#5DCAA5"><i class="ti ti-check"></i> All players assigned to groups</div>'}
     </div>${assignPanel}${assignDisplay}`:
     `<hr class="rec-divider"><div style="font-size:11px;color:var(--t3);padding:4px 0 10px">No confirmed roster yet.${!past&&canManageRaids()?' Accept sign-ups below.':''}</div>`;
 
@@ -5125,6 +5231,7 @@ function fullRaidCard(r,highlight){
         const p=gp(n);
         return`<div style="display:flex;align-items:center;gap:8px;padding:5px 8px;background:var(--bg3);border-radius:var(--r);margin-bottom:4px;border:1px solid var(--border)">
           ${pill(n,false)}
+          ${roleBadge(r,n)}
           ${p?`${ctag(p.cls)} ${rtag(p.type)}`:'<span style="font-size:10px;color:var(--t3)">External</span>'}
           <div style="margin-left:auto;display:flex;gap:4px">
             <button class="btn btn-s btn-sm" onclick="acceptSignup('${r.id}','${n}')"><i class="ti ti-check"></i></button>
@@ -5141,12 +5248,12 @@ function fullRaidCard(r,highlight){
       Sign-ups (${r.signedUp.length} ready${tentativePlayers.length?' · '+tentativePlayers.length+' tentative':''}${benchPlayers.length?' · '+benchPlayers.length+' bench':''}${absentPlayers.length?' · '+absentPlayers.length+' absent':''})
     </div>
     <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px">${r.signedUp.filter(n=>{const p=gp(n);return !p||p.present;}).map(n=>{
-      const isMe=isNamed()&&n===CURRENT_USER.name;
+      const isMe=isNamed()&&getMyChars().includes(n);
       const mp=gp(n);const mc=mp?CC[mp.cls]||'#aaa':'#aaa';const mb=mp?CB[mp.cls]||'rgba(100,100,100,.12)':'rgba(100,100,100,.12)';
       return isMe
         ?`<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 6px 2px 9px;border-radius:20px;font-size:11px;font-weight:700;background:${mb};color:${mc};border:1.5px solid ${mc};box-shadow:0 0 8px ${mc}66">
             <i class="ti ti-user" style="font-size:10px"></i>${n}
-            <span onclick="clearSignupStatus('${r.id}')" title="Remove sign-up"
+            <span onclick="clearSignupStatus('${r.id}','${n}')" title="Remove sign-up"
               style="cursor:pointer;display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;border-radius:50%;background:${mc}33;color:${mc};font-size:10px;font-weight:700;line-height:1;margin-left:1px"
               onmouseover="this.style.background='rgba(192,57,43,.4)';this.style.color='#e07b72'"
               onmouseout="this.style.background='${mc}33';this.style.color='${mc}'">×</span>
@@ -5277,20 +5384,8 @@ function fullRaidCard(r,highlight){
     ${rosterPost}
     ${absentSection}
     <hr class="rec-divider">
-    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${(()=>{
-      if(past||!canInteract()) return '';
-      const myName=isNamed()?CURRENT_USER.name:null;
-      const isConfirmed=myName&&r.confirmed.includes(myName);
-      const isReady=myName&&r.signedUp.includes(myName);
-      const myStatus=myName&&ss[myName];
-      if(isConfirmed) return `<span class="badge" style="background:rgba(26,158,114,.18);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.35);font-size:11px"><i class="ti ti-check"></i> Confirmed</span>`;
-      if(myStatus){
-        const sc=SIGNUP_STATUS[myStatus]||{};
-        return `<span class="badge" style="background:${sc.bg};color:${sc.color};border:0.5px solid ${sc.border};font-size:11px"><i class="ti ${sc.icon}"></i> ${sc.label}</span><button class="btn btn-sm" style="font-size:11px;color:var(--t3);border-color:var(--borderl)" onclick="clearSignupStatus('${r.id}')"><i class="ti ti-x" style="font-size:10px"></i> Unsign</button>`;
-      }
-      if(isReady) return `<span class="badge" style="background:rgba(26,158,114,.1);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.25);font-size:11px"><i class="ti ti-user-check"></i> Signed up</span><button class="btn btn-w btn-sm" style="font-size:11px" onclick="clearSignupStatus('${r.id}')"><i class="ti ti-x" style="font-size:10px"></i> Unsign</button>`;
-      return `<button class="btn btn-s btn-sm" onclick="signUpWithStatus('${r.id}','ready')"><i class="ti ti-user-plus"></i>Sign up</button><button class="btn btn-sm" style="border-color:rgba(245,166,35,.35);color:#f5a623" onclick="signUpWithStatus('${r.id}','tentative')"><i class="ti ti-help"></i>Tentative</button><button class="btn btn-sm" style="border-color:rgba(41,128,185,.35);color:#6ab4e8" onclick="signUpWithStatus('${r.id}','bench')"><i class="ti ti-armchair"></i>Bench</button><button class="btn btn-sm" style="border-color:rgba(192,57,43,.35);color:#e07b72" onclick="signUpWithStatus('${r.id}','absent')"><i class="ti ti-user-x"></i>Absent</button>`;
-    })()}
+    ${(()=>{const c=signupControlsHTML(r);return c?`<div style="margin-bottom:8px">${c}</div>`:'';})()}
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
       <button class="btn btn-sm" onclick="addToICal('${r.id}')"><i class="ti ti-calendar-plus"></i>Add to calendar</button>
       ${canManageRaids()&&!past?`<button class="btn btn-w btn-sm" onclick="postRoster('${r.id}')"><i class="ti ti-list"></i>${r.rosterPosted?'Update roster':'Post roster'}</button>`:''}
       ${canManageRaids()&&!past?`<button class="btn btn-sm" onclick="togglePUG('${r.id}')"><i class="ti ti-users"></i>${r.pug?'Remove PUG':'Mark PUG'}</button>`:''}
@@ -5315,18 +5410,25 @@ function _clearPlayerFromRaid(r, name){
   if(r.confirmed)r.confirmed=r.confirmed.filter(n=>n!==name);
   if(r.raidGroups)r.raidGroups.forEach(g=>{const i=g.indexOf(name);if(i!==-1)g.splice(i,1);});
 }
-function clearSignupStatus(raidId){
+function clearSignupStatus(raidId, charName){
   const r=raidSchedule.find(x=>x.id===raidId);
-  const name=isNamed()?CURRENT_USER.name:null;
+  let name;
+  if(charName){
+    if(isNamed()&&!getMyChars().includes(charName)){toast('You can only manage your own characters','warn');return;}
+    name=charName;
+  } else { name=isNamed()?CURRENT_USER.name:null; }
   if(!r||!name)return;
   _clearPlayerFromRaid(r,name);
   saveRaids();renderRaids();renderCalendar();
-  toast('Removed from '+r.name,'ok');
+  toast(name+' removed from '+r.name,'ok');
 }
-function unSignUp(raidId){clearSignupStatus(raidId);}
-function signUpWithStatus(raidId, status){
+function unSignUp(raidId,charName){clearSignupStatus(raidId,charName);}
+function signUpWithStatus(raidId, status, charName){
   let name;
-  if(isNamed()){name=CURRENT_USER.name;}
+  if(charName){
+    if(isNamed()&&!getMyChars().includes(charName)){toast('You can only sign up your own characters','warn');return;}
+    name=charName;
+  } else if(isNamed()){ name=CURRENT_USER.name; }
   else{const n=prompt('Your in-game name:');if(!n||!n.trim())return;name=n.trim();}
   const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
   if(!r.signupStatus)r.signupStatus={};
@@ -5338,13 +5440,13 @@ function signUpWithStatus(raidId, status){
   } else {
     r.signupStatus[name]=status;
     const lbl=SIGNUP_STATUS[status]?.label||status;
-    toast('Marked as '+lbl+' for '+r.name,'ok');
+    toast(name+' marked as '+lbl+' for '+r.name,'ok');
   }
   saveRaids();renderRaids();renderCalendar();
 }
 function signUp(raidId){signUpWithStatus(raidId,'ready');}
 function quickSignUp(raidId, name){
-  if(isNamed()&&name!==CURRENT_USER.name){toast('You can only sign up yourself','warn');return;}
+  if(isNamed()&&!getMyChars().includes(name)){toast('You can only sign up your own characters','warn');return;}
   const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
   if(r.signedUp.includes(name)||(r.signupStatus&&r.signupStatus[name])){toast(name+' already responded to this raid','err');return;}
   if(r.signedUp.length>=SIGNUP_POOL_MAX){toast('Sign-up queue is full','err');return;}
