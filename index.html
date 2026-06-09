@@ -2365,6 +2365,12 @@ function logout(){
 // NAV
 // ============================================================
 function nav(el,page){
+  // Leaving the calendar: clear the day detail so its raid-card element IDs
+  // don't collide with the same cards in #raids-list (cal-detail is earlier in DOM).
+  if(page!=='calendar'){
+    selectedDay=null;
+    const cd=document.getElementById('cal-detail'); if(cd) cd.innerHTML='';
+  }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
   const pg=document.getElementById('page-'+page);
@@ -4906,10 +4912,12 @@ function renderCalendar(){
 function calPrev(){if(calMonth===0){calMonth=11;calYear--;}else calMonth--;renderCalendar();}
 function calNext(){if(calMonth===11){calMonth=0;calYear++;}else calMonth++;renderCalendar();}
 function showCalDay(k){
+  selectedDay=k;
   const raids=raidSchedule.filter(r=>r.date===k);
   const det=document.getElementById('cal-detail');
+  if(!det) return;
   if(!raids.length){det.innerHTML=`<div class="card" style="margin-top:6px"><div style="font-size:12px;color:var(--t3);display:flex;align-items:center;gap:8px"><i class="ti ti-calendar-off"></i>${fmtKey(k)} — no raids scheduled.<button class="btn btn-sm" style="margin-left:8px" onclick="prefillCreate('${k}')"><i class="ti ti-plus"></i>Create raid</button></div></div>`;return;}
-  det.innerHTML='<div style="margin-top:8px">'+raids.map(r=>compactRaidCard(r)).join('')+'</div>';
+  det.innerHTML=`<div style="margin-top:8px"><div style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px"><i class="ti ti-calendar-event" style="margin-right:4px"></i>${fmtKey(k)}</div>`+raids.map(r=>fullRaidCard(r)).join('')+'</div>';
 }
 function prefillCreate(k){document.getElementById('cr-date').value=k;document.querySelector('#nav-rl .ni:nth-child(3)')?.click();}
 
@@ -4940,12 +4948,54 @@ function renderRaids(){
     :'<div class="empty"><i class="ti ti-calendar-off"></i><p>'+
       (raidsTab==='upcoming'?'No upcoming raids.':'No archived raids.')+
       '</p></div>';
+  // Keep the calendar day detail in sync after any raid data change
+  if(selectedDay) showCalDay(selectedDay);
 }
 // ── Per-raid role indicators ────────────────────────────────────────────────
 // Each signed-up/confirmed player shows a role emoji. RL/officers click it to
 // reassign that player's role *for this raid* (stored in r.roleAssign, an
 // override that doesn't touch the global roster type).
 const RAID_ROLES=['Tank','Melee','Ranged','Healer'];
+// Raid-marker clicker slots (WoW-style markers) — used for Magtheridon cube clicks
+const CLICKER_MARKERS=[
+  {key:'skull',    emoji:'💀', label:'Skull'},
+  {key:'cross',    emoji:'❌', label:'Cross'},
+  {key:'square',   emoji:'🟦', label:'Square'},
+  {key:'moon',     emoji:'🌙', label:'Moon'},
+  {key:'triangle', emoji:'<span style="color:#44cc44;font-weight:900;font-size:13px">▼</span>', label:'Triangle'},
+];
+function isMagRaid(r){return (r.name||'').toLowerCase().includes('mag');}
+function setClicker(raidId, marker, name){
+  if(!canManageRaids())return;
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
+  if(!r.clickers)r.clickers={};
+  if(name) r.clickers[marker]=name; else delete r.clickers[marker];
+  saveRaids();renderRaids();
+}
+function setKicker(raidId, marker, name){
+  if(!canManageRaids())return;
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
+  if(!r.kickers)r.kickers={};
+  if(name) r.kickers[marker]=name; else delete r.kickers[marker];
+  saveRaids();renderRaids();
+}
+// Render a marker-assignment column (clickers or kickers) for Magtheridon
+function markerAssignColumn(r, title, fn, store){
+  return `<div style="min-width:210px;flex:1">
+    <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin:0 0 6px"><i class="ti ti-target" style="margin-right:4px"></i>${title} <span style="font-size:9px;font-weight:400;opacity:.6">(Magtheridon)</span></div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      ${CLICKER_MARKERS.map(m=>`
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:15px;width:22px;text-align:center" title="${m.label}">${m.emoji}</span>
+        <span style="font-size:10px;color:var(--t3);width:54px">${m.label}</span>
+        <select onchange="${fn}('${r.id}','${m.key}',this.value)" style="font-size:11px;flex:1;max-width:160px">
+          <option value="">— none —</option>
+          ${r.confirmed.map(n=>`<option value="${n}" ${(r[store]||{})[m.key]===n?'selected':''}>${n}</option>`).join('')}
+        </select>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
 function roleEmojiRaw(role){
   return role==='Healer'?'<span style="color:#43c46f;font-weight:900">✚</span>'
     : role==='Tank'?'🛡️' : role==='Melee'?'⚔️' : role==='Ranged'?'🏹' : '<span style="opacity:.45">❔</span>';
@@ -4989,6 +5039,13 @@ function setRaidRoleAssign(raidId,name,role){
   const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
   if(!r.roleAssign)r.roleAssign={};
   r.roleAssign[name]=role;
+  // If no longer a healer, drop any healer assignment they had
+  if(role!=='Healer' && r.assignments?.healerTargets) delete r.assignments.healerTargets[name];
+  // If no longer a tank, remove from the tank priority list
+  if(role!=='Tank' && r.assignments?.tankList){
+    r.assignments.tankList=r.assignments.tankList.filter(t=>t!==name);
+    _syncTankList(r);
+  }
   closeRoleMenu();
   saveRaids();renderRaids();
   toast(name+' → '+role,'ok');
@@ -5077,10 +5134,11 @@ function fullRaidCard(r,highlight){
   const notSignedUp=rosterNames.filter(n=>!r.signedUp.includes(n)&&!r.confirmed.includes(n)&&!ss[n]);
   const notConfirmed=r.signedUp.filter(n=>!r.confirmed.includes(n)&&r.confirmed.length>0);
 
-  // Assignments
+  // Assignments — driven by per-raid role (raidRole), so a DPS-marked player
+  // drops out of healer assignments and a Heal-marked player gains one.
   const asgn=r.assignments||{MT:'',OT1:'',OT2:'',healerTargets:{}};
-  const confirmedTanks=r.confirmed.filter(n=>{const p=gp(n);return p?.type==='Tank'||p?.type==='Mage Tank';});
-  const confirmedHealers=r.confirmed.filter(n=>{const p=gp(n);return p?.type==='Healer';});
+  const confirmedTanks=r.confirmed.filter(n=>raidRole(r,n)==='Tank');
+  const confirmedHealers=r.confirmed.filter(n=>raidRole(r,n)==='Healer');
   // Build tank list: prefer stored tankList, fall back to legacy MT/OT1/OT2
   const tankList=asgn.tankList?.length?asgn.tankList:[asgn.MT,asgn.OT1,asgn.OT2].filter(Boolean);
   const tanksNotInList=confirmedTanks.filter(n=>!tankList.includes(n));
@@ -5128,22 +5186,40 @@ function fullRaidCard(r,highlight){
           })()}</select>
         </div>`).join('')}
       </div>`:''}
+      ${isMagRaid(r)?`
+      <div style="display:flex;gap:22px;flex-wrap:wrap;margin-top:12px">
+        ${markerAssignColumn(r,'Clicker Assignments','setClicker','clickers')}
+        ${markerAssignColumn(r,'Kicker Assignments','setKicker','kickers')}
+      </div>`:''}
     </div>`:'';
 
   // Assignments read-only display for non-manager (shown when assignments exist)
   const tankListDisplay=tankList.length?tankList:[asgn.MT,asgn.OT1,asgn.OT2].filter(Boolean);
-  const assignDisplay=!canManageRaids()&&r.confirmed.length&&(tankListDisplay.length||Object.keys(asgn.healerTargets||{}).length)?`
+  const healerTargetsDisplay=Object.entries(asgn.healerTargets||{}).filter(([h])=>confirmedHealers.includes(h));
+  const clickersSet=isMagRaid(r)?CLICKER_MARKERS.filter(m=>r.clickers?.[m.key]):[];
+  const kickersSet=isMagRaid(r)?CLICKER_MARKERS.filter(m=>r.kickers?.[m.key]):[];
+  const assignDisplay=!canManageRaids()&&r.confirmed.length&&(tankListDisplay.length||healerTargetsDisplay.length||clickersSet.length||kickersSet.length)?`
     <hr class="rec-divider">
     <div style="margin-bottom:8px">
       <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px"><i class="ti ti-shield-check"></i> Assignments</div>
       <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">
         ${tankListDisplay.map((n,i)=>`<span class="badge" style="background:rgba(200,80,60,${i===0?'.15':'.08'});color:#e07060;border:0.5px solid rgba(200,80,60,${i===0?'.35':'.2'})"><span style="background:rgba(200,80,60,.25);border-radius:50%;width:13px;height:13px;display:inline-flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;margin-right:3px">${i+1}</span>${n}</span>`).join('')}
       </div>
-      ${Object.entries(asgn.healerTargets||{}).length?`
-      <div style="display:flex;flex-wrap:wrap;gap:4px">
-        ${Object.entries(asgn.healerTargets||{}).map(([h,t])=>`
+      ${healerTargetsDisplay.length?`
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">
+        ${healerTargetsDisplay.map(([h,t])=>`
           <span class="badge" style="background:rgba(26,158,114,.1);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.25)"><i class="ti ti-heart"></i> ${h} → ${t}</span>
         `).join('')}
+      </div>`:''}
+      ${clickersSet.length?`
+      <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Clickers</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">
+        ${clickersSet.map(m=>`<span class="badge" style="background:var(--bg3);border:1px solid var(--borderl);color:var(--t1)">${m.emoji} ${r.clickers[m.key]}</span>`).join('')}
+      </div>`:''}
+      ${kickersSet.length?`
+      <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px">Kickers</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">
+        ${kickersSet.map(m=>`<span class="badge" style="background:var(--bg3);border:1px solid var(--borderl);color:var(--t1)">${m.emoji} ${r.kickers[m.key]}</span>`).join('')}
       </div>`:''}
     </div>`:'';
 
@@ -5210,7 +5286,7 @@ function fullRaidCard(r,highlight){
     <div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
       <div style="font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">Other responses</div>
       ${tentativePlayers.length?`<div style="margin-bottom:5px"><span style="font-size:9px;font-weight:600;color:#f5a623;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:3px;margin-bottom:3px"><i class="ti ti-help" style="font-size:11px"></i> Tentative (${tentativePlayers.length})</span><div style="display:flex;flex-wrap:wrap;gap:3px">${tentativePlayers.map(([n])=>pill(n,false)).join('')}</div></div>`:''}
-      ${benchPlayers.length?`<div style="margin-bottom:5px"><span style="font-size:9px;font-weight:600;color:#6ab4e8;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:3px;margin-bottom:3px"><i class="ti ti-armchair" style="font-size:11px"></i> Bench (${benchPlayers.length})</span><div style="display:flex;flex-wrap:wrap;gap:3px">${benchPlayers.map(([n])=>pill(n,false)).join('')}</div></div>`:''}
+      ${benchPlayers.length?`<div style="margin-bottom:5px"><span style="font-size:9px;font-weight:600;color:#6ab4e8;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:3px;margin-bottom:3px"><i class="ti ti-armchair" style="font-size:11px"></i> Bench (${benchPlayers.length})${canManageRaids()&&!past?'<span style="font-weight:400;color:var(--t3);text-transform:none;letter-spacing:0">— click ＋ to roster in</span>':''}</span><div style="display:flex;flex-wrap:wrap;gap:6px">${benchPlayers.map(([n])=>canManageRaids()&&!past?`<span style="display:inline-flex;align-items:center;gap:3px">${pill(n,false)}<button onclick="rosterInBench('${r.id}','${n}')" title="Roster ${n} in" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(26,158,114,.2);border:1px solid #5DCAA5;color:#5DCAA5;cursor:pointer;font-size:14px;font-weight:900;line-height:1;padding:0" onmouseover="this.style.background='#5DCAA5';this.style.color='#0a0c11'" onmouseout="this.style.background='rgba(26,158,114,.2)';this.style.color='#5DCAA5'">+</button></span>`:pill(n,false)).join('')}</div></div>`:''}
       ${absentPlayers.length?`<div><span style="font-size:9px;font-weight:600;color:#e07b72;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:3px;margin-bottom:3px"><i class="ti ti-user-x" style="font-size:11px"></i> Absent (${absentPlayers.length})</span><div style="display:flex;flex-wrap:wrap;gap:3px">${absentPlayers.map(([n])=>pill(n,false)).join('')}</div></div>`:''}
     </div>`:'';
   const signupMgmt=canManageRaids()&&!past?`
@@ -5409,6 +5485,7 @@ function _clearPlayerFromRaid(r, name){
   if(r.signupStatus)delete r.signupStatus[name];
   if(r.confirmed)r.confirmed=r.confirmed.filter(n=>n!==name);
   if(r.raidGroups)r.raidGroups.forEach(g=>{const i=g.indexOf(name);if(i!==-1)g.splice(i,1);});
+  if(r.fromBench)delete r.fromBench[name];
 }
 function clearSignupStatus(raidId, charName){
   const r=raidSchedule.find(x=>x.id===raidId);
@@ -5543,6 +5620,21 @@ function acceptSignup(raidId, name){
   saveRaids();renderRaids();
   toast(name+' confirmed for '+r.name,'ok');
 }
+// Roster a benched player into the raid: add to confirmed and clear bench status.
+// Remembers their bench origin so removing them later returns them to the bench.
+function rosterInBench(raidId, name){
+  const r=raidSchedule.find(x=>x.id===raidId);
+  if(!r||!canManageRaids()) return;
+  if(!r.confirmed) r.confirmed=[];
+  if(r.confirmed.includes(name)){toast(name+' already rostered','err');return;}
+  if(r.confirmed.length>=r.max){toast('Raid is full ('+r.max+'/'+r.max+')','err');return;}
+  r.confirmed.push(name);
+  if(r.signupStatus) delete r.signupStatus[name]; // no longer benched
+  if(!r.fromBench) r.fromBench={};
+  r.fromBench[name]=true; // remember origin
+  saveRaids();renderRaids();
+  toast(name+' rostered in from bench','ok');
+}
 
 function declineSignup(raidId, name){
   const r=raidSchedule.find(x=>x.id===raidId);
@@ -5621,6 +5713,16 @@ function removeFromRaid(raidId, name){
   const r=raidSchedule.find(x=>x.id===raidId);
   if(!r||!canManageRaids()) return;
   r.confirmed=(r.confirmed||[]).filter(n=>n!==name);
+  if(r.raidGroups)r.raidGroups.forEach(g=>{const i=g.indexOf(name);if(i!==-1)g.splice(i,1);});
+  // If they were rostered in from the bench, send them back to the bench
+  if(r.fromBench&&r.fromBench[name]){
+    if(!r.signupStatus)r.signupStatus={};
+    r.signupStatus[name]='bench';
+    delete r.fromBench[name];
+    saveRaids();renderRaids();
+    toast(name+' moved back to bench','ok');
+    return;
+  }
   saveRaids();renderRaids();
   toast(name+' removed from confirmed roster','ok');
 }
