@@ -429,6 +429,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'calendar')"><i class="ti ti-calendar"></i><span>Calendar</span></div>
       <div class="ni" onclick="nav(this,'raids')"><i class="ti ti-list"></i><span>Upcoming Raids</span></div>
       <div class="ni" onclick="nav(this,'create-raid')"><i class="ti ti-plus"></i><span>Create Raid</span></div>
+      <div class="ni" onclick="nav(this,'leave')"><i class="ti ti-plane"></i><span>Leave of Absence</span></div>
     </div>
     <div class="sbs"><div class="sbl">Tools</div>
       <div class="ni" onclick="nav(this,'loot')"><i class="ti ti-trophy"></i><span>Loot Priority</span></div>
@@ -472,6 +473,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <div class="sbs"><div class="sbl">Schedule</div>
       <div class="ni" onclick="nav(this,'calendar')"><i class="ti ti-calendar"></i><span>Calendar</span></div>
       <div class="ni" onclick="nav(this,'raids')"><i class="ti ti-list"></i><span>Upcoming Raids</span></div>
+      <div class="ni" onclick="nav(this,'leave')"><i class="ti ti-plane"></i><span>Leave of Absence</span></div>
     </div>
     <div class="sbs"><div class="sbl">Raid Info</div>
       <div class="ni" onclick="nav(this,'pov')"><i class="ti ti-user-circle"></i><span>Player POV</span></div>
@@ -497,6 +499,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'calendar')"><i class="ti ti-calendar"></i><span>Calendar</span></div>
       <div class="ni" onclick="nav(this,'raids')"><i class="ti ti-list"></i><span>Upcoming Raids</span></div>
       <div class="ni" onclick="nav(this,'create-raid')"><i class="ti ti-plus"></i><span>Create Raid</span></div>
+      <div class="ni" onclick="nav(this,'leave')"><i class="ti ti-plane"></i><span>Leave of Absence</span></div>
     </div>
     <div class="sbs"><div class="sbl">Sign-up</div>
       <div class="ni" onclick="nav(this,'signup')"><i class="ti ti-forms"></i><span>Apply for Raid</span></div>
@@ -842,6 +845,11 @@ tr:hover td{background:rgba(255,255,255,.013)}
   </div>
 </div>
 
+<div class="page" id="page-leave">
+  <div class="ph"><div class="pt">Leave of Absence</div><div class="ps">Going on holiday? Mark a character absent for a date range — they'll auto-decline every raid in that period, including new ones.</div></div>
+  <div id="leave-content"></div>
+</div>
+
 <!-- BOSS PAGES -->
 <div class="page" id="page-gruul"><div class="ph"><div class="pt">Gruul's Lair</div><div class="ps">High King Maulgar · Gruul the Dragonkiller</div></div><div id="gruul-content"></div></div>
 <div class="page" id="page-mag"><div class="ph"><div class="pt">Magtheridon's Lair</div><div class="ps">Magtheridon — cube click coordination &amp; auto-assignment</div></div><div id="mag-content"></div></div>
@@ -902,6 +910,7 @@ let CURRENT_USER=null; // roster player when signed in by name
 let rosterSortCol='name';let rosterSortDir=1;
 let appTab='pending';let srTab='pending';let stTab='overview';
 let applications=[];let specRequests=[];let raidSchedule=[];let reviews=[];
+let leaves=[]; // Leave of absence: [{id,name,from,to,note,by}] — from/to inclusive YYYY-MM-DD
 let bossAssignments={}; // {bossId:{tanks:[{role,name}],healers:[],special:[{label,players:[]}]}}
 const SIGNUP_POOL_MAX=100; // sign-up queue cap; r.max is the raid roster limit (25)
 let calYear=new Date().getFullYear();let calMonth=new Date().getMonth();
@@ -1087,6 +1096,110 @@ function saveSpecRequests(){
 function saveReviews(){
   try{localStorage.setItem('boogalo-reviews',JSON.stringify({list:reviews,stars:reviewStars}));}catch(e){}
   fbSet('reviews',{list:reviews.length?reviews:null,stars:reviewStars});
+}
+function saveLeaves(){
+  try{localStorage.setItem('boogalo-leaves',JSON.stringify(leaves));}catch(e){}
+  fbSet('leaves', leaves.length?leaves:null);
+}
+// Is a character on leave on a given raid date?
+function isOnLeave(name, dateKey){
+  return leaves.some(lv=>lv.name===name && lv.from<=dateKey && dateKey<=lv.to);
+}
+// Force-mark every leave-covered character as Absent for one raid. Returns true if it changed anything.
+function applyLeavesToRaid(r){
+  if(!leaves.length||!r) return false;
+  let changed=false;
+  leaves.forEach(lv=>{
+    if(lv.from<=r.date && r.date<=lv.to){
+      const cleanlyAbsent = (r.signupStatus?.[lv.name]==='absent') && !(r.signedUp||[]).includes(lv.name) && !(r.confirmed||[]).includes(lv.name);
+      if(!cleanlyAbsent){
+        _clearPlayerFromRaid(r, lv.name);
+        if(!r.signupStatus) r.signupStatus={};
+        r.signupStatus[lv.name]='absent';
+        changed=true;
+      }
+    }
+  });
+  return changed;
+}
+// Apply all leaves across upcoming raids (after a leave is added or synced).
+function applyAllLeaves(){
+  let changed=false;
+  raidSchedule.forEach(r=>{ if(!isPast(r.date)||r.date===todayKey()){ if(applyLeavesToRaid(r)) changed=true; } });
+  if(changed){ saveRaids(); renderRaids?.(); renderCalendar?.(); }
+  return changed;
+}
+function renderLeave(){
+  const el=document.getElementById('leave-content');
+  if(!el) return;
+  const manager=canManageRaids();
+  const mine=isNamed()?getMyChars():[];
+  if(!manager&&!isNamed()){el.innerHTML='<div class="empty"><i class="ti ti-plane"></i><p>Sign in with your character to set a leave of absence.</p></div>';return;}
+  const charOptions=manager?ROSTER.map(p=>p.name).sort((a,b)=>a.localeCompare(b)):mine;
+  const today=todayKey();
+  const visibleLeaves=(manager?leaves:leaves.filter(lv=>mine.includes(lv.name))).slice().sort((a,b)=>a.from.localeCompare(b.from));
+  el.innerHTML=`
+    <div class="card ab" style="margin-bottom:14px">
+      <div class="ct"><i class="ti ti-plane-departure" style="color:var(--acc)"></i>Add Leave of Absence</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+        <div class="fg" style="flex:1;min-width:150px;margin-bottom:0"><span class="fl">Character</span>
+          <select id="lv-name" style="width:100%"><option value="">— select —</option>${charOptions.map(n=>`<option value="${n}">${n}</option>`).join('')}</select>
+        </div>
+        <div class="fg" style="margin-bottom:0"><span class="fl">From</span><input type="date" id="lv-from" min="${today}" value="${today}" style="width:145px"></div>
+        <div class="fg" style="margin-bottom:0"><span class="fl">Until (incl.)</span><input type="date" id="lv-to" min="${today}" style="width:145px"></div>
+      </div>
+      <div class="fg" style="margin-top:8px;margin-bottom:8px"><span class="fl">Note (optional)</span><input id="lv-note" placeholder="e.g. Summer holiday"></div>
+      <button class="btn btn-p" onclick="addLeave()"><i class="ti ti-plane"></i> Mark Absent for Period</button>
+      <div style="font-size:10px;color:var(--t3);margin-top:6px">The character will auto-decline every raid in this range — and any new raid created during it.</div>
+    </div>
+    <div class="card">
+      <div class="ct"><i class="ti ti-calendar-off" style="color:var(--acc)"></i>${manager?'All Leaves':'My Leaves'} <span class="badge" style="margin-left:6px;background:var(--bg3);color:var(--t2)">${visibleLeaves.length}</span></div>
+      ${visibleLeaves.length?visibleLeaves.map(lv=>{
+        const active=lv.to>=today;
+        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">
+          ${pill(lv.name,false)}
+          <span style="font-size:12px;color:var(--t1)">${fmtKey(lv.from)} → ${fmtKey(lv.to)}</span>
+          ${active?'<span class="badge" style="background:rgba(192,57,43,.12);color:#e07b72;border:0.5px solid rgba(192,57,43,.3)"><i class="ti ti-user-x"></i> Absent</span>':'<span class="badge" style="background:var(--bg3);color:var(--t3)">Ended</span>'}
+          ${lv.note?`<span style="font-size:11px;color:var(--t3)"><i class="ti ti-note"></i> ${lv.note}</span>`:''}
+          ${lv.by?`<span style="font-size:10px;color:var(--t3)">by ${lv.by}</span>`:''}
+          ${(manager||(isNamed()&&getMyChars().includes(lv.name)))?`<button class="btn btn-d btn-sm" style="margin-left:auto" onclick="removeLeave('${lv.id}')"><i class="ti ti-trash"></i> Remove</button>`:''}
+        </div>`;
+      }).join(''):'<div style="font-size:12px;color:var(--t3);padding:6px 0">No leaves set.</div>'}
+    </div>`;
+}
+function addLeave(){
+  const name=document.getElementById('lv-name')?.value;
+  const from=document.getElementById('lv-from')?.value;
+  const to=document.getElementById('lv-to')?.value;
+  const note=(document.getElementById('lv-note')?.value||'').trim();
+  if(!name){toast('Pick a character','err');return;}
+  if(!from||!to){toast('Pick a date range','err');return;}
+  if(to<from){toast('End date must be on or after the start date','err');return;}
+  if(!canManageRaids() && !(isNamed()&&getMyChars().includes(name))){toast('You can only set leave for your own characters','warn');return;}
+  leaves.push({id:genId(),name,from,to,note,by:CURRENT_USER?.name||(canManageRaids()?'RL':'')});
+  saveLeaves();
+  applyAllLeaves();
+  renderLeave();
+  toast(name+' marked absent '+fmtKey(from)+' → '+fmtKey(to),'ok');
+}
+function removeLeave(id){
+  const lv=leaves.find(x=>x.id===id);if(!lv)return;
+  if(!canManageRaids() && !(isNamed()&&getMyChars().includes(lv.name))){toast('Not allowed','warn');return;}
+  leaves=leaves.filter(x=>x.id!==id);
+  saveLeaves();
+  // Revert the auto-absent marks for this character in the period (unless another leave still covers it)
+  let changed=false;
+  raidSchedule.forEach(r=>{
+    if((!isPast(r.date)||r.date===todayKey()) && lv.from<=r.date && r.date<=lv.to){
+      if(r.signupStatus?.[lv.name]==='absent' && !isOnLeave(lv.name, r.date)){
+        delete r.signupStatus[lv.name];
+        changed=true;
+      }
+    }
+  });
+  if(changed) saveRaids();
+  renderLeave(); renderRaids?.(); renderCalendar?.();
+  toast('Leave removed for '+lv.name,'ok');
 }
 function saveVortexRequests(){
   try{localStorage.setItem('boogalo-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}
@@ -1725,6 +1838,7 @@ function setView(v, user){
     if(applications.length) seedIfEmpty('applications',saveApplications);
     if(specRequests.length) seedIfEmpty('specRequests',saveSpecRequests);
     if(reviews.length) seedIfEmpty('reviews',saveReviews);
+    if(leaves.length) seedIfEmpty('leaves',saveLeaves);
     if(vortexRequests.length) seedIfEmpty('vortexRequests',saveVortexRequests);
   }
   else if(v==='officer'){
@@ -1736,6 +1850,7 @@ function setView(v, user){
     if(applications.length) seedIfEmpty('applications',saveApplications);
     if(specRequests.length) seedIfEmpty('specRequests',saveSpecRequests);
     if(reviews.length) seedIfEmpty('reviews',saveReviews);
+    if(leaves.length) seedIfEmpty('leaves',saveLeaves);
     if(vortexRequests.length) seedIfEmpty('vortexRequests',saveVortexRequests);
   }
   else if(v==='guest') document.querySelector('#nav-guest .ni[onclick*="roster"]')?.click();
@@ -2381,7 +2496,7 @@ function nav(el,page){
   if(window.innerWidth<=768) collapseSidebar();
   updateMobTitle(page);
   updateMobNav(page);
-  ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles,progression:renderProgression,buffs:renderBuffs})[page]?.();
+  ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles,progression:renderProgression,buffs:renderBuffs})[page]?.();
 }
 
 // ============================================================
@@ -2402,10 +2517,12 @@ function seedRaids(){
       d.setDate(d.getDate()+diff+w*7);
       const k=ikey(d);
       if(raidSchedule.find(x=>x.date===k&&x.name===r.name))return;
-      raidSchedule.push({id:genId(),name:r.name,date:k,start:r.start,end:r.end,extra:r.extra,
+      const nr={id:genId(),name:r.name,date:k,start:r.start,end:r.end,extra:r.extra,
         max:r.name.includes('Kara')?10:25,rl:'Holsteinbeef',notes:r.notes,
         signedUp:[],confirmed:[],attended:[],signupStatus:{},
-        status:'upcoming',rosterPosted:false,pug:false,cleanup:false});
+        status:'upcoming',rosterPosted:false,pug:false,cleanup:false};
+      applyLeavesToRaid(nr);
+      raidSchedule.push(nr);
     });
   }
 }
@@ -5601,6 +5718,7 @@ function createCleanupRaid(raidId){
     rosterPosted:false,pug:false,cleanup:true,
     raidGroups:Array.from({length:src.max<=10?2:5},()=>[])
   };
+  applyLeavesToRaid(newRaid);
   raidSchedule.push(newRaid);
   saveRaids();
   // Switch to upcoming tab and re-render
@@ -5837,7 +5955,9 @@ function createRaid(){
   if(date<todayKey()){toast('Cannot create a raid in the past','err');return;}
   if(!canManageRaids()){toast('Raid Leaders only','err');return;}
   const numGrp=max<=10?2:5;
-  raidSchedule.push({id:genId(),name,date,start,end,max,extra,rl,notes,signedUp:[],confirmed:[],attended:[],signupStatus:{},status:isPast(date)?'completed':'upcoming',rosterPosted:false,pug:false,cleanup:false,raidGroups:Array.from({length:numGrp},()=>[])});
+  const newRaid={id:genId(),name,date,start,end,max,extra,rl,notes,signedUp:[],confirmed:[],attended:[],signupStatus:{},status:isPast(date)?'completed':'upcoming',rosterPosted:false,pug:false,cleanup:false,raidGroups:Array.from({length:numGrp},()=>[])};
+  applyLeavesToRaid(newRaid); // auto-decline anyone on leave during this date
+  raidSchedule.push(newRaid);
   saveRaids();renderRaids();renderCalendar();toast(`${name} raid created!`,'ok');
   document.getElementById('cr-notes').value='';
 }
@@ -5852,7 +5972,9 @@ function generateStandardWeek(){
     const d=new Date(now);const diff=(r.dow-d.getDay()+7)%7||7;d.setDate(d.getDate()+diff);
     const k=ikey(d);
     if(!raidSchedule.find(x=>x.date===k&&x.name===r.name)){
-      raidSchedule.push({id:genId(),name:r.name,date:k,start:r.start,end:r.end,max:25,extra:r.extra,rl:'Holsteinbeef',notes:r.notes,signedUp:[],confirmed:[],attended:[],signupStatus:{},status:'upcoming',rosterPosted:false,pug:false,cleanup:false});
+      const nr={id:genId(),name:r.name,date:k,start:r.start,end:r.end,max:25,extra:r.extra,rl:'Holsteinbeef',notes:r.notes,signedUp:[],confirmed:[],attended:[],signupStatus:{},status:'upcoming',rosterPosted:false,pug:false,cleanup:false};
+      applyLeavesToRaid(nr);
+      raidSchedule.push(nr);
       added++;
     }
   });
@@ -6211,7 +6333,7 @@ function restoreSidebarState(){
     }
   }catch(e){}
 }
-const MOB_PAGE_NAMES={attendance:'Attendance',roster:'Roster',roles:'Roles & Groups',dispels:'Dispels & CCs',res:'Resistances',loot:'Loot Priority',pov:'Player POV',specreq:'Spec Requests',signup:'Apply for Raid','rl-review':'RL Review',calendar:'Calendar',raids:'Upcoming Raids','create-raid':'Create Raid',gruul:"Gruul's Lair",mag:'Magtheridon',tk:'Tempest Keep',ssc:'Serpent Shrine',kara:'Karazhan',stats:'Statistics',reviews:'Reviews',profiles:'Profiles',progression:'Progression',buffs:'Buff Coverage'};
+const MOB_PAGE_NAMES={attendance:'Attendance',roster:'Roster',roles:'Roles & Groups',dispels:'Dispels & CCs',res:'Resistances',loot:'Loot Priority',pov:'Player POV',specreq:'Spec Requests',signup:'Apply for Raid','rl-review':'RL Review',calendar:'Calendar',raids:'Upcoming Raids','create-raid':'Create Raid',leave:'Leave of Absence',gruul:"Gruul's Lair",mag:'Magtheridon',tk:'Tempest Keep',ssc:'Serpent Shrine',kara:'Karazhan',stats:'Statistics',reviews:'Reviews',profiles:'Profiles',progression:'Progression',buffs:'Buff Coverage'};
 function updateMobTitle(page){
   const el=document.getElementById('mob-title');
   if(el) el.textContent=MOB_PAGE_NAMES[page]||'Boogalo';
@@ -6231,7 +6353,7 @@ function mobNav(page){
     if(pg)pg.classList.add('active');
     const mainEl=document.querySelector('.main');if(mainEl)mainEl.scrollTop=0;
     collapseSidebar();updateMobTitle(page);updateMobNav(page);
-    ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles,progression:renderProgression,buffs:renderBuffs})[page]?.();
+    ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles,progression:renderProgression,buffs:renderBuffs})[page]?.();
   }
 }
 function initSwipeGesture(){
@@ -6296,6 +6418,7 @@ function applyFirebaseKey(key,data){
     else if(key==='applications'){const d=_fbArr(data);_fbSync(applications,d);try{localStorage.setItem('boogalo-applications',JSON.stringify(applications));}catch(e){}renderRLReview?.();updatePendingBadge?.();renderSignup?.();}
     else if(key==='specRequests'){const d=_fbArr(data);_fbSync(specRequests,d);try{localStorage.setItem('boogalo-specRequests',JSON.stringify(specRequests));}catch(e){}renderSRList?.();renderSpecReq?.();updateSRBadge?.();}
     else if(key==='reviews'){if(data&&typeof data==='object'){const list=_fbArr(data.list);_fbSync(reviews,list);if(data.stars&&typeof data.stars==='object'){Object.keys(reviewStars).forEach(k=>delete reviewStars[k]);Object.assign(reviewStars,data.stars);}try{localStorage.setItem('boogalo-reviews',JSON.stringify({list:reviews,stars:reviewStars}));}catch(e){}}renderReviews?.();updateRevBadge?.();}
+    else if(key==='leaves'){const d=_fbArr(data);_fbSync(leaves,d);try{localStorage.setItem('boogalo-leaves',JSON.stringify(leaves));}catch(e){}renderLeave?.();setTimeout(()=>{try{applyAllLeaves();}catch(e){}},0);}
     else if(key==='vortexRequests'){const d=_fbArr(data);_fbSync(vortexRequests,d);try{localStorage.setItem('boogalo-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}renderVortex?.();}
     else if(key==='healerTanks'){const d=_fbArr(data);if(d.length){_fbSync(healerTanks,d);try{localStorage.setItem('boogalo-healerTanks',JSON.stringify(healerTanks));}catch(e){}}renderRoles?.();}
     else if(key==='groups'){if(data){const outer=_fbArr(data);if(outer.length){groups.length=0;outer.forEach(g=>groups.push(_fbArr(g)));try{localStorage.setItem('boogalo-groups',JSON.stringify(groups));}catch(e){}}}renderRoles?.();}
@@ -6324,7 +6447,7 @@ function initFirebaseSync(){
   setSyncDot('syncing');
   let synced=false;
   const keys=['raids','roster','vortex','weights','alts','roleOverrides','applications',
-   'specRequests','reviews','vortexRequests','healerTanks','groups','bossAssignments','killLog'];
+   'specRequests','reviews','vortexRequests','healerTanks','groups','bossAssignments','killLog','leaves'];
   keys.forEach(key=>{
     _fbDB.ref(key).on('value', snap=>{
       const data=snap.val();
@@ -6347,6 +6470,7 @@ window.onload=function(){
   try{const sap=localStorage.getItem('boogalo-applications');if(sap){const a=JSON.parse(sap);if(Array.isArray(a))a.forEach(x=>applications.push(x));}}catch(e){}
   try{const ssp=localStorage.getItem('boogalo-specRequests');if(ssp){const s=JSON.parse(ssp);if(Array.isArray(s))s.forEach(x=>specRequests.push(x));}}catch(e){}
   try{const srv=localStorage.getItem('boogalo-reviews');if(srv){const d=JSON.parse(srv);if(d&&Array.isArray(d.list))d.list.forEach(x=>reviews.push(x));if(d&&d.stars&&typeof d.stars==='object')Object.assign(reviewStars,d.stars);}}catch(e){}
+  try{const slv=localStorage.getItem('boogalo-leaves');if(slv){const l=JSON.parse(slv);if(Array.isArray(l))l.forEach(x=>leaves.push(x));}}catch(e){}
   try{const svr=localStorage.getItem('boogalo-vortexRequests');if(svr){const v=JSON.parse(svr);if(Array.isArray(v))v.forEach(x=>vortexRequests.push(x));}}catch(e){}
   try{const sht=localStorage.getItem('boogalo-healerTanks');if(sht){const h=JSON.parse(sht);if(Array.isArray(h)&&h.length){healerTanks.length=0;h.forEach(x=>healerTanks.push(x));}}}catch(e){}
   try{const sg=localStorage.getItem('boogalo-groups');if(sg){const g=JSON.parse(sg);if(Array.isArray(g)&&g.length){groups.length=0;g.forEach(x=>groups.push(Array.isArray(x)?x:[])); }}}catch(e){}
