@@ -5113,6 +5113,82 @@ function markerAssignColumn(r, title, fn, store){
     </div>
   </div>`;
 }
+// ── Opera Gamble (Karazhan) ─────────────────────────────────────────────────
+// RL/officer enables it + sets a stake (1–1000g). Raiders pick which Opera
+// event will spawn. RL sees the tally.
+const OPERA_EVENTS=[
+  {key:'wolf',  name:'Big Bad Wolf',   emoji:'🐺'},
+  {key:'romeo', name:'Romeo & Juliet', emoji:'🌹'},
+  {key:'oz',    name:'Wizard of Oz',   emoji:'🦁'},
+];
+function toggleOperaGamble(raidId){
+  if(!canManageRaids())return;
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r||!isKaraRaid(r))return;
+  if(!r.operaGamble) r.operaGamble={enabled:false,amount:0,votes:{}};
+  r.operaGamble.enabled=!r.operaGamble.enabled;
+  saveRaids();renderRaids();
+  toast('Opera Gamble '+(r.operaGamble.enabled?'opened':'closed'),'ok');
+}
+function setOperaAmount(raidId){
+  if(!canManageRaids())return;
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
+  let v=parseInt(document.getElementById('opera-amt-'+raidId)?.value)||0;
+  if(v<1||v>1000){toast('Amount must be 1–1000 gold','err');return;}
+  if(!r.operaGamble)r.operaGamble={enabled:true,amount:0,votes:{}};
+  r.operaGamble.amount=v;
+  saveRaids();renderRaids();
+  toast('Gamble stake set to '+v+'g','ok');
+}
+function setOperaVote(raidId,event){
+  if(!isNamed()){toast('Sign in with your character to vote','warn');return;}
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
+  if(!r.operaGamble?.enabled){toast('Opera Gamble is closed','err');return;}
+  if(!r.operaGamble.votes)r.operaGamble.votes={};
+  r.operaGamble.votes[CURRENT_USER.name]=event;
+  saveRaids();renderRaids();
+  const ev=OPERA_EVENTS.find(e=>e.key===event);
+  toast('Gamble placed: '+(ev?.name||event),'ok');
+}
+// Render the Opera Gamble panel for a Karazhan raid (only when enabled).
+function operaGambleHTML(r){
+  if(!isKaraRaid(r)) return '';
+  const og=r.operaGamble;
+  if(!og?.enabled) return '';
+  const votes=og.votes||{};
+  const myVote=isNamed()?votes[CURRENT_USER.name]:null;
+  const totalVotes=Object.keys(votes).length;
+  return `<hr class="rec-divider">
+    <div style="border:1px solid rgba(212,175,55,.4);border-radius:var(--r);padding:11px;background:rgba(212,175,55,.06);margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:9px">
+        <span style="font-size:13px;font-weight:700;color:var(--gold);font-family:Cinzel,serif">🎭 Opera Gamble</span>
+        <span style="font-size:11px;color:var(--t2)">Stake: <strong style="color:var(--gold)">${og.amount?og.amount+'g':'— not set —'}</strong></span>
+      </div>
+      ${canManageRaids()?`
+      <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+        <span style="font-size:11px;color:var(--t3)">Gamble amount (1–1000 g):</span>
+        <input type="number" id="opera-amt-${r.id}" min="1" max="1000" value="${og.amount||''}" placeholder="1-1000" style="width:90px;font-size:12px">
+        <button class="btn btn-s btn-sm" onclick="setOperaAmount('${r.id}')"><i class="ti ti-check"></i> Set</button>
+      </div>`:''}
+      ${isNamed()?`
+      <div style="font-size:10px;color:var(--t3);margin-bottom:5px">Which Opera will it be? Tap to place your gamble${myVote?' — tap again to change':''}:</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:${canManageRaids()?'10px':'0'}">
+        ${OPERA_EVENTS.map(ev=>{const mine=myVote===ev.key;return `<button onclick="setOperaVote('${r.id}','${ev.key}')" style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 4px;border-radius:var(--r);cursor:pointer;border:1.5px solid ${mine?'var(--gold)':'var(--borderl)'};background:${mine?'rgba(212,175,55,.16)':'var(--bg3)'};color:var(--t1);transition:border-color .12s">
+          <span style="font-size:22px">${ev.emoji}</span>
+          <span style="font-size:10px;font-weight:600;text-align:center;line-height:1.2">${ev.name}</span>
+          ${mine?'<span style="font-size:9px;color:var(--gold);font-weight:700">✓ Your gamble</span>':''}
+        </button>`;}).join('')}
+      </div>`:''}
+      ${canManageRaids()?`
+      <div style="font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Votes (${totalVotes})</div>
+      ${OPERA_EVENTS.map(ev=>{const voters=Object.entries(votes).filter(([,v])=>v===ev.key).map(([n])=>n);return `
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;flex-wrap:wrap">
+          <span style="font-size:15px">${ev.emoji}</span>
+          <span style="font-size:11px;font-weight:600;min-width:96px">${ev.name}</span>
+          <span class="badge" style="background:var(--bg3);color:var(--t2)">${voters.length}</span>
+          <div style="display:flex;flex-wrap:wrap;gap:3px">${voters.map(n=>pill(n,false)).join('')}</div>
+        </div>`;}).join('')}`:''}
+    </div>`;
+}
 function roleEmojiRaw(role){
   return role==='Healer'?'<span style="color:#43c46f;font-weight:900">✚</span>'
     : role==='Tank'?'🛡️' : role==='Melee'?'⚔️' : role==='Ranged'?'🏹' : '<span style="opacity:.45">❔</span>';
@@ -5576,10 +5652,12 @@ function fullRaidCard(r,highlight){
     ${signupMgmt}
     ${rosterPost}
     ${absentSection}
+    ${operaGambleHTML(r)}
     <hr class="rec-divider">
     ${(()=>{const c=signupControlsHTML(r);return c?`<div style="margin-bottom:8px">${c}</div>`:'';})()}
     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
       <button class="btn btn-sm" onclick="addToICal('${r.id}')"><i class="ti ti-calendar-plus"></i>Add to calendar</button>
+      ${canManageRaids()&&!past&&isKaraRaid(r)?`<button class="btn btn-sm" onclick="toggleOperaGamble('${r.id}')" style="${r.operaGamble?.enabled?'background:rgba(212,175,55,.16);border-color:rgba(212,175,55,.45);color:var(--gold)':''}">🎭 ${r.operaGamble?.enabled?'Close Opera Gamble':'Opera Gamble'}</button>`:''}
       ${canManageRaids()&&!past?`<button class="btn btn-w btn-sm" onclick="postRoster('${r.id}')"><i class="ti ti-list"></i>${r.rosterPosted?'Update roster':'Post roster'}</button>`:''}
       ${canManageRaids()&&!past?`<button class="btn btn-sm" onclick="togglePUG('${r.id}')"><i class="ti ti-users"></i>${r.pug?'Remove PUG':'Mark PUG'}</button>`:''}
       ${canManageRaids()&&!past?`<button class="btn btn-sm" onclick="toggleCleanup('${r.id}')" style="${r.cleanup?'background:rgba(41,128,185,.15);border-color:rgba(41,128,185,.35);color:#6ab4e8':''}"><i class="ti ti-broom"></i>${r.cleanup?'Remove Cleanup':'Mark Cleanup'}</button>`:''}
