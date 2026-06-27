@@ -4578,11 +4578,19 @@ const effRole=player.type;
 const resType=player.resFrost?'frost':player.resNature?'nature':player.resFire?'fire':null;
 const svgId=boss.id+'-'+effRole+(resType||'');
 let svgHtml='';
-if(boss.id==='vashj'||boss.id==='kaelthas'||boss.id==='opera'){
-  const phases=boss.id==='vashj'?[1,2,3]:[1,2,3];
-  const pLabels=boss.id==='vashj'?['P1 100-70%','P2 70-50%','P3 50-0%']:
-    boss.id==='opera'?['Wizard of Oz','Romulo & Jul.','Big Bad Wolf']:
-    ['P1 Advisors','P2 Weapons','P4-5 Kael'];
+if(boss.id==='vashj'){
+  // Lady Vashj now uses the live Phase-2 raid spread (built from the SSC roster), your spot highlighted.
+  const sr=nextSSCRaid();
+  svgHtml=(sr&&sr.confirmed?.length)?`<div style="margin-top:8px">
+    <div style="font-size:10px;color:var(--t3);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
+      <span><i class="ti ti-arrows-shuffle"></i> Phase 2 raid spread — ${sr.name}, ${fmtKey(sr.date)} · your spot highlighted</span>
+      <button class="btn btn-sm" style="font-size:10px;padding:2px 8px;background:rgba(93,202,165,.12);border-color:rgba(93,202,165,.35);color:#5DCAA5" onclick="openVashjSpreadForPlayer('${playerName}')"><i class="ti ti-maximize"></i> Full screen</button>
+    </div>
+    ${buildVashjSVG(computeVashjSpread(sr), playerName)}
+  </div>`:`<div style="margin-top:8px;font-size:11px;color:var(--t3)"><i class="ti ti-arrows-shuffle"></i> Phase 2 raid spread appears here once a Serpent Shrine raid has a confirmed roster.</div>`;
+} else if(boss.id==='kaelthas'||boss.id==='opera'){
+  const phases=[1,2,3];
+  const pLabels=boss.id==='opera'?['Wizard of Oz','Romulo & Jul.','Big Bad Wolf']:['P1 Advisors','P2 Weapons','P4-5 Kael'];
   svgHtml=`<div style="margin-top:8px">
     <div style="display:flex;gap:4px;margin-bottom:4px;flex-wrap:wrap">
       ${phases.map((ph,i)=>`<button onclick="showPhaseMap(this,'${boss.id}','${effRole}',${ph},'${resType||''}')"
@@ -5189,6 +5197,166 @@ function operaGambleHTML(r){
         </div>`;}).join('')}`:''}
     </div>`;
 }
+// ── Lady Vashj Phase-2 spread (SSC) ─────────────────────────────────────────
+function isSSCRaid(r){return /serpent|ssc/i.test(r?.name||'');}
+// Compute evenly-spread positions: melee outer ring, ranged inner ring,
+// tanks at thirds, healers at fifths, raid groups kept together, DPS balanced per third.
+function computeVashjSpread(r){
+  const cx=400, cy=400;
+  const R={healer:150, ranged:232, melee:312, tank:340};
+  const polar=(deg,rad)=>{const t=deg*Math.PI/180;return [cx+rad*Math.sin(t), cy-rad*Math.cos(t)];}; // 0=top, clockwise
+  const groupOf=(n)=>{const gs=r.raidGroups||[];for(let i=0;i<gs.length;i++)if((gs[i]||[]).includes(n))return i;return 99;};
+  const byRole={Tank:[],Healer:[],Melee:[],Ranged:[]};
+  (r.confirmed||[]).forEach(n=>{const role=raidRole(r,n)||'Melee';(byRole[role]||byRole.Melee).push(n);});
+  // keep groups together
+  Object.values(byRole).forEach(arr=>arr.sort((a,b)=>groupOf(a)-groupOf(b)||a.localeCompare(b)));
+  const pts=[];
+  const sectorCenters=[60,180,300]; // middle of each third — tanks sit here, DPS spread around
+  // Tanks → middle of each third (2 / 6 / 10 o'clock); extra tanks nudged off-centre
+  byRole.Tank.forEach((n,i)=>{const[x,y]=polar(sectorCenters[i%3]+(i>=3?22:0),R.tank);pts.push({name:n,role:'Tank',x,y});});
+  // Healers → fifths (evenly, whatever the count)
+  const hN=byRole.Healer.length;
+  byRole.Healer.forEach((n,i)=>{const[x,y]=polar((360/Math.max(hN,1))*i+36,R.healer);pts.push({name:n,role:'Healer',x,y});});
+  // Balance DPS EQUALLY across the three thirds (priority over groups). Greedily put each
+  // DPS into the third with the fewest so far — keeps every section's total within 1.
+  const nMelee=byRole.Melee.length, nRanged=byRole.Ranged.length;
+  const sectionTotal=[0,0,0], meleeCounts=[0,0,0], rangedCounts=[0,0,0];
+  for(let i=0;i<nMelee;i++){const s=sectionTotal.indexOf(Math.min(...sectionTotal));meleeCounts[s]++;sectionTotal[s]++;}
+  for(let i=0;i<nRanged;i++){const s=sectionTotal.indexOf(Math.min(...sectionTotal));rangedCounts[s]++;sectionTotal[s]++;}
+  // Spread each third's DPS AROUND the tank (alternating left/right of the centre so they
+  // never sit on top of it).
+  const distribute=(arr,rad,roleName,counts)=>{
+    let idx=0;
+    for(let s=0;s<3;s++){
+      const k=counts[s]; if(!k)continue;
+      const chunk=arr.slice(idx,idx+k); idx+=k;
+      // Keep DPS within ±46° of the third centre → ≥14° clear of the dividers (at ±60°),
+      // which also stops DPS in adjacent thirds from colliding near a divider line.
+      const C=sectorCenters[s], gap=16, sideSpan=30;
+      const leftN=Math.ceil(k/2), rightN=k-leftN;
+      chunk.forEach((n,j)=>{
+        const side=j%2===0?-1:1;               // left, right, left, right…
+        const i=Math.floor(j/2);
+        const cnt=side<0?leftN:rightN;
+        const off=cnt<=1?gap+sideSpan/2:gap+sideSpan*(i/(cnt-1));
+        const[x,y]=polar(C+side*off,rad);
+        pts.push({name:n,role:roleName,x,y});
+      });
+    }
+  };
+  distribute(byRole.Melee,R.melee,'Melee',meleeCounts);
+  distribute(byRole.Ranged,R.ranged,'Ranged',rangedCounts);
+  // Manual position overrides set by the RL (drag-to-place) win over the computed layout
+  if(r.vashjPos) pts.forEach(p=>{const o=r.vashjPos[p.name]; if(o&&typeof o.x==='number'&&typeof o.y==='number'){p.x=o.x;p.y=o.y;}});
+  return pts;
+}
+function buildVashjSVG(pts, highlight, draggable){
+  const cx=400,cy=400;
+  const hl=(highlight||'').toLowerCase();
+  const oct=[];for(let i=0;i<8;i++){const a=(i*45+22.5)*Math.PI/180;oct.push((cx+362*Math.cos(a)).toFixed(1)+','+(cy+362*Math.sin(a)).toFixed(1));}
+  const rings=[150,232,312,340].map(rad=>`<circle cx="${cx}" cy="${cy}" r="${rad}" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`).join('');
+  // Divider lines at 12 / 4 / 8 o'clock — clearly visible so the thirds read at a glance
+  const sectors=[0,120,240].map(d=>{const t=d*Math.PI/180;return `<line x1="${cx}" y1="${cy}" x2="${(cx+362*Math.sin(t)).toFixed(1)}" y2="${(cy-362*Math.cos(t)).toFixed(1)}" stroke="rgba(245,200,120,.45)" stroke-width="2.5" stroke-dasharray="9 7"/>`;}).join('');
+  // Entrance marker BELOW the arena (a tank now sits in the bottom third)
+  const entrance=`<g><polygon points="${cx-8},800 ${cx+8},800 ${cx},786" fill="#f5a623"/><line x1="${cx}" y1="800" x2="${cx}" y2="822" stroke="#f5a623" stroke-width="3"/><text x="${cx}" y="843" font-size="16" fill="#f5a623" text-anchor="middle" style="font-weight:700;letter-spacing:.08em;paint-order:stroke;stroke:#0a0c11;stroke-width:3.5px">ENTRANCE</text></g>`;
+  // Body = a translatable group (circle + role icon), keyed by name so it can be dragged.
+  const body=(p)=>{
+    const col=p.role==='Tank'?'#3b82c4':p.role==='Healer'?'#2e9e57':'#c0392b';
+    const emoji=p.role==='Tank'?'🛡️':p.role==='Healer'?'✚':p.role==='Melee'?'⚔️':'🏹';
+    const me=hl&&p.name.toLowerCase()===hl;
+    return `<g class="vbody" data-name="${p.name}" transform="translate(${p.x.toFixed(1)},${p.y.toFixed(1)})"${draggable?' style="cursor:grab"':''}>`
+      +(me?`<circle r="24" fill="rgba(245,166,35,.18)" stroke="#f5a623" stroke-width="3"/>`:'')
+      +`<circle r="15" fill="${col}" stroke="${me?'#f5a623':'rgba(0,0,0,.55)'}" stroke-width="${me?'2.5':'1.5'}"/>`
+      +`<text y="5" font-size="14" text-anchor="middle" style="pointer-events:none">${emoji}</text></g>`;
+  };
+  // Name labels in a SECOND pass so they sit on top of all icons. pointer-events:none so the
+  // body under them stays the drag target. Keyed by name so drag can move them in sync.
+  const label=(p)=>{const me=hl&&p.name.toLowerCase()===hl;return `<text class="vlabel" data-name="${p.name}" x="${p.x.toFixed(1)}" y="${(p.y+29).toFixed(1)}" font-size="${me?'13':'12'}" fill="${me?'#f5a623':'#f3f3f3'}" text-anchor="middle" style="pointer-events:none;paint-order:stroke;stroke:#0a0c11;stroke-width:4px;font-weight:${me?'800':'700'}">${p.name}${me?' (You)':''}</text>`;};
+  return `<svg viewBox="0 0 800 855" style="width:100%;height:auto;touch-action:none;background:radial-gradient(circle at center,rgba(36,86,62,.3),rgba(10,16,18,.55))">`
+    +`<polygon points="${oct.join(' ')}" fill="rgba(55,90,68,.12)" stroke="rgba(120,170,135,.28)" stroke-width="2"/>`
+    +rings+sectors+entrance
+    +`<circle cx="${cx}" cy="${cy}" r="26" fill="rgba(124,111,224,.22)" stroke="var(--acc)" stroke-width="2"/>`
+    +`<text x="${cx}" y="${cy+6}" font-size="22" text-anchor="middle">🐍</text>`
+    +`<text x="${cx}" y="${cy+45}" font-size="11" fill="var(--acc)" text-anchor="middle" style="paint-order:stroke;stroke:#0a0c11;stroke-width:3px">Vashj</text>`
+    +pts.map(body).join('')   /* all icons first */
+    +pts.map(label).join('')  /* then all names on top */
+    +`</svg>`;
+}
+// Attach drag-to-reposition behaviour (managers only) to a Vashj spread SVG.
+function attachVashjDrag(svg, raidId, highlight){
+  const r=raidSchedule.find(x=>x.id===raidId); if(!r) return;
+  let dragName=null;
+  const toSvg=(evt)=>{const pt=svg.createSVGPoint();pt.x=evt.clientX;pt.y=evt.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse());};
+  svg.addEventListener('pointerdown',e=>{
+    const g=e.target.closest('.vbody'); if(!g)return;
+    dragName=g.getAttribute('data-name'); g.style.cursor='grabbing';
+    try{svg.setPointerCapture(e.pointerId);}catch(_){}
+    e.preventDefault();
+  });
+  svg.addEventListener('pointermove',e=>{
+    if(!dragName)return;
+    const c=toSvg(e);
+    const g=svg.querySelector('.vbody[data-name="'+CSS.escape(dragName)+'"]');
+    const lab=svg.querySelector('.vlabel[data-name="'+CSS.escape(dragName)+'"]');
+    if(g)g.setAttribute('transform','translate('+c.x.toFixed(1)+','+c.y.toFixed(1)+')');
+    if(lab){lab.setAttribute('x',c.x.toFixed(1));lab.setAttribute('y',(c.y+29).toFixed(1));}
+  });
+  const end=e=>{
+    if(!dragName)return;
+    const c=toSvg(e); const nm=dragName; dragName=null;
+    if(!r.vashjPos)r.vashjPos={};
+    r.vashjPos[nm]={x:Math.round(c.x),y:Math.round(c.y)};
+    saveRaids();
+    openVashjSpread(raidId, highlight); // re-render with the saved position
+  };
+  svg.addEventListener('pointerup',end);
+  svg.addEventListener('pointercancel',()=>{dragName=null;});
+}
+function resetVashjPositions(raidId){
+  if(!canManageRaids())return;
+  const r=raidSchedule.find(x=>x.id===raidId);if(!r)return;
+  delete r.vashjPos; saveRaids();
+  openVashjSpread(raidId);
+  toast('Positions reset to auto-layout','ok');
+}
+function nextSSCRaid(){
+  const up=raidSchedule.filter(r=>isSSCRaid(r)&&(!isPast(r.date)||r.date===todayKey())).sort((a,b)=>a.date.localeCompare(b.date));
+  return up.find(r=>r.confirmed?.length) || up[0] || raidSchedule.filter(isSSCRaid).sort((a,b)=>b.date.localeCompare(a.date))[0] || null;
+}
+function openVashjSpreadForPlayer(name){
+  const r=nextSSCRaid();
+  if(!r){toast('No Serpent Shrine raid scheduled','err');return;}
+  if(!r.confirmed?.length){toast('No confirmed roster for the SSC raid yet','err');return;}
+  openVashjSpread(r.id, name);
+}
+function openVashjSpread(raidId, highlight){
+  const r=raidSchedule.find(x=>x.id===raidId); if(!r) return;
+  if(!r.confirmed||!r.confirmed.length){toast('No confirmed roster to arrange','err');return;}
+  const canEdit=canManageRaids();
+  const pts=computeVashjSpread(r);
+  let m=document.getElementById('vashj-modal');
+  if(!m){m=document.createElement('div');m.id='vashj-modal';m.style.cssText='position:fixed;inset:0;z-index:1000;background:rgba(5,7,12,.93);display:flex;align-items:center;justify-content:center;padding:14px';m.onclick=(e)=>{if(e.target===m)closeVashjSpread();};document.body.appendChild(m);}
+  m.innerHTML=`<div style="max-width:780px;width:100%;max-height:96vh;overflow:auto;background:var(--bg1);border:1px solid var(--borderl);border-radius:var(--r);padding:14px" onclick="event.stopPropagation()">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+      <div style="font-family:Cinzel,serif;font-size:15px;color:var(--gold)"><i class="ti ti-droplet"></i> Lady Vashj — Phase 2 Spread</div>
+      <div style="display:flex;gap:6px">
+        ${canEdit&&r.vashjPos&&Object.keys(r.vashjPos).length?`<button class="btn btn-sm" onclick="resetVashjPositions('${r.id}')"><i class="ti ti-refresh"></i> Reset</button>`:''}
+        <button class="btn btn-sm" onclick="closeVashjSpread()"><i class="ti ti-x"></i> Close</button>
+      </div>
+    </div>
+    <div style="font-size:11px;color:var(--t3);margin-bottom:8px">${highlight?'<strong style="color:#f5a623">Your spot is highlighted.</strong> ':''}${canEdit?'<strong style="color:#5DCAA5">Drag any token to reposition — players will see your layout.</strong> ':''}Melee outer · Ranged inner · tanks at thirds · DPS balanced across thirds.</div>
+    ${buildVashjSVG(pts, highlight, canEdit)}
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--t2)">
+      <span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#3b82c4;vertical-align:middle"></span> 🛡️ Tank</span>
+      <span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#c0392b;vertical-align:middle"></span> ⚔️ Melee</span>
+      <span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#c0392b;vertical-align:middle"></span> 🏹 Ranged</span>
+      <span><span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#2e9e57;vertical-align:middle"></span> ✚ Healer</span>
+    </div>
+  </div>`;
+  m.style.display='flex';
+  if(canEdit){const svg=m.querySelector('svg'); if(svg) attachVashjDrag(svg, raidId, highlight);}
+}
+function closeVashjSpread(){const m=document.getElementById('vashj-modal');if(m)m.style.display='none';}
 function roleEmojiRaw(role){
   return role==='Healer'?'<span style="color:#43c46f;font-weight:900">✚</span>'
     : role==='Tank'?'🛡️' : role==='Melee'?'⚔️' : role==='Ranged'?'🏹' : '<span style="opacity:.45">❔</span>';
@@ -5657,6 +5825,7 @@ function fullRaidCard(r,highlight){
     ${(()=>{const c=signupControlsHTML(r);return c?`<div style="margin-bottom:8px">${c}</div>`:'';})()}
     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
       <button class="btn btn-sm" onclick="addToICal('${r.id}')"><i class="ti ti-calendar-plus"></i>Add to calendar</button>
+      ${isSSCRaid(r)&&r.confirmed.length?`<button class="btn btn-sm" onclick="openVashjSpread('${r.id}')" style="background:rgba(93,202,165,.12);border-color:rgba(93,202,165,.35);color:#5DCAA5"><i class="ti ti-arrows-shuffle"></i> Vashj P2 Spread</button>`:''}
       ${canManageRaids()&&!past&&isKaraRaid(r)?`<button class="btn btn-sm" onclick="toggleOperaGamble('${r.id}')" style="${r.operaGamble?.enabled?'background:rgba(212,175,55,.16);border-color:rgba(212,175,55,.45);color:var(--gold)':''}">🎭 ${r.operaGamble?.enabled?'Close Opera Gamble':'Opera Gamble'}</button>`:''}
       ${canManageRaids()&&!past?`<button class="btn btn-w btn-sm" onclick="postRoster('${r.id}')"><i class="ti ti-list"></i>${r.rosterPosted?'Update roster':'Post roster'}</button>`:''}
       ${canManageRaids()&&!past?`<button class="btn btn-sm" onclick="togglePUG('${r.id}')"><i class="ti ti-users"></i>${r.pug?'Remove PUG':'Mark PUG'}</button>`:''}
@@ -6487,7 +6656,7 @@ function _fbSync(arr,data){arr.length=0;data.forEach(x=>arr.push(x));}
 function applyFirebaseKey(key,data){
   _fbIgnore=true;
   try{
-    if(key==='raids'){if(data&&typeof data==='object'){const d=_fbArr(data).map(r=>r?({...r,signedUp:r.signedUp?_fbArr(r.signedUp):[],confirmed:r.confirmed?_fbArr(r.confirmed):[],attended:r.attended?_fbArr(r.attended):[],signupStatus:r.signupStatus&&typeof r.signupStatus==='object'?{...r.signupStatus}:{},assignments:(()=>{const a=r.assignments||{};const tl=a.tankList?_fbArr(a.tankList):[a.MT,a.OT1,a.OT2].filter(Boolean);return{...a,tankList:tl,healerTargets:a.healerTargets||{}};})(),raidGroups:(()=>{const ng=r.max<=10?2:5;return Array.from({length:ng},(_,i)=>{const g=(r.raidGroups||{})[i];return g?_fbArr(g):[];});})()} ):null).filter(Boolean);raidSchedule=d;normalizeRaidStatuses();try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();}
+    if(key==='raids'){if(data&&typeof data==='object'){const d=_fbArr(data).map(r=>r?({...r,signedUp:r.signedUp?_fbArr(r.signedUp):[],confirmed:r.confirmed?_fbArr(r.confirmed):[],attended:r.attended?_fbArr(r.attended):[],signupStatus:r.signupStatus&&typeof r.signupStatus==='object'?{...r.signupStatus}:{},assignments:(()=>{const a=r.assignments||{};const tl=a.tankList?_fbArr(a.tankList):[a.MT,a.OT1,a.OT2].filter(Boolean);return{...a,tankList:tl,healerTargets:a.healerTargets||{}};})(),raidGroups:(()=>{const ng=r.max<=10?2:5;return Array.from({length:ng},(_,i)=>{const g=(r.raidGroups||{})[i];return g?_fbArr(g):[];});})()} ):null).filter(Boolean);raidSchedule=d;normalizeRaidStatuses();try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();if(document.getElementById('pov-search')?.value)renderPOV?.();}
     else if(key==='roster'){if(data&&typeof data==='object'){const d=_fbArr(data).map(p=>p?({...p,dispel:p.dispel?_fbArr(p.dispel):[]}):null).filter(Boolean);_fbSync(ROSTER,d);normalizeRosterRoles();try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}}renderRoster?.();renderAttendance?.();renderRoles?.();renderRes?.();renderProfiles?.();}
     else if(key==='vortex'){if(data&&typeof data==='object'){Object.assign(vortexCounts,data);try{localStorage.setItem('boogalo-vortex',JSON.stringify(vortexCounts));}catch(e){}}renderVortex?.();}
     else if(key==='weights'){if(data&&typeof data==='object'){Object.keys(playerWeights).forEach(k=>delete playerWeights[k]);Object.assign(playerWeights,data);try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}}}
