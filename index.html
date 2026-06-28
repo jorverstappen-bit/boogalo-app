@@ -4579,13 +4579,15 @@ const resType=player.resFrost?'frost':player.resNature?'nature':player.resFire?'
 const svgId=boss.id+'-'+effRole+(resType||'');
 let svgHtml='';
 if(boss.id==='vashj'){
-  // Lady Vashj now uses the live Phase-2 raid spread (built from the SSC roster), your spot highlighted.
-  const sr=nextSSCRaid();
+  // Lady Vashj uses the live Phase-2 raid spread (built from the SSC roster), this player's spot highlighted.
+  const sr=sscRaidForPlayer(playerName);
+  const inRoster=sr&&sr.confirmed?.includes(playerName);
   svgHtml=(sr&&sr.confirmed?.length)?`<div style="margin-top:8px">
     <div style="font-size:10px;color:var(--t3);margin-bottom:4px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px">
-      <span><i class="ti ti-arrows-shuffle"></i> Phase 2 raid spread — ${sr.name}, ${fmtKey(sr.date)} · your spot highlighted</span>
-      <button class="btn btn-sm" style="font-size:10px;padding:2px 8px;background:rgba(93,202,165,.12);border-color:rgba(93,202,165,.35);color:#5DCAA5" onclick="openVashjSpreadForPlayer('${playerName}')"><i class="ti ti-maximize"></i> Full screen</button>
+      <span><i class="ti ti-arrows-shuffle"></i> Phase 2 raid spread — ${sr.name}, ${fmtKey(sr.date)}${inRoster?' · your spot highlighted':''}</span>
+      <button class="btn btn-sm" style="font-size:10px;padding:2px 8px;background:rgba(93,202,165,.12);border-color:rgba(93,202,165,.35);color:#5DCAA5" onclick="openVashjSpread('${sr.id}','${playerName}')"><i class="ti ti-maximize"></i> Full screen</button>
     </div>
+    ${inRoster?'':`<div style="font-size:10px;color:var(--ora);margin-bottom:4px"><i class="ti ti-info-circle"></i> ${playerName} isn't in this raid's confirmed roster yet — get confirmed to get a spot.</div>`}
     ${buildVashjSVG(computeVashjSpread(sr), playerName)}
   </div>`:`<div style="margin-top:8px;font-size:11px;color:var(--t3)"><i class="ti ti-arrows-shuffle"></i> Phase 2 raid spread appears here once a Serpent Shrine raid has a confirmed roster.</div>`;
 } else if(boss.id==='kaelthas'||boss.id==='opera'){
@@ -5323,6 +5325,12 @@ function nextSSCRaid(){
   const up=raidSchedule.filter(r=>isSSCRaid(r)&&(!isPast(r.date)||r.date===todayKey())).sort((a,b)=>a.date.localeCompare(b.date));
   return up.find(r=>r.confirmed?.length) || up[0] || raidSchedule.filter(isSSCRaid).sort((a,b)=>b.date.localeCompare(a.date))[0] || null;
 }
+// Best SSC raid to show a given player: soonest upcoming where THEY are confirmed,
+// else soonest with any confirmed roster, else soonest scheduled.
+function sscRaidForPlayer(name){
+  const up=raidSchedule.filter(r=>isSSCRaid(r)&&(!isPast(r.date)||r.date===todayKey())).sort((a,b)=>a.date.localeCompare(b.date));
+  return up.find(r=>r.confirmed?.includes(name)) || up.find(r=>r.confirmed?.length) || up[0] || null;
+}
 function openVashjSpreadForPlayer(name){
   const r=nextSSCRaid();
   if(!r){toast('No Serpent Shrine raid scheduled','err');return;}
@@ -5825,7 +5833,7 @@ function fullRaidCard(r,highlight){
     ${(()=>{const c=signupControlsHTML(r);return c?`<div style="margin-bottom:8px">${c}</div>`:'';})()}
     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
       <button class="btn btn-sm" onclick="addToICal('${r.id}')"><i class="ti ti-calendar-plus"></i>Add to calendar</button>
-      ${isSSCRaid(r)&&r.confirmed.length?`<button class="btn btn-sm" onclick="openVashjSpread('${r.id}')" style="background:rgba(93,202,165,.12);border-color:rgba(93,202,165,.35);color:#5DCAA5"><i class="ti ti-arrows-shuffle"></i> Vashj P2 Spread</button>`:''}
+      ${isSSCRaid(r)&&r.confirmed.length?`<button class="btn btn-sm" onclick="openVashjSpread('${r.id}'${isNamed()?`,'${CURRENT_USER.name}'`:''})" style="background:rgba(93,202,165,.12);border-color:rgba(93,202,165,.35);color:#5DCAA5"><i class="ti ti-arrows-shuffle"></i> Lady Vashj Setup${isNamed()?' — my spot':''}</button>`:''}
       ${canManageRaids()&&!past&&isKaraRaid(r)?`<button class="btn btn-sm" onclick="toggleOperaGamble('${r.id}')" style="${r.operaGamble?.enabled?'background:rgba(212,175,55,.16);border-color:rgba(212,175,55,.45);color:var(--gold)':''}">🎭 ${r.operaGamble?.enabled?'Close Opera Gamble':'Opera Gamble'}</button>`:''}
       ${canManageRaids()&&!past?`<button class="btn btn-w btn-sm" onclick="postRoster('${r.id}')"><i class="ti ti-list"></i>${r.rosterPosted?'Update roster':'Post roster'}</button>`:''}
       ${canManageRaids()&&!past?`<button class="btn btn-sm" onclick="togglePUG('${r.id}')"><i class="ti ti-users"></i>${r.pug?'Remove PUG':'Mark PUG'}</button>`:''}
