@@ -448,6 +448,8 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'tk')"><i class="ti ti-bolt"></i><span>Tempest Keep</span></div>
       <div class="ni" onclick="nav(this,'ssc')"><i class="ti ti-droplet"></i><span>Serpent Shrine</span></div>
       <div class="ni" onclick="nav(this,'kara')"><i class="ti ti-building-castle"></i><span>Karazhan</span></div>
+      <div class="ni" onclick="nav(this,'hyjal')"><i class="ti ti-mountain"></i><span>Mount Hyjal</span></div>
+      <div class="ni" onclick="nav(this,'bt')"><i class="ti ti-building-castle"></i><span>Black Temple</span></div>
     </div>
     <div class="sbs"><div class="sbl">Analysis</div>
       <div class="ni" onclick="nav(this,'profiles')"><i class="ti ti-user-circle"></i><span>Profiles</span></div>
@@ -488,6 +490,8 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'tk')"><i class="ti ti-bolt"></i><span>Tempest Keep</span></div>
       <div class="ni" onclick="nav(this,'ssc')"><i class="ti ti-droplet"></i><span>Serpent Shrine</span></div>
       <div class="ni" onclick="nav(this,'kara')"><i class="ti ti-building-castle"></i><span>Karazhan</span></div>
+      <div class="ni" onclick="nav(this,'hyjal')"><i class="ti ti-mountain"></i><span>Mount Hyjal</span></div>
+      <div class="ni" onclick="nav(this,'bt')"><i class="ti ti-building-castle"></i><span>Black Temple</span></div>
     </div>
     <div class="sbs"><div class="sbl">My Account</div>
       <div class="ni" onclick="nav(this,'signup')"><i class="ti ti-forms"></i><span>Apply for Raid</span></div>
@@ -511,6 +515,8 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'tk')"><i class="ti ti-bolt"></i><span>Tempest Keep</span></div>
       <div class="ni" onclick="nav(this,'ssc')"><i class="ti ti-droplet"></i><span>Serpent Shrine</span></div>
       <div class="ni" onclick="nav(this,'kara')"><i class="ti ti-building-castle"></i><span>Karazhan</span></div>
+      <div class="ni" onclick="nav(this,'hyjal')"><i class="ti ti-mountain"></i><span>Mount Hyjal</span></div>
+      <div class="ni" onclick="nav(this,'bt')"><i class="ti ti-building-castle"></i><span>Black Temple</span></div>
     </div>
     <div class="sbs"><div class="sbl">Analysis</div>
       <div class="ni" onclick="nav(this,'profiles')"><i class="ti ti-user-circle"></i><span>Profiles</span></div>
@@ -707,6 +713,8 @@ tr:hover td{background:rgba(255,255,255,.013)}
         <option value="tk">Tempest Keep</option>
         <option value="ssc">Serpent Shrine</option>
         <option value="kara">Karazhan</option>
+        <option value="hyjal">Mount Hyjal</option>
+        <option value="bt">Black Temple</option>
       </select>
     </div>
     <div class="fg" style="min-width:160px;flex:1;margin-bottom:0">
@@ -856,6 +864,8 @@ tr:hover td{background:rgba(255,255,255,.013)}
 <div class="page" id="page-tk"><div class="ph"><div class="pt">Tempest Keep — The Eye</div><div class="ps">Al'ar · Void Reaver · Solarian · Kael'thas</div></div><div id="tk-content"></div></div>
 <div class="page" id="page-ssc"><div class="ph"><div class="pt">Serpent Shrine Cavern</div><div class="ps">Hydross · Lurker · Leotheras · Karathress · Morogrim · Lady Vashj</div></div><div id="ssc-content"></div></div>
 <div class="page" id="page-kara"><div class="ph"><div class="pt">Karazhan</div><div class="ps">Full 10-player raid — Attumen through Nightbane</div></div><div id="kara-content"></div></div>
+<div class="page" id="page-hyjal"><div class="ph"><div class="pt">Mount Hyjal</div><div class="ps">Rage Winterchill · Anetheron · Kaz'rogal · Azgalor · Archimonde</div></div><div id="hyjal-content"></div></div>
+<div class="page" id="page-bt"><div class="ph"><div class="pt">Black Temple</div><div class="ps">Naj'entus · Supremus · Shade of Akama · Teron Gorefiend · Gurtogg Bloodboil · Reliquary of Souls · Mother Shahraz · Illidari Council · Illidan Stormrage</div></div><div id="bt-content"></div></div>
 
 <div class="page" id="page-profiles">
   <div class="ph"><div class="pt">Player Profiles</div><div class="ps">Full history, alts, stats, and assignment details per player</div></div>
@@ -1606,6 +1616,94 @@ kara:[
    special:[{label:'Skeleton killers',players:['Cakemon','Csoti','Mantine']},{label:'Tremor Totem',players:['Vvambull','Swagmon']}],
    tactics:{Tank:"P1: tank facing away. P2: adds tank picks up skeletons immediately. MT retaunts on landing.",Healer:"P2: raid heals for Charred Earth AoE. Fear Ward on MT before EVERY air phase (~90s CD) — reapply on landing.",Melee:"P2: kill skeletons fast — priority above boss. P1: DPS boss.",Ranged:"P2: AoE skeletons. Spread for Charred Earth zones."},
    position:{Tank:"MT holds Nightbane in corner of platform. Add tank near spawn point for skeletons.",Healer:"One on MT, one on raid group.",Melee:"Behind Nightbane. Move to skeleton spawns in P2.",Ranged:"Outer platform. Move from Charred Earth circles."}}
+],
+hyjal:[
+  {id:'winterchill',name:'Rage Winterchill',bl:'On pull',note:"First boss, reached after the Alliance-base trash waves. A tank-and-move fight: keep stepping out of Death and Decay. Frost Nova roots the raid (melee trinket/dispel out). Icebolt freezes a random player and is undispellable — just heal them through it. Decurse where possible. Short fight — Bloodlust on pull.",
+   tanks:[{role:'MT',name:''}],
+   healers:[],
+   special:[{label:'Decurse / Frost Nova dispel',players:[]}],
+   tactics:{Tank:"Hold Winterchill at the edge of the pull area, faced away from the raid. Only move him for your own Death and Decay. Keep threat through the slows.",Healer:"Out-heal Icebolt — it's undispellable, so heal the frozen player through the DoT. Top everyone after Frost Nova. Watch raid chip from Death and Decay.",Melee:"Step out of Death and Decay the instant it drops. When Frost Nova roots you, trinket or get dispelled and reposition. Stay slightly spread.",Ranged:"Stay at range and spread. Move out of Death and Decay. Decurse/dispel where you can. Blow cooldowns on pull — it's a short race."},
+   position:{Tank:"Boss parked at one side, faced away from the raid.",Healer:"Spread behind the boss, ready to slide out of Death and Decay pools.",Melee:"On the boss; hop out of Death and Decay immediately when it lands under you.",Ranged:"Wide spread at max range, clear of Death and Decay."}},
+  {id:'anetheron',name:'Anetheron',bl:'On pull',note:"Tank faces the boss away — Carrion Swarm is a frontal cone that also reduces healing received. Sleep puts a random player to sleep — wake/dispel them fast. Inferno drops Infernals from the sky that do heavy AoE: move out of the landing zone; an offtank/hunter slows or kites them away. Vampiric Aura heals the boss from damage it deals.",
+   tanks:[{role:'MT',name:''},{role:'Infernal OT / kiter',name:''}],
+   healers:[],
+   special:[{label:'Dispel Sleep',players:[]},{label:'Infernal slow/kite',players:[]}],
+   tactics:{Tank:"MT faces Anetheron away from the raid for Carrion Swarm. The Infernal OT (or a hunter) picks up / slows each Infernal and drags it away from the group.",Healer:"Carrion Swarm cuts healing — pre-empt with big heals and HoTs. Dispel Sleep immediately. Keep moving out of Infernal AoE.",Melee:"Never stand in the frontal cone. Move out of an Infernal's AoE the moment it lands. Help control or burn Infernals if assigned.",Ranged:"Spread for Sleep and dispel it on others. Slow/kite Infernals to the edge. Stay out of the boss's front arc."},
+   position:{Tank:"Boss faced away from the raid at the edge. OT stages where Infernals land.",Healer:"Spread behind the boss and stay mobile — relocate away from Infernals.",Melee:"Behind the boss; reposition when an Infernal lands nearby.",Ranged:"Wide spread; assigned players herd Infernals to the outside."}},
+  {id:'kazrogal',name:"Kaz'rogal",bl:'On pull / at soft enrage',note:"Mark of Kaz'rogal drains your mana; when it hits 0 it explodes for heavy raid AoE and re-applies to others. Mana users intentionally dump mana (Life Tap, pots, just cast) so the explosion happens while topped, or get the Mark dispelled. War Stomp is an AoE stun; Malevolent Cleave is a frontal. It's a DPS/mana race — kill him before too many Marks stack.",
+   tanks:[{role:'MT',name:''}],
+   healers:[],
+   special:[{label:'Mark dispellers',players:[]}],
+   tactics:{Tank:"Face Kaz'rogal away from the raid (Malevolent Cleave). Hold position through War Stomp. Pop cooldowns as Marks stack toward the end.",Healer:"Top the raid after every Mark explosion. Manage your own mana — you'll be Marked too. Heal through War Stomp stuns.",Melee:"Full DPS — it's a burn race. Expect a heal lull right after a Mark explosion. Bloodlust to beat the soft enrage.",Ranged:"Manage mana: drop low before a Mark forces an explosion at full mana, or get it dispelled. Spread for War Stomp. Burn hard."},
+   position:{Tank:"Boss parked at the edge, faced away from the raid.",Healer:"Spread within range and not stacked — Mark explosions are AoE.",Melee:"On the boss, slightly spread.",Ranged:"Spread at range, clear of melee."}},
+  {id:'azgalor',name:'Azgalor',bl:'On pull',note:"Doom is cast on a random player — after ~20s that player dies and spawns a Lesser Doomguard (undispellable). Doomed players move to the designated kill spot; an offtank grabs the Doomguard and the raid burns it. Move out of Rain of Fire. Howl of Azgalor is an AoE silence — casters reposition out of it. MT faces the boss away (Cleave).",
+   tanks:[{role:'MT',name:''},{role:'Doomguard OT',name:''}],
+   healers:[],
+   special:[{label:'Doomguard tank/kill',players:[]}],
+   tactics:{Tank:"MT faces Azgalor away for Cleave. The Doomguard OT immediately grabs each Lesser Doomguard that spawns from Doom and holds it for the raid to kill.",Healer:"Heal through Rain of Fire chip. Howl silences — pre-cast HoTs/shields before it. Keep the Doomguard tank topped.",Melee:"Move out of Rain of Fire. If you get Doom, walk to the assigned spot before it expires so the Doomguard spawns safely, then help kill it.",Ranged:"Spread for Howl and reposition when silenced. Doomed players move to the kill spot. Swap to Doomguards on call."},
+   position:{Tank:"Azgalor faced away from the raid. Doomguard OT stages at the designated add spot.",Healer:"Spread behind the boss; slide out of Rain of Fire.",Melee:"On the boss; relocate out of Rain of Fire pools.",Ranged:"Wide spread; doomed players run to the add spot before they die."}},
+  {id:'archimonde',name:'Archimonde',bl:'Final phase / execute',note:"EVERYONE picks up and carries Tears of the Goddess — use it when Air Burst throws you into the air to slow your fall (the landing is otherwise fatal). Doomfire is a fire trail that chases a random player — run it around the raid's edge, never through the group. Grip of the Legion is a dispellable DoT. Finger of Death hits anyone who strays too far/isolates — stay near the raid. Every death gives Archimonde a Soul Charge he releases as an AoE, so minimise deaths.",
+   tanks:[{role:'MT',name:''}],
+   healers:[],
+   special:[{label:'Doomfire kiters',players:[]},{label:'Grip of the Legion dispellers',players:[]}],
+   tactics:{Tank:"Hold Archimonde still in the center. Stay topped — he hits hard. Use your Tears on Air Burst like everyone else.",Healer:"Dispel Grip of the Legion fast. Pre-heal before Air Burst. Use Tears on Air Burst. Keep everyone high — each death feeds a Soul Charge.",Melee:"USE TEARS OF THE GODDESS when Air Burst launches you or you die on landing. Run from Doomfire — never drag it through the raid. Stay close to the group (Finger of Death).",Ranged:"Carry and use Tears on Air Burst. If Doomfire targets you, kite it around the outside. Dispel Grip. Don't isolate — stay in range so Finger of Death doesn't pick you."},
+   position:{Tank:"Archimonde in the dead center of the platform; the raid spreads around him.",Healer:"Spread evenly around the boss, mobile for Air Burst and Doomfire.",Melee:"On the boss; run Doomfire outward and return.",Ranged:"Even spread around the center — never stray to the far edges (Finger of Death)."}}
+],
+bt:[
+  {id:'najentus',name:"High Warlord Naj'entus",bl:'On pull',note:"A spine-management fight. Impaling Spine impales a random player (rooted and taking heavy damage) — a Naj'entus Spine drops on the ground; pick it up and use it on the impaled player to free them. Tidal Shield periodically shields the boss; the raid must throw spines at him to shatter the shield, or he unleashes Needle Spine Volley across the whole raid. Keep spines flowing — assign people to free impaled players and break shields.",
+   tanks:[{role:'MT',name:''}],
+   healers:[],
+   special:[{label:'Spine throwers (free impaled / break shield)',players:[]}],
+   tactics:{Tank:"Standard tank-and-hold. Face the boss away from the raid. Stay topped — he hits hard between spine mechanics.",Healer:"Burst-heal impaled players until a spine frees them. Pre-heal before Tidal Shield breaks — Needle Spine Volley is raid-wide. Watch Crashing Wave chip.",Melee:"Grab a dropped Naj'entus Spine and free impaled players, then throw spines at the boss to break Tidal Shield. DPS in between.",Ranged:"Same spine duty — pick up spines, free the impaled, and shatter Tidal Shield fast before Needle Spine Volley fires. Spread out."},
+   position:{Tank:"Boss held in place, faced away from the raid.",Healer:"Within range of impaled targets; spread for Needle Spine Volley.",Melee:"On the boss; break off to grab spines as needed.",Ranged:"Spread at range, ready to retrieve spines and break the shield."}},
+  {id:'supremus',name:'Supremus',bl:'On chase phase',note:"Two phases that alternate. Tank phase: stand and burn while Molten Flame geysers erupt from the ground — move out of them. Chase phase: Supremus fixates a random player and chases them at high speed (un-tankable) while Volcanic Geysers spawn under the raid — everyone kites the boss in a slow circle and dodges geysers until it reverts to tank phase. Molten Punch knockback throughout.",
+   tanks:[{role:'MT',name:''}],
+   healers:[],
+   special:[{label:'Kite caller',players:[]}],
+   tactics:{Tank:"Hold the boss in tank phase, faced away. In chase phase you can't hold him — disengage and let the fixated player kite. Re-grab when tank phase resumes.",Healer:"Keep the fixated kiter alive in chase phase. Move constantly out of Volcanic Geysers and Molten Flame. Stay mobile and within range of the kite path.",Melee:"Burn in tank phase, dodging Molten Flame. In chase phase keep DPS on the boss while moving with the kite and avoiding geysers.",Ranged:"Spread and avoid geysers. In chase phase keep distance and follow the kite circle. If fixated, run the boss along the planned path — don't drag him through the raid."},
+   position:{Tank:"Boss tanked in the open in tank phase; hands off during chase.",Healer:"Mobile, following the kite route, clear of geysers.",Melee:"On the boss but ready to run during chase phase.",Ranged:"Loose spread; everyone kites a slow circle in chase phase."}},
+  {id:'akama',name:'Shade of Akama',bl:'When the Shade is freed',note:"Akama's Shade is held in place by channeling Ashtongue Channelers — the raid kills the Channelers while fending off waves of adds (Defenders, Sorcerers, and Spiritbinders that heal — interrupt Spirit Mend). Once all Channelers die the Shade activates and rushes Akama / the main tank — burn it down fast. Add control and interrupts are the whole fight.",
+   tanks:[{role:'MT (Shade)',name:''},{role:'Add tank',name:''}],
+   healers:[],
+   special:[{label:'Channeler killers',players:[]},{label:'Spiritbinder interrupts',players:[]}],
+   tactics:{Tank:"Shade tank waits near Akama to grab the Shade the instant it's freed and holds it for the burn. Add tank picks up Defenders and incoming wave adds away from the channeler line.",Healer:"Keep the add tank up under wave pressure and top Akama. Heavy movement — Sorcerers and adds hit hard. Save cooldowns for when the Shade activates.",Melee:"Kill the Ashtongue Channelers on assignment, then swap to the Shade when it's freed. Help cleave down adds between channelers.",Ranged:"Focus Channelers and interrupt Spiritbinder Spirit Mend — uninterrupted heals reset progress. Burn the Shade on activation."},
+   position:{Tank:"Shade tank up by Akama; add tank holds the choke where adds funnel in.",Healer:"Behind the tanks, mobile, within range of both tank spots.",Melee:"On the channeler line, then collapse on the Shade.",Ranged:"Spread covering the add spawns and channelers; interrupters on Spiritbinders."}},
+  {id:'teron',name:'Teron Gorefiend',bl:'On pull',note:"A straightforward tank fight wrapped around the 'ghost game'. Shadow of Death marks a random player who dies after a timer and becomes a ghost — that player must use the Ghost action bar to kill the Vengeful Spirits and Shadowy Constructs they spawn into, before the constructs overwhelm the raid. Avoid Doom Blossom (spawns above players and casts Shadow Bolt) and Crushing Shadows. Success hinges on everyone knowing how to play the ghost.",
+   tanks:[{role:'MT',name:''}],
+   healers:[],
+   special:[{label:'Ghost players (must know the rotation)',players:[]}],
+   tactics:{Tank:"Tank-and-spank, faced away from the raid. Keep stable threat — DPS will be uneven while people play the ghost. Watch Crushing Shadows.",Healer:"Heal Crushing Shadows damage and the constructs' hits. You may be marked too — be ready to play your own ghost. Top the raid through Doom Blossom Shadow Bolts.",Melee:"When marked by Shadow of Death you WILL die — immediately use the Ghost bar (Spirit Volley / Spirit Lance / Spirit Chains) to kill your Vengeful Spirits and Constructs. Otherwise DPS and dodge Doom Blossom.",Ranged:"Same ghost duty when marked. Between marks, kill any loose Shadowy Constructs and avoid standing under Doom Blossoms."},
+   position:{Tank:"Boss held still, faced away from the raid.",Healer:"Spread within range; reposition away from Doom Blossoms.",Melee:"On the boss; ghosts use their abilities from wherever they died.",Ranged:"Spread to limit Doom Blossom overlap and to handle Constructs."}},
+  {id:'gurtogg',name:'Gurtogg Bloodboil',bl:'On pull',note:"A range-rotation and Fel Rage fight. Bloodboil hits the five players farthest from the boss, so the raid is split into groups that rotate in and out of range to share the debuff stacks. Acidic Wound stacks on the tank. Periodically Gurtogg casts Fel Rage on a random player — he fixates them, becomes hugely buffed, and that player gets enormous health/threat and is effectively the tank while the raid burns him; melee may need to move out during Fel Rage. Eject knockback throughout.",
+   tanks:[{role:'MT',name:''}],
+   healers:[],
+   special:[{label:'Bloodboil group rotation',players:[]}],
+   tactics:{Tank:"Hold threat through stacking Acidic Wound. During Fel Rage the targeted player becomes the 'tank' — re-establish threat the moment Fel Rage ends.",Healer:"Heal stacking Acidic Wound on the MT and burst-heal the Fel Rage target (they take/deal huge damage). Coordinate which healers cover the Fel Rage player. Watch Bloodboil ticks on the far group.",Melee:"Follow the group rotation so Bloodboil lands on the assigned far group, not randomly. During Fel Rage, keep DPS up but mind Eject knockback and positioning.",Ranged:"Rotate in/out of the far-five range on the assigned cadence to share Bloodboil. Spread for Eject. Pour DPS on the Fel Rage target."},
+   position:{Tank:"Boss tanked at a fixed point; raid splits into near and far groups around him.",Healer:"Positioned to cover both the MT and the rotating far group.",Melee:"In melee range except when their group rotates out for Bloodboil.",Ranged:"Two groups swapping the far position on cue."}},
+  {id:'ros',name:'Reliquary of Souls',bl:'Phase 3 (Essence of Anger)',note:"Three sequential Essences with a short run-back between each. Essence of Suffering: a no-heal DPS phase — Aura of Suffering and Soul Drain mean healers contribute little; tank with high HP and burn it (it Fixates and Frenzies). Essence of Desire: healing resumes but it reflects and shields spells (Spell Reflection / Rune Shield) and Deaden increases damage taken — heal hard, watch reflects. Essence of Anger: Soul Scream and Spite — burn it fast before it enrages. Bloodlust the Anger phase.",
+   tanks:[{role:'MT',name:''}],
+   healers:[],
+   special:[{label:'Phase 2 dispel/spell-reflect awareness',players:[]}],
+   tactics:{Tank:"P1 (Suffering): tank with as much HP as possible — little healing comes. P2 (Desire): standard tanking but beware Rune Shield reflect — don't overcommit. P3 (Anger): hold threat through the burn.",Healer:"P1: conserve — you can barely heal (Aura of Suffering). P2: heal aggressively but avoid casting into Rune Shield reflect; manage Deaden damage amp. P3: triage hard and outpace the enrage with the raid.",Melee:"P1: full burn, mind Fixate/Frenzy. P2: DPS but watch spell-reflect if you have casts. P3: Bloodlust and burn before enrage.",Ranged:"P1: heavy DPS. P2: stop casting into Rune Shield when it's up. P3: all-in burn. Reposition during each run-back between Essences."},
+   position:{Tank:"Each Essence tanked roughly center; raid resets position each phase.",Healer:"Spread within range; reposition on each run-back.",Melee:"On the active Essence.",Ranged:"Spread at range; mind spell reflect in the Desire phase."}},
+  {id:'shahraz',name:'Mother Shahraz',bl:'On pull',note:"A healing and movement check. Fatal Attraction teleports three random players together and applies a stacking debuff that ramps damage the longer they stay near each other — they must instantly sprint far apart. Saber Lash splits a huge frontal hit across stacked tanks, so multiple tanks stack to share it. Prismatic Aura cycles random resistance auras, so the raid wants all-resist (Shadow Resistance) gear. Silencing Shriek interrupts casters. Spread is everything.",
+   tanks:[{role:'MT',name:''},{role:'Saber Lash OT',name:''}],
+   healers:[],
+   special:[{label:'Fatal Attraction spread',players:[]}],
+   tactics:{Tank:"Tanks STACK together to split Saber Lash. Hold position and face the boss away. Wear all-resist gear for the Prismatic Aura damage.",Healer:"This is your fight — heal through constant raid damage. The instant Fatal Attraction lands, those three sprint apart; keep them alive while they separate. Watch Silencing Shriek and pre-cast HoTs.",Melee:"Stay spread except the tank stack. If Fatal Attraction grabs you, run directly away from the other two targets immediately — distance kills the debuff.",Ranged:"Spread widely. On Fatal Attraction, run to your assigned far corner. Keep DPS up; Silencing Shriek will interrupt — re-cast after."},
+   position:{Tank:"Tanks stacked together for Saber Lash, boss faced away.",Healer:"Spread around the room with clear lanes to run on Fatal Attraction.",Melee:"On the boss but spread; sprint out on Fatal Attraction.",Ranged:"Wide spread with pre-assigned corners for Fatal Attraction."}},
+  {id:'council',name:'Illidari Council',bl:'On pull',note:"Four bosses that share a health pool — they must die together, so even DPS and clean tanking matter. Gathios the Shatterer (tank him; Consecration, Hammer of Justice, blessings). High Nethermancer Zerevor (interrupt Arcane Bolt; spread for Blizzard/Flamestrike). Lady Malande (interrupt her heals — Reflective Shield reflects melee/spell). Veras Darkshadow (vanishes and reappears with poisons). Assign a tank and interrupters to each caster and burn them evenly.",
+   tanks:[{role:'Gathios tank',name:''},{role:'Veras tank',name:''},{role:'Zerevor/Malande tank',name:''}],
+   healers:[],
+   special:[{label:'Zerevor interrupts',players:[]},{label:'Malande heal interrupts',players:[]}],
+   tactics:{Tank:"Pick up your assigned council member and keep them separated. Gathios tank watches Reflective Shield/Blessing of Spell Warding. Move Zerevor and Gathios out of each other's AoE.",Healer:"Spread raid healing across all four pulls. Avoid casting into Lady Malande's Reflective Shield. Stay out of Consecration and Blizzard.",Melee:"DPS evenly so the shared health pool drops together. Interrupt Lady Malande's heals. Move out of Consecration and Flamestrike.",Ranged:"Interrupt Zerevor's Arcane Bolt and Malande's heals on assignment. Spread for Blizzard/Flamestrike. Keep damage balanced across the four."},
+   position:{Tank:"Four bosses tanked apart, each in their own corner/zone to separate AoE.",Healer:"Central-ish with line of sight to all four tank spots; mobile for AoE.",Melee:"Rotate/cleave to keep the shared pool even; interrupters on Malande.",Ranged:"Spread between casters; interrupters cover Zerevor and Malande."}},
+  {id:'illidan',name:'Illidan Stormrage',bl:'Phase 2 (Flames) / final phase',note:"The endgame fight, multiple phases. P1: tank Illidan, swap or cooldown for Shear (a massive tank hit), spread for Flame Crash and Parasitic Shadowfiend. P2: Illidan flies up and drops his Warglaives, then summons two Flames of Azzinoth — two tanks pick up the Flame elementals near the glaives and kite them out of Blaze patches while the raid burns them. P3: ground phase again. P4 Demon Form: the raid uses the fallen Warglaives to break his Demon transformation; dodge Eye Beam sweeps and Shadow Demons (ranged kill the demons before they trap players). P5: final burn. Heavy coordination — assign Flame tanks and demon handling.",
+   tanks:[{role:'MT (Illidan)',name:''},{role:'Flame of Azzinoth tank 1',name:''},{role:'Flame of Azzinoth tank 2',name:''}],
+   healers:[],
+   special:[{label:'Warglaive / Demon-form handlers',players:[]},{label:'Shadow Demon killers',players:[]}],
+   tactics:{Tank:"MT cooldowns or swaps for Shear in P1/P3. Flame tanks each take one Flame of Azzinoth in P2, keeping them ~separated and out of Blaze. In Demon form, position Illidan near a dropped Warglaive so the raid can break the transformation.",Healer:"Keep the MT up through Shear and the Flame tanks up through Blaze in P2. Pre-heal before Eye Beams and Demon-form damage. Heavy sustained healing — manage mana across phases.",Melee:"P1/P3: DPS and dodge Flame Crash. P2: kill the Flames of Azzinoth (mind Blaze). P4: break Demon form with the Warglaives, dodge Eye Beam, and stay clear of Shadow Demons.",Ranged:"P2: help burn the Flames and avoid Blaze. P4: kill Shadow Demons before they trap players, dodge Eye Beam sweeps. P5: full burn on Illidan."},
+   position:{Tank:"Illidan center in P1/P3; Flame tanks split the two elementals apart in P2; reposition Illidan by a Warglaive for Demon form.",Healer:"Mobile, covering the MT and both Flame tanks; reposition for Eye Beams.",Melee:"On the boss/Flames per phase; spread to dodge Flame Crash and Eye Beam.",Ranged:"Spread wide; on Flames and Shadow Demons as the phase demands."}}
 ]
 };
 
@@ -1663,6 +1761,10 @@ const INSTANCE_DEFS=[
     bosses:[{id:'hydross',name:'Hydross'},{id:'lurker',name:'The Lurker Below'},{id:'leo',name:'Leotheras'},{id:'karathress',name:'Karathress'},{id:'morogrim',name:'Morogrim'},{id:'vashj',name:'Lady Vashj'}]},
   {key:'kara',name:'Karazhan',color:'#9482C9',
     bosses:[{id:'attumen',name:'Attumen'},{id:'moroes',name:'Moroes'},{id:'opera',name:'Opera Event'},{id:'curator',name:'The Curator'},{id:'chess',name:'Chess Event'},{id:'prince',name:'Prince Malchezaar'},{id:'nightbane',name:'Nightbane'}]},
+  {key:'hyjal',name:'Mount Hyjal',color:'#d4884a',
+    bosses:[{id:'winterchill',name:'Rage Winterchill'},{id:'anetheron',name:'Anetheron'},{id:'kazrogal',name:"Kaz'rogal"},{id:'azgalor',name:'Azgalor'},{id:'archimonde',name:'Archimonde'}]},
+  {key:'bt',name:'Black Temple',color:'#7a5fb0',
+    bosses:[{id:'najentus',name:"High Warlord Naj'entus"},{id:'supremus',name:'Supremus'},{id:'akama',name:'Shade of Akama'},{id:'teron',name:'Teron Gorefiend'},{id:'gurtogg',name:'Gurtogg Bloodboil'},{id:'ros',name:'Reliquary of Souls'},{id:'shahraz',name:'Mother Shahraz'},{id:'council',name:'Illidari Council'},{id:'illidan',name:'Illidan Stormrage'}]},
 ];
 
 // ============================================================
@@ -2496,7 +2598,7 @@ function nav(el,page){
   if(window.innerWidth<=768) collapseSidebar();
   updateMobTitle(page);
   updateMobNav(page);
-  ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles,progression:renderProgression,buffs:renderBuffs})[page]?.();
+  ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles,progression:renderProgression,buffs:renderBuffs})[page]?.();
 }
 
 // ============================================================
@@ -4528,7 +4630,7 @@ function renderPOV(){
 
   raidsToShow.forEach(rk=>{
     const raidBosses=BOSSES[rk];if(!raidBosses)return;
-    const raidName={gruul:"Gruul's Lair",mag:"Magtheridon's Lair",tk:'Tempest Keep',ssc:'Serpent Shrine Cavern',kara:'Karazhan'}[rk]||rk;
+    const raidName={gruul:"Gruul's Lair",mag:"Magtheridon's Lair",tk:'Tempest Keep',ssc:'Serpent Shrine Cavern',kara:'Karazhan',hyjal:'Mount Hyjal',bt:'Black Temple'}[rk]||rk;
     const bossesToShow=bossKey?raidBosses.filter(b=>b.id===bossKey):raidBosses;
     if(!bossesToShow.length)return;
 
@@ -6601,7 +6703,7 @@ function restoreSidebarState(){
     }
   }catch(e){}
 }
-const MOB_PAGE_NAMES={attendance:'Attendance',roster:'Roster',roles:'Roles & Groups',dispels:'Dispels & CCs',res:'Resistances',loot:'Loot Priority',pov:'Player POV',specreq:'Spec Requests',signup:'Apply for Raid','rl-review':'RL Review',calendar:'Calendar',raids:'Upcoming Raids','create-raid':'Create Raid',leave:'Leave of Absence',gruul:"Gruul's Lair",mag:'Magtheridon',tk:'Tempest Keep',ssc:'Serpent Shrine',kara:'Karazhan',stats:'Statistics',reviews:'Reviews',profiles:'Profiles',progression:'Progression',buffs:'Buff Coverage'};
+const MOB_PAGE_NAMES={attendance:'Attendance',roster:'Roster',roles:'Roles & Groups',dispels:'Dispels & CCs',res:'Resistances',loot:'Loot Priority',pov:'Player POV',specreq:'Spec Requests',signup:'Apply for Raid','rl-review':'RL Review',calendar:'Calendar',raids:'Upcoming Raids','create-raid':'Create Raid',leave:'Leave of Absence',gruul:"Gruul's Lair",mag:'Magtheridon',tk:'Tempest Keep',ssc:'Serpent Shrine',kara:'Karazhan',hyjal:'Mount Hyjal',bt:'Black Temple',stats:'Statistics',reviews:'Reviews',profiles:'Profiles',progression:'Progression',buffs:'Buff Coverage'};
 function updateMobTitle(page){
   const el=document.getElementById('mob-title');
   if(el) el.textContent=MOB_PAGE_NAMES[page]||'Boogalo';
@@ -6621,7 +6723,7 @@ function mobNav(page){
     if(pg)pg.classList.add('active');
     const mainEl=document.querySelector('.main');if(mainEl)mainEl.scrollTop=0;
     collapseSidebar();updateMobTitle(page);updateMobNav(page);
-    ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles,progression:renderProgression,buffs:renderBuffs})[page]?.();
+    ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles,progression:renderProgression,buffs:renderBuffs})[page]?.();
   }
 }
 function initSwipeGesture(){
