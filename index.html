@@ -450,6 +450,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'kara')"><i class="ti ti-building-castle"></i><span>Karazhan</span></div>
       <div class="ni" onclick="nav(this,'hyjal')"><i class="ti ti-mountain"></i><span>Mount Hyjal</span></div>
       <div class="ni" onclick="nav(this,'bt')"><i class="ti ti-building-castle"></i><span>Black Temple</span></div>
+      <div class="ni" onclick="nav(this,'za')"><i class="ti ti-feather"></i><span>Zul'Aman</span></div>
     </div>
     <div class="sbs"><div class="sbl">Analysis</div>
       <div class="ni" onclick="nav(this,'profiles')"><i class="ti ti-user-circle"></i><span>Profiles</span></div>
@@ -492,6 +493,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'kara')"><i class="ti ti-building-castle"></i><span>Karazhan</span></div>
       <div class="ni" onclick="nav(this,'hyjal')"><i class="ti ti-mountain"></i><span>Mount Hyjal</span></div>
       <div class="ni" onclick="nav(this,'bt')"><i class="ti ti-building-castle"></i><span>Black Temple</span></div>
+      <div class="ni" onclick="nav(this,'za')"><i class="ti ti-feather"></i><span>Zul'Aman</span></div>
     </div>
     <div class="sbs"><div class="sbl">My Account</div>
       <div class="ni" onclick="nav(this,'signup')"><i class="ti ti-forms"></i><span>Apply for Raid</span></div>
@@ -517,6 +519,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'kara')"><i class="ti ti-building-castle"></i><span>Karazhan</span></div>
       <div class="ni" onclick="nav(this,'hyjal')"><i class="ti ti-mountain"></i><span>Mount Hyjal</span></div>
       <div class="ni" onclick="nav(this,'bt')"><i class="ti ti-building-castle"></i><span>Black Temple</span></div>
+      <div class="ni" onclick="nav(this,'za')"><i class="ti ti-feather"></i><span>Zul'Aman</span></div>
     </div>
     <div class="sbs"><div class="sbl">Analysis</div>
       <div class="ni" onclick="nav(this,'profiles')"><i class="ti ti-user-circle"></i><span>Profiles</span></div>
@@ -715,6 +718,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
         <option value="kara">Karazhan</option>
         <option value="hyjal">Mount Hyjal</option>
         <option value="bt">Black Temple</option>
+        <option value="za">Zul'Aman</option>
       </select>
     </div>
     <div class="fg" style="min-width:160px;flex:1;margin-bottom:0">
@@ -866,6 +870,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
 <div class="page" id="page-kara"><div class="ph"><div class="pt">Karazhan</div><div class="ps">Full 10-player raid — Attumen through Nightbane</div></div><div id="kara-content"></div></div>
 <div class="page" id="page-hyjal"><div class="ph"><div class="pt">Mount Hyjal</div><div class="ps">Rage Winterchill · Anetheron · Kaz'rogal · Azgalor · Archimonde</div></div><div id="hyjal-content"></div></div>
 <div class="page" id="page-bt"><div class="ph"><div class="pt">Black Temple</div><div class="ps">Naj'entus · Supremus · Shade of Akama · Teron Gorefiend · Gurtogg Bloodboil · Reliquary of Souls · Mother Shahraz · Illidari Council · Illidan Stormrage</div></div><div id="bt-content"></div></div>
+<div class="page" id="page-za"><div class="ph"><div class="pt">Zul'Aman</div><div class="ps">Akil'zon · Nalorakk · Jan'alai · Halazzi · Hex Lord Malacrass · Zul'jin</div></div><div id="za-content"></div></div>
 
 <div class="page" id="page-profiles">
   <div class="ph"><div class="pt">Player Profiles</div><div class="ps">Full history, alts, stats, and assignment details per player</div></div>
@@ -1704,6 +1709,44 @@ bt:[
    special:[{label:'Warglaive / Demon-form handlers',players:[]},{label:'Shadow Demon killers',players:[]}],
    tactics:{Tank:"MT cooldowns or swaps for Shear in P1/P3. Flame tanks each take one Flame of Azzinoth in P2, keeping them ~separated and out of Blaze. In Demon form, position Illidan near a dropped Warglaive so the raid can break the transformation.",Healer:"Keep the MT up through Shear and the Flame tanks up through Blaze in P2. Pre-heal before Eye Beams and Demon-form damage. Heavy sustained healing — manage mana across phases.",Melee:"P1/P3: DPS and dodge Flame Crash. P2: kill the Flames of Azzinoth (mind Blaze). P4: break Demon form with the Warglaives, dodge Eye Beam, and stay clear of Shadow Demons.",Ranged:"P2: help burn the Flames and avoid Blaze. P4: kill Shadow Demons before they trap players, dodge Eye Beam sweeps. P5: full burn on Illidan."},
    position:{Tank:"Illidan center in P1/P3; Flame tanks split the two elementals apart in P2; reposition Illidan by a Warglaive for Demon form.",Healer:"Mobile, covering the MT and both Flame tanks; reposition for Eye Beams.",Melee:"On the boss/Flames per phase; spread to dodge Flame Crash and Eye Beam.",Ranged:"Spread wide; on Flames and Shadow Demons as the phase demands."}}
+],
+za:[
+  {id:'akilzon',name:"Akil'zon",bl:'On pull',note:"The Eagle boss and one of the four timed Amani objectives. The signature mechanic is Electrical Storm: a random player is lifted into a storm cloud and the rest of the raid must STACK directly underneath them to split the falling lightning damage — then spread back out for Static Disruption (a chain that jumps between close players). Gust of Wind throws a player around; Call Lightning hits a random target. It's a stack-on-cue, spread-after dance.",
+   tanks:[{role:'MT',name:''}],
+   healers:[],
+   special:[{label:'Stack caller (Electrical Storm)',players:[]}],
+   tactics:{Tank:"Tank Akil'zon in the center so the raid always has room to stack under the lifted player. Hold threat through the movement.",Healer:"Pre-heal before Electrical Storm and top the stacked group as the lightning splits. After the storm, expect Static Disruption chip on anyone too close together. Heal Gust of Wind targets.",Melee:"Stay near the middle. On Electrical Storm, immediately stack under the floating player to share the damage, then spread for Static Disruption.",Ranged:"Don't over-spread — you must be able to collapse to the stack point fast when Electrical Storm hits. Spread back out the instant the storm ends to avoid Static Disruption chains."},
+   position:{Tank:"Boss in the center of the room.",Healer:"Mid-range, ready to collapse to the stack and heal it.",Melee:"On the boss; stack under the lifted player on cue.",Ranged:"Loose spread that can collapse to one point for Electrical Storm."}},
+  {id:'nalorakk',name:'Nalorakk',bl:'On pull',note:"The Bear boss — a tank-swap fight. Mangle applies a stacking bleed/heal-reduction debuff to the current tank, so two tanks alternate taunting to let stacks fall off. Brutal Swipe hits the tank hard; Surge is a charge at a random ranged player (everyone spreads). Lacerate stacks on whoever he's hitting. Steady damage, clean taunt rotation is the key.",
+   tanks:[{role:'MT',name:''},{role:'OT (swap)',name:''}],
+   healers:[],
+   special:[{label:'Tank swap callouts',players:[]}],
+   tactics:{Tank:"Two tanks swap on Mangle stacks — taunt off before the bleed/healing-reduction gets dangerous. Off-tank stays in melee range to taunt instantly.",Healer:"Mangle reduces healing on the tank — pre-empt with big heals and HoTs and pump through the debuff window before the swap. Heal Surge targets.",Melee:"Standard DPS behind the boss. Be aware of Surge charges landing on ranged. Don't pull threat during a tank swap.",Ranged:"Spread so Surge only catches one player. Keep DPS steady; nothing here requires you to move much beyond the charge."},
+   position:{Tank:"Boss faced away; both tanks in melee for clean swaps.",Healer:"Behind the boss within range of both tanks.",Melee:"Behind the boss.",Ranged:"Spread to minimise Surge chaining."}},
+  {id:'janalai',name:"Jan'alai",bl:'On pull / at 35%',note:"The Dragonhawk boss — an egg and bomb-control fight. Two banks of dragonhawk eggs flank the room; Jan'alai summons Hatchers that run to hatch them into Dragonhawk Hatchlings, so the raid pre-clears or controls one side's eggs and AoEs the hatchlings. Fire Bombs bombard zones of the floor (move out of the bomb tiles). Flame Breath is a frontal cone. At 35% he hatches ALL remaining eggs at once — manage egg count so that release is survivable. Bloodlust the final burn.",
+   tanks:[{role:'MT',name:''},{role:'Hatchling/add tank',name:''}],
+   healers:[],
+   special:[{label:'Egg / hatcher control',players:[]},{label:'Hatchling AoE',players:[]}],
+   tactics:{Tank:"MT holds Jan'alai out of the bomb zones, faced away (Flame Breath). Add tank grabs hatched Dragonhawk Hatchlings for the AoE.",Healer:"Heavy raid healing during Fire Bombs and the hatchling waves. Pre-heal before the 35% mass hatch. Keep the add tank up under hatchling damage.",Melee:"Move out of Fire Bomb tiles immediately. Help burn hatchlings and the controlled egg side. Stay out of the frontal cone.",Ranged:"Control eggs/hatchers on assignment and AoE hatchlings down. Constantly relocate out of Fire Bomb bombardment. Burn the boss at 35%."},
+   position:{Tank:"Boss tanked center, clear of bomb tiles; add tank stages near the worked egg side.",Healer:"Mobile mid-range, dodging Fire Bombs.",Melee:"On the boss/hatchlings; hop off bomb tiles.",Ranged:"Spread along the egg banks they're controlling, avoiding bombs."}},
+  {id:'halazzi',name:'Halazzi',bl:'On pull / final merge',note:"The Lynx boss — a split-tanking fight. At intervals Halazzi splits into himself plus a Lynx Spirit that must be tanked and killed separately; when their health lines up he merges back and goes into a frenzy/Enrage window. Saber Lash splits a frontal hit (tanks stay positioned), plus Flame Shock and Earth Shock on the raid and Total Body Curse. Manage the split phases and burn the merge windows.",
+   tanks:[{role:'MT (Halazzi)',name:''},{role:'Lynx Spirit tank',name:''}],
+   healers:[],
+   special:[{label:'Lynx Spirit kill',players:[]}],
+   tactics:{Tank:"MT holds Halazzi; the Lynx Spirit tank picks up the spirit the instant it splits and holds it apart. Re-grab Halazzi cleanly on each merge.",Healer:"Heal both tanks during split phases. Dispel/heal Flame Shock and Total Body Curse. Top the raid before each merge frenzy.",Melee:"Burn the Lynx Spirit down fast during splits, then swap back to Halazzi. Mind Saber Lash positioning behind the boss.",Ranged:"Split DPS as called between Halazzi and the Lynx Spirit. Dispel where you can and spread for the shocks."},
+   position:{Tank:"Halazzi and the Lynx Spirit tanked apart from each other.",Healer:"Positioned to cover both tank spots.",Melee:"On the active target; swap to the spirit on split.",Ranged:"Spread; focus the spirit when it's up."}},
+  {id:'malacrass',name:'Hex Lord Malacrass',bl:'After adds die',note:"The penultimate boss, flanked by four Amani'shi adds whose makeup varies — kill or control the adds first, then burn the Hex Lord. He channels Spirit Bolts (raid-wide AoE — heal through it), casts Drain Power (a self-buff that should be dispelled/stolen), and Siphon Soul to copy a raid member's abilities. Crowd-control and focus the adds, dispel his buffs, then DPS him down.",
+   tanks:[{role:'MT',name:''},{role:'Add tank',name:''}],
+   healers:[],
+   special:[{label:'Add CC / kill order',players:[]},{label:'Drain Power dispel',players:[]}],
+   tactics:{Tank:"MT holds the Hex Lord; add tank gathers the four adds. Keep the boss and adds separated so casters can CC and the raid can cleave the adds first.",Healer:"Heal through Spirit Bolts channels (raid-wide). Keep the add tank up early. Dispel Drain Power and any nasty copied abilities from Siphon Soul.",Melee:"Burn the adds down on the kill order, then swap to the Hex Lord. Interrupt/CC adds as assigned.",Ranged:"CC and focus adds first. Dispel Drain Power. After adds are down, full DPS on Malacrass through the Spirit Bolts damage."},
+   position:{Tank:"Hex Lord held in place; adds tanked together to one side.",Healer:"Behind the tanks, mobile for Spirit Bolts healing.",Melee:"On the adds first, then the boss.",Ranged:"Spread; CC/burn adds, then the boss."}},
+  {id:'zuljin',name:"Zul'jin",bl:'Per phase (Lynx / Dragonhawk)',note:"The final boss — five phases, each themed on an Amani animal and unlocked as he loses health. Troll: Grievous Throw leaves a debuff that only heals off when the target is topped to full. Lynx: Claw Rage frenzy and Lynx Rush — high tank/raid damage. Bear: Creeping Paralysis (dispel before it stuns) and Overpower — tank swap. Eagle: he takes flight, roaming Cyclone tornadoes sweep the room and Energy Storm punishes casting near him. Dragonhawk: Flame Whirl and Pillar of Fire leave fire patches — spread and dodge. Bloodlust the Lynx or final Dragonhawk phase.",
+   tanks:[{role:'MT',name:''},{role:'OT (Bear swap)',name:''}],
+   healers:[],
+   special:[{label:'Creeping Paralysis dispel',players:[]},{label:'Grievous Throw heal-to-full',players:[]}],
+   tactics:{Tank:"Hold Zul'jin through each phase; swap on the Bear phase (Overpower/paralysis). In Eagle phase reposition out of Cyclones and away from the Energy Storm radius.",Healer:"Grievous Throw targets must be healed to FULL to clear the debuff — prioritise that. Dispel Creeping Paralysis fast in Bear phase. Heal Lynx-phase tank spikes. Avoid casting inside Energy Storm during Eagle.",Melee:"Behind the boss each phase. In Lynx phase mind Claw Rage/Lynx Rush. In Dragonhawk phase dodge Pillar of Fire patches and Flame Whirl.",Ranged:"Spread for tornadoes and fire patches. In Eagle phase stay out of the Energy Storm radius (it drains/punishes casting). Dispel Creeping Paralysis in Bear phase."},
+   position:{Tank:"Boss tanked centrally; reposition each phase (out of Cyclones in Eagle).",Healer:"Mobile mid-range; clear of Energy Storm and fire patches.",Melee:"Behind the boss; dodge fire patches in Dragonhawk phase.",Ranged:"Wide spread; relocate for tornadoes, fire, and Energy Storm."}}
 ]
 };
 
@@ -1765,6 +1808,8 @@ const INSTANCE_DEFS=[
     bosses:[{id:'winterchill',name:'Rage Winterchill'},{id:'anetheron',name:'Anetheron'},{id:'kazrogal',name:"Kaz'rogal"},{id:'azgalor',name:'Azgalor'},{id:'archimonde',name:'Archimonde'}]},
   {key:'bt',name:'Black Temple',color:'#7a5fb0',
     bosses:[{id:'najentus',name:"High Warlord Naj'entus"},{id:'supremus',name:'Supremus'},{id:'akama',name:'Shade of Akama'},{id:'teron',name:'Teron Gorefiend'},{id:'gurtogg',name:'Gurtogg Bloodboil'},{id:'ros',name:'Reliquary of Souls'},{id:'shahraz',name:'Mother Shahraz'},{id:'council',name:'Illidari Council'},{id:'illidan',name:'Illidan Stormrage'}]},
+  {key:'za',name:"Zul'Aman",color:'#5fa86b',
+    bosses:[{id:'akilzon',name:"Akil'zon"},{id:'nalorakk',name:'Nalorakk'},{id:'janalai',name:"Jan'alai"},{id:'halazzi',name:'Halazzi'},{id:'malacrass',name:'Hex Lord Malacrass'},{id:'zuljin',name:"Zul'jin"}]},
 ];
 
 // ============================================================
@@ -2598,7 +2643,7 @@ function nav(el,page){
   if(window.innerWidth<=768) collapseSidebar();
   updateMobTitle(page);
   updateMobNav(page);
-  ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles,progression:renderProgression,buffs:renderBuffs})[page]?.();
+  ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),za:()=>renderBossPage('za'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles,progression:renderProgression,buffs:renderBuffs})[page]?.();
 }
 
 // ============================================================
@@ -4630,7 +4675,7 @@ function renderPOV(){
 
   raidsToShow.forEach(rk=>{
     const raidBosses=BOSSES[rk];if(!raidBosses)return;
-    const raidName={gruul:"Gruul's Lair",mag:"Magtheridon's Lair",tk:'Tempest Keep',ssc:'Serpent Shrine Cavern',kara:'Karazhan',hyjal:'Mount Hyjal',bt:'Black Temple'}[rk]||rk;
+    const raidName={gruul:"Gruul's Lair",mag:"Magtheridon's Lair",tk:'Tempest Keep',ssc:'Serpent Shrine Cavern',kara:'Karazhan',hyjal:'Mount Hyjal',bt:'Black Temple',za:"Zul'Aman"}[rk]||rk;
     const bossesToShow=bossKey?raidBosses.filter(b=>b.id===bossKey):raidBosses;
     if(!bossesToShow.length)return;
 
@@ -6703,7 +6748,7 @@ function restoreSidebarState(){
     }
   }catch(e){}
 }
-const MOB_PAGE_NAMES={attendance:'Attendance',roster:'Roster',roles:'Roles & Groups',dispels:'Dispels & CCs',res:'Resistances',loot:'Loot Priority',pov:'Player POV',specreq:'Spec Requests',signup:'Apply for Raid','rl-review':'RL Review',calendar:'Calendar',raids:'Upcoming Raids','create-raid':'Create Raid',leave:'Leave of Absence',gruul:"Gruul's Lair",mag:'Magtheridon',tk:'Tempest Keep',ssc:'Serpent Shrine',kara:'Karazhan',hyjal:'Mount Hyjal',bt:'Black Temple',stats:'Statistics',reviews:'Reviews',profiles:'Profiles',progression:'Progression',buffs:'Buff Coverage'};
+const MOB_PAGE_NAMES={attendance:'Attendance',roster:'Roster',roles:'Roles & Groups',dispels:'Dispels & CCs',res:'Resistances',loot:'Loot Priority',pov:'Player POV',specreq:'Spec Requests',signup:'Apply for Raid','rl-review':'RL Review',calendar:'Calendar',raids:'Upcoming Raids','create-raid':'Create Raid',leave:'Leave of Absence',gruul:"Gruul's Lair",mag:'Magtheridon',tk:'Tempest Keep',ssc:'Serpent Shrine',kara:'Karazhan',hyjal:'Mount Hyjal',bt:'Black Temple',za:"Zul'Aman",stats:'Statistics',reviews:'Reviews',profiles:'Profiles',progression:'Progression',buffs:'Buff Coverage'};
 function updateMobTitle(page){
   const el=document.getElementById('mob-title');
   if(el) el.textContent=MOB_PAGE_NAMES[page]||'Boogalo';
@@ -6723,7 +6768,7 @@ function mobNav(page){
     if(pg)pg.classList.add('active');
     const mainEl=document.querySelector('.main');if(mainEl)mainEl.scrollTop=0;
     collapseSidebar();updateMobTitle(page);updateMobNav(page);
-    ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles,progression:renderProgression,buffs:renderBuffs})[page]?.();
+    ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),za:()=>renderBossPage('za'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles,progression:renderProgression,buffs:renderBuffs})[page]?.();
   }
 }
 function initSwipeGesture(){
