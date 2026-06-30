@@ -812,7 +812,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
   <div class="card">
     <div class="ct"><i class="ti ti-calendar-plus" style="color:var(--acc)"></i>New Raid Event</div>
     <div class="frow">
-      <div class="fg" style="flex:1;min-width:140px"><span class="fl">Raid Name</span><select id="cr-name" onchange="crNameChange()"><option>Gruul's Lair</option><option>Magtheridon's Lair</option><option>Tempest Keep</option><option>Serpent Shrine Cavern</option><option>Karazhan</option><option>Mount Hyjal</option><option>Black Temple</option><option>Ahn'Qiraj (AQ40)</option><option>Custom</option></select></div>
+      <div class="fg" style="flex:1;min-width:140px"><span class="fl">Raid Name</span><select id="cr-name" onchange="crNameChange()"><option>Gruul's Lair</option><option>Magtheridon's Lair</option><option>Tempest Keep</option><option>Serpent Shrine Cavern</option><option>Karazhan</option><option>Zul'Aman</option><option>Mount Hyjal</option><option>Black Temple</option><option>Ahn'Qiraj (AQ40)</option><option>Custom</option></select></div>
       <div class="fg"><span class="fl">Date</span><input type="date" id="cr-date"></div>
       <div class="fg"><span class="fl">Start</span><input type="time" id="cr-start" value="20:00" style="width:100px"></div>
       <div class="fg"><span class="fl">End</span><input type="time" id="cr-end" value="23:00" style="width:100px"></div>
@@ -5482,6 +5482,7 @@ function raidBg(name){
   if(n.includes('qiraj')||n.includes('aq40')) return 'img/aq40.jpg';
   if(n.includes('hyjal')) return 'img/mh.jpg';
   if(n.includes('black temple')||n.includes('bt')) return 'img/bt.jpg';
+  if(n.includes('zul')||n.includes('aman')) return 'img/za.jpg';
   return null;
 }
 function fullRaidCard(r,highlight){
@@ -5765,7 +5766,7 @@ function fullRaidCard(r,highlight){
         <div class="fg" style="flex:1;min-width:130px;margin-bottom:0">
           <span class="fl">Raid Name</span>
           <select id="re-name-${r.id}" style="width:100%">
-            ${["Gruul's Lair","Magtheridon's Lair","Tempest Keep","Serpent Shrine Cavern","Karazhan","Mount Hyjal","Black Temple","Ahn'Qiraj (AQ40)","Custom"].map(n=>`<option ${n===r.name?'selected':''}>${n}</option>`).join('')}
+            ${["Gruul's Lair","Magtheridon's Lair","Tempest Keep","Serpent Shrine Cavern","Karazhan","Zul'Aman","Mount Hyjal","Black Temple","Ahn'Qiraj (AQ40)","Custom"].map(n=>`<option ${n===r.name?'selected':''}>${n}</option>`).join('')}
           </select>
         </div>
         <div class="fg" style="margin-bottom:0">
@@ -6206,7 +6207,7 @@ function crNameChange(){
   const maxEl=document.getElementById('cr-max');
   if(!maxEl) return;
   if(/ahn'?qiraj|aq40/i.test(name)) maxEl.value=40;
-  else if(/kara/i.test(name)) maxEl.value=10;
+  else if(/kara|zul.?aman/i.test(name)) maxEl.value=10;
   else maxEl.value=25;
 }
 function createRaid(){
