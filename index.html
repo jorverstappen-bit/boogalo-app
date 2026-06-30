@@ -4575,6 +4575,121 @@ function roomSVG(bossId, role, phase, viewMode, resType){
       return s;
     },
 
+    // ── RAGE WINTERCHILL ─────────────────────────────────────────────────
+    winterchill(){
+      let s=bg('rect')+compass()+phaseLabel('RAGE WINTERCHILL','');
+      const cx=W/2, cy=H/2;
+      // Death and Decay pools to avoid
+      s+=zoneCircle(150,cy-40,26,'D&D','rgba(80,40,120,.22)',true);
+      s+=zoneCircle(210,cy+55,24,'D&D','rgba(80,40,120,.22)',true);
+      // Boss parked left, faced away from raid (raid to the right)
+      s+=bossNode(70,cy,'W',17);
+      s+=node(102,cy,'MT',RC.Tank,13);
+      s+=goldLabel(70,cy-30,'FACED AWAY');
+      // Melee on boss
+      [[110,cy-26],[112,cy+26],[132,cy-6]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers mid
+      [[180,cy-70],[185,cy+5],[175,cy+80]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged wide spread right, clear of D&D
+      [[300,cy-90],[360,cy-70],[420,cy-40],[450,cy+5],[420,cy+45],[360,cy+75],[300,cy+90],[330,cy-20],[390,cy+15]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx+60,H-22,'Step out of Death & Decay · heal Icebolt through · spread');
+      s+=legend();
+      return s;
+    },
+
+    // ── ANETHERON ────────────────────────────────────────────────────────
+    anetheron(){
+      let s=bg('rect')+compass()+phaseLabel('ANETHERON','');
+      const cx=W/2, cy=H/2;
+      // Infernal landing zones (right side, kited out)
+      s+=zoneCircle(410,90,30,'INFERNAL','rgba(200,80,40,.2)',true);
+      s+=zoneCircle(440,cy+60,28,'INFERNAL','rgba(200,80,40,.2)',true);
+      // Boss faced away at left edge
+      s+=bossNode(75,cy,'A',17);
+      s+=node(108,cy,'MT',RC.Tank,13);
+      s+=goldLabel(75,cy-30,'FACED AWAY');
+      // Infernal OT / kiter staged toward landings
+      s+=node(330,110,'OT',RC.Tank,13);
+      s+=goldLabel(330,90,'INFERNAL KITE');
+      // Carrion Swarm frontal cone (away from raid)
+      s+=`<path d="M75,${cy} L18,${cy-55} L18,${cy+55} Z" fill="rgba(120,40,120,.12)" stroke="rgba(160,80,160,.3)" stroke-dasharray="4 3"/>`;
+      // Melee behind boss
+      [[116,cy-26],[118,cy+26],[138,cy-4]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers
+      [[185,cy-65],[190,cy+5],[180,cy+72]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged spread, away from infernals
+      [[260,cy-95],[320,cy-80],[260,cy+95],[320,cy+80],[230,cy-30],[240,cy+30],[300,cy-10]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx+40,H-22,'Dispel Sleep · move out of Infernal AoE · kite Infernals out');
+      s+=legend();
+      return s;
+    },
+
+    // ── KAZ'ROGAL ────────────────────────────────────────────────────────
+    kazrogal(){
+      let s=bg('oval')+compass()+phaseLabel("KAZ'ROGAL",'');
+      const cx=W/2, cy=H/2;
+      // Boss center-left faced away
+      s+=bossNode(cx-70,cy,'K',17);
+      s+=node(cx-40,cy,'MT',RC.Tank,13);
+      s+=goldLabel(cx-70,cy-30,'FACED AWAY');
+      // Melee on boss
+      [[cx-46,cy-26],[cx-44,cy+26],[cx-24,cy-4]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers
+      [[cx+10,cy-60],[cx+15,cy+5],[cx+5,cy+65]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged spread (Mark explosion is AoE — don't stack)
+      [[cx+90,cy-80],[cx+150,cy-50],[cx+170,cy],[cx+150,cy+50],[cx+90,cy+80],[cx+60,cy-30],[cx+70,cy+35]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx+30,H-22,'Spread — Mark explosions are AoE · manage mana · burn race');
+      s+=legend();
+      return s;
+    },
+
+    // ── AZGALOR ──────────────────────────────────────────────────────────
+    azgalor(){
+      let s=bg('rect')+compass()+phaseLabel('AZGALOR','');
+      const cx=W/2, cy=H/2;
+      // Rain of Fire pools
+      s+=zoneCircle(200,cy-60,24,'RoF','rgba(200,80,40,.2)',true);
+      s+=zoneCircle(250,cy+55,22,'RoF','rgba(200,80,40,.2)',true);
+      // Designated Doomguard kill spot (right)
+      s+=zoneRect(400,cy-40,90,80,'DOOMGUARD KILL SPOT','rgba(100,60,160,.18)',true);
+      // Boss faced away left
+      s+=bossNode(75,cy,'A',17);
+      s+=node(108,cy,'MT',RC.Tank,13);
+      s+=goldLabel(75,cy-30,'FACED AWAY');
+      // Doomguard OT at add spot
+      s+=node(420,cy,'OT',RC.Tank,13);
+      // Melee on boss
+      [[116,cy-26],[118,cy+26],[138,cy-4]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers
+      [[185,cy-72],[190,cy+8],[175,cy+78]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged spread (silence — reposition)
+      [[300,cy-90],[340,cy-65],[300,cy+90],[340,cy+65],[270,cy-25],[280,cy+30]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx,H-22,'Doomed players run to kill spot · OT grabs Doomguard · dodge RoF');
+      s+=legend();
+      return s;
+    },
+
+    // ── ARCHIMONDE ───────────────────────────────────────────────────────
+    archimonde(){
+      let s=bg('oval')+compass()+phaseLabel('ARCHIMONDE','TEARS ON AIR BURST');
+      const cx=W/2, cy=H/2;
+      // Boss dead center
+      s+=bossNode(cx,cy,'A',18);
+      s+=node(cx+28,cy,'MT',RC.Tank,13);
+      // Doomfire trail (kited around outside)
+      s+=`<path d="M${cx+90},${cy-70} Q${cx+150},${cy} ${cx+90},${cy+70}" fill="none" stroke="rgba(220,120,40,.4)" stroke-width="3" stroke-dasharray="3 4"/>`;
+      s+=goldLabel(cx+140,cy,'DOOMFIRE');
+      // Melee ring
+      [[cx-24,cy-20],[cx-20,cy+22],[cx+8,cy-26],[cx+6,cy+26]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers ring
+      [[cx-58,cy-30],[cx-60,cy+26],[cx+50,cy-30],[cx+52,cy+28],[cx,cy-60],[cx,cy+62]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged even spread around center (not far edges — Finger of Death)
+      [[cx-110,cy-55],[cx-120,cy],[cx-110,cy+55],[cx-60,cy-85],[cx+60,cy-85],[cx-60,cy+85],[cx+60,cy+85],[cx+115,cy-50],[cx+118,cy+52]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx,H-22,'EVERYONE carries Tears · run Doomfire outward · dispel Grip · stay near raid');
+      s+=legend();
+      return s;
+    },
+
   };
 
   // ── dispatch ─────────────────────────────────────────────────────────
@@ -4599,6 +4714,11 @@ function roomSVG(bossId, role, phase, viewMode, resType){
     chess:()=>builders.chess(),
     prince:()=>builders.prince(),
     nightbane:()=>builders.nightbane(),
+    winterchill:()=>builders.winterchill(),
+    anetheron:()=>builders.anetheron(),
+    kazrogal:()=>builders.kazrogal(),
+    azgalor:()=>builders.azgalor(),
+    archimonde:()=>builders.archimonde(),
   };
 
   const buildFn = builderMap[bossId];
