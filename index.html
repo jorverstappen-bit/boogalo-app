@@ -4823,6 +4823,215 @@ function roomSVG(bossId, role, phase, viewMode, resType){
       return s;
     },
 
+    // ── HIGH WARLORD NAJ'ENTUS ───────────────────────────────────────────
+    najentus(){
+      let s=bg('rect')+compass()+phaseLabel("HIGH WARLORD NAJ'ENTUS",'SPINE MANAGEMENT');
+      const cx=W/2, cy=H/2;
+      // Boss faced away left
+      s+=bossNode(95,cy,'N',17);
+      s+=node(128,cy,'MT',RC.Tank,13);
+      s+=goldLabel(95,cy-30,'FACED AWAY');
+      // Dropped spine markers
+      s+=`<g><rect x="200" y="${cy-70}" width="10" height="20" rx="2" fill="rgba(120,200,220,.5)" stroke="#7fd8e8"/><text x="205" y="${cy-74}" text-anchor="middle" fill="#7fd8e8" font-size="7" font-family="sans-serif">spine</text></g>`;
+      s+=`<g><rect x="260" y="${cy+60}" width="10" height="20" rx="2" fill="rgba(120,200,220,.5)" stroke="#7fd8e8"/></g>`;
+      // Impaled marker
+      s+=addNode(300,cy-40,'IMP',13);
+      s+=goldLabel(300,cy-58,'IMPALED');
+      // Melee on boss
+      [[136,cy-28],[156,cy-6],[140,cy+30]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers
+      [[200,cy-30],[210,cy+40],[260,cy-10]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged spread
+      [[360,cy-80],[420,cy-50],[450,cy],[420,cy+50],[360,cy+80],[330,cy+30]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx+30,H-22,'Grab spines → free impaled & break Tidal Shield before Needle Spine Volley');
+      s+=legend();
+      return s;
+    },
+
+    // ── SUPREMUS ─────────────────────────────────────────────────────────
+    supremus(){
+      let s=bg('oval')+compass()+phaseLabel('SUPREMUS','TANK / CHASE PHASES');
+      const cx=W/2, cy=H/2;
+      // Kite circle for chase phase
+      s+=`<circle cx="${cx}" cy="${cy}" r="120" fill="none" stroke="rgba(201,164,53,.35)" stroke-width="1.4" stroke-dasharray="6 5"/>`;
+      s+=goldLabel(cx,cy-128,'CHASE-PHASE KITE PATH');
+      // Volcanic geysers
+      s+=zoneCircle(cx-70,cy+40,18,'GEYSER','rgba(200,80,40,.2)',true);
+      s+=zoneCircle(cx+80,cy-30,18,'GEYSER','rgba(200,80,40,.2)',true);
+      // Boss center (tank phase)
+      s+=bossNode(cx,cy,'S',17);
+      s+=node(cx+30,cy,'MT',RC.Tank,13);
+      // Melee
+      [[cx-22,cy-18],[cx-18,cy+22],[cx+8,cy+24]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers
+      [[cx-58,cy-26],[cx+52,cy+26],[cx,cy-58]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged on the kite ring
+      [[cx-110,cy-45],[cx-110,cy+45],[cx+110,cy-45],[cx+110,cy+45],[cx,cy+95],[cx,cy-95]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx,H-22,'Tank phase: burn & dodge flame · Chase: kite circle, avoid geysers');
+      s+=legend();
+      return s;
+    },
+
+    // ── SHADE OF AKAMA ───────────────────────────────────────────────────
+    akama(){
+      let s=bg('rect')+compass()+phaseLabel('SHADE OF AKAMA','KILL CHANNELERS');
+      const cx=W/2, cy=H/2;
+      // Channeler line (right) channeling the Shade
+      s+=zoneRect(360,40,130,H-80,'CHANNELERS','rgba(100,60,160,.14)',true);
+      [[400,cy-70],[450,cy-40],[400,cy],[450,cy+40],[400,cy+70]].forEach(([x,y])=>s+=addNode(x,y,'AR',11));
+      // Akama + Shade tank (left, where Shade rushes)
+      s+=bossNode(95,cy,'SH',16);
+      s+=goldLabel(95,cy-28,'SHADE');
+      s+=node(128,cy,'MT',RC.Tank,13);
+      // Add tank at the choke
+      s+=node(250,cy,'OT',RC.Tank,13);
+      s+=goldLabel(250,cy-22,'ADD TANK');
+      // Melee on channelers
+      [[370,cy-20],[380,cy+20]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers
+      [[160,cy-40],[170,cy+45],[230,cy+40]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged on channelers + interrupt spiritbinders
+      [[300,cy-70],[310,cy-20],[310,cy+30],[300,cy+70],[330,cy]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx,H-22,'Kill channelers · interrupt Spiritbinders · burn Shade when freed');
+      s+=legend();
+      return s;
+    },
+
+    // ── TERON GOREFIEND ──────────────────────────────────────────────────
+    teron(){
+      let s=bg('rect')+compass()+phaseLabel('TERON GOREFIEND','THE GHOST GAME');
+      const cx=W/2, cy=H/2;
+      // Doom Blossoms overhead markers
+      s+=zoneCircle(cx-80,cy-60,16,'BLOSSOM','rgba(80,40,120,.22)',true);
+      s+=zoneCircle(cx+90,cy+50,16,'BLOSSOM','rgba(80,40,120,.22)',true);
+      // Boss faced away left
+      s+=bossNode(100,cy,'T',17);
+      s+=node(133,cy,'MT',RC.Tank,13);
+      s+=goldLabel(100,cy-30,'FACED AWAY');
+      // Constructs (ghost targets)
+      [[330,cy-50],[370,cy+30]].forEach(([x,y])=>s+=addNode(x,y,'AR',12));
+      s+=goldLabel(350,cy-66,'CONSTRUCTS (ghosts kill)');
+      // Melee
+      [[141,cy-26],[161,cy-4],[145,cy+28]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers
+      [[210,cy-50],[215,cy+45],[270,cy]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged spread (limit blossom overlap)
+      [[280,cy-80],[420,cy-70],[450,cy],[420,cy+70],[280,cy+80]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx,H-22,'Marked players play the ghost bar · avoid Doom Blossoms');
+      s+=legend();
+      return s;
+    },
+
+    // ── GURTOGG BLOODBOIL ────────────────────────────────────────────────
+    gurtogg(){
+      let s=bg('rect')+compass()+phaseLabel('GURTOGG BLOODBOIL','RANGE ROTATION');
+      const cx=W/2, cy=H/2;
+      // Boss center
+      s+=bossNode(cx,cy,'G',17);
+      s+=node(cx+30,cy,'MT',RC.Tank,13);
+      // Near group (close) vs far group (Bloodboil hits 5 furthest)
+      s+=zoneCircle(cx,cy,70,'NEAR','rgba(90,150,210,.12)',true);
+      s+=zoneRect(W-120,cy-70,95,140,'FAR GROUP (Bloodboil)','rgba(200,80,40,.14)',true);
+      // Fel Rage target marker
+      s+=addNode(cx-70,cy-70,'FR',13);
+      s+=goldLabel(cx-70,cy-88,'FEL RAGE');
+      // Melee near
+      [[cx-22,cy-18],[cx-18,cy+22],[cx+8,cy+24]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers
+      [[cx-58,cy-26],[cx-60,cy+26],[cx,cy+62]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Far group ranged (rotate in/out)
+      [[W-90,cy-45],[W-60,cy-15],[W-90,cy+15],[W-60,cy+45],[W-100,cy]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx,H-22,'Rotate groups so Bloodboil hits the far 5 · burn Fel Rage target');
+      s+=legend();
+      return s;
+    },
+
+    // ── RELIQUARY OF SOULS ───────────────────────────────────────────────
+    ros(){
+      let s=bg('oval')+compass()+phaseLabel('RELIQUARY OF SOULS','3 ESSENCES');
+      const cx=W/2, cy=H/2;
+      // Phase banner
+      s+=zoneRect(cx-150,38,300,22,'P1 SUFFERING (no heal) → P2 DESIRE → P3 ANGER (BL)','rgba(100,60,160,.14)');
+      // Boss center
+      s+=bossNode(cx,cy,'RoS',16);
+      s+=node(cx+30,cy,'MT',RC.Tank,13);
+      // Melee
+      [[cx-22,cy-18],[cx-18,cy+22],[cx+8,cy+24]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers
+      [[cx-58,cy-26],[cx+52,cy+26],[cx,cy+62]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged spread (mind spell reflect in P2)
+      [[cx-110,cy-50],[cx-118,cy+10],[cx+110,cy-50],[cx+118,cy+10],[cx-50,cy-80],[cx+50,cy-80]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx,H-22,'P1 conserve mana · P2 no casting into Rune Shield · P3 burn before enrage');
+      s+=legend();
+      return s;
+    },
+
+    // ── MOTHER SHAHRAZ ───────────────────────────────────────────────────
+    shahraz(){
+      let s=bg('rect')+compass()+phaseLabel('MOTHER SHAHRAZ','FATAL ATTRACTION SPREAD');
+      const cx=W/2, cy=H/2;
+      // Fatal Attraction corners (spread far apart)
+      [[55,55],[W-55,55],[55,H-55],[W-55,H-55]].forEach(([x,y])=>s+=zoneCircle(x,y,22,'FA','rgba(120,40,120,.2)',true));
+      // Boss center + STACKED tanks (Saber Lash)
+      s+=bossNode(cx,cy,'MS',17);
+      s+=node(cx+26,cy-6,'MT',RC.Tank,12);
+      s+=node(cx+30,cy+12,'OT',RC.Tank,12);
+      s+=goldLabel(cx+40,cy-22,'TANKS STACK');
+      // Melee
+      [[cx-22,cy-16],[cx-18,cy+20]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers spread
+      [[cx-70,cy-40],[cx+70,cy-40],[cx-70,cy+40],[cx+70,cy+40]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged wide spread (run to corners on FA)
+      [[cx-120,cy],[cx+120,cy],[cx,cy-100],[cx,cy+100],[cx-90,cy-70],[cx+90,cy+70]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx,H-22,'Tanks stack for Saber Lash · sprint apart on Fatal Attraction');
+      s+=legend();
+      return s;
+    },
+
+    // ── ILLIDARI COUNCIL ─────────────────────────────────────────────────
+    council(){
+      let s=bg('rect')+compass()+phaseLabel('ILLIDARI COUNCIL','4 BOSSES — SHARED HP');
+      const cx=W/2, cy=H/2;
+      // Four bosses in four zones
+      const spots=[['Gathios',120,95,'GA'],['Zerevor',W-120,95,'ZE'],['Malande',120,H-95,'MA'],['Veras',W-120,H-95,'VE']];
+      spots.forEach(([nm,x,y,lb])=>{ s+=bossNode(x,y,lb,15); s+=goldLabel(x,y-26,nm); s+=node(x+26,y,'T',RC.Tank,11); });
+      // Healers center
+      [[cx-18,cy],[cx+18,cy],[cx,cy-22]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Melee + ranged distributed (even DPS)
+      [[150,cy-20],[W-150,cy-20]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      [[cx-60,cy-60],[cx+60,cy-60],[cx-60,cy+60],[cx+60,cy+60]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx,H-22,'Tank 4 apart · interrupt Zerevor & Malande · even DPS (shared HP)');
+      s+=legend();
+      return s;
+    },
+
+    // ── ILLIDAN STORMRAGE ────────────────────────────────────────────────
+    illidan(){
+      let s=bg('oval')+compass()+phaseLabel('ILLIDAN STORMRAGE','P2: FLAMES OF AZZINOTH');
+      const cx=W/2, cy=H/2;
+      // Two Warglaive markers (used to break demon form)
+      s+=`<g><rect x="${cx-130}" y="${cy-8}" width="8" height="26" rx="2" fill="rgba(120,200,220,.5)" stroke="#7fd8e8"/><text x="${cx-126}" y="${cy-14}" text-anchor="middle" fill="#7fd8e8" font-size="7" font-family="sans-serif">glaive</text></g>`;
+      s+=`<g><rect x="${cx+122}" y="${cy-8}" width="8" height="26" rx="2" fill="rgba(120,200,220,.5)" stroke="#7fd8e8"/></g>`;
+      // Boss center (P1/P3)
+      s+=bossNode(cx,cy,'IL',17);
+      s+=node(cx+28,cy,'MT',RC.Tank,13);
+      // Two Flame of Azzinoth tanks (apart, near glaives) + flame adds
+      s+=node(cx-100,cy,'OT1',RC.Tank,12);
+      s+=addNode(cx-125,cy+30,'FL',12);
+      s+=node(cx+98,cy,'OT2',RC.Tank,12);
+      s+=addNode(cx+125,cy+30,'FL',12);
+      s+=goldLabel(cx,cy-70,'FLAMES SPLIT APART · KITE FROM BLAZE');
+      // Melee
+      [[cx-22,cy-18],[cx-18,cy+22],[cx+8,cy+24]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers
+      [[cx-58,cy-30],[cx+52,cy-30],[cx,cy+60]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged
+      [[cx-90,cy+60],[cx+90,cy+60],[cx,cy-90],[cx-60,cy+80],[cx+60,cy+80]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx,H-22,'Flame tanks split P2 · break Demon form with glaives · kill Shadow Demons');
+      s+=legend();
+      return s;
+    },
+
   };
 
   // ── dispatch ─────────────────────────────────────────────────────────
@@ -4858,6 +5067,15 @@ function roomSVG(bossId, role, phase, viewMode, resType){
     halazzi:()=>builders.halazzi(),
     malacrass:()=>builders.malacrass(),
     zuljin:()=>builders.zuljin(),
+    najentus:()=>builders.najentus(),
+    supremus:()=>builders.supremus(),
+    akama:()=>builders.akama(),
+    teron:()=>builders.teron(),
+    gurtogg:()=>builders.gurtogg(),
+    ros:()=>builders.ros(),
+    shahraz:()=>builders.shahraz(),
+    council:()=>builders.council(),
+    illidan:()=>builders.illidan(),
   };
 
   const buildFn = builderMap[bossId];
