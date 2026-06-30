@@ -4690,6 +4690,139 @@ function roomSVG(bossId, role, phase, viewMode, resType){
       return s;
     },
 
+    // ── AKIL'ZON ─────────────────────────────────────────────────────────
+    akilzon(){
+      let s=bg('oval')+compass()+phaseLabel("AKIL'ZON",'STACK ON ELECTRICAL STORM');
+      const cx=W/2, cy=H/2;
+      // Stack point under lifted player (center)
+      s+=zoneCircle(cx,cy,42,'STACK HERE (Electrical Storm)','rgba(90,150,210,.18)',true);
+      // Boss center
+      s+=bossNode(cx,cy-2,'A',17);
+      s+=node(cx+30,cy,'MT',RC.Tank,13);
+      // Melee on boss
+      [[cx-24,cy-18],[cx-20,cy+20],[cx+8,cy+24]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers near (must collapse to stack)
+      [[cx-58,cy-26],[cx-60,cy+26],[cx+54,cy-26]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged loose ring that can collapse fast
+      [[cx-100,cy-50],[cx-108,cy+10],[cx-80,cy+60],[cx+90,cy-55],[cx+108,cy+5],[cx+80,cy+62],[cx,cy-78],[cx-30,cy+80],[cx+34,cy+80]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx,H-22,'Stack under lifted player · spread after for Static Disruption');
+      s+=legend();
+      return s;
+    },
+
+    // ── NALORAKK ─────────────────────────────────────────────────────────
+    nalorakk(){
+      let s=bg('rect')+compass()+phaseLabel('NALORAKK','TANK SWAP ON MANGLE');
+      const cx=W/2, cy=H/2;
+      // Boss faced away left
+      s+=bossNode(95,cy,'N',17);
+      s+=node(128,cy-10,'MT',RC.Tank,13);
+      s+=node(128,cy+18,'OT',RC.Tank,13);
+      s+=goldLabel(95,cy-30,'FACED AWAY');
+      // Melee behind boss
+      [[136,cy-30],[156,cy-8],[140,cy+38]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers
+      [[205,cy-60],[210,cy+5],[200,cy+68]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged spread (Surge charges furthest — spread so it hits one)
+      [[300,cy-85],[360,cy-60],[420,cy-25],[440,cy+25],[380,cy+60],[310,cy+85],[290,cy-25],[300,cy+30]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx+40,H-22,'Two tanks swap on Mangle stacks · spread for Surge');
+      s+=legend();
+      return s;
+    },
+
+    // ── JAN'ALAI ─────────────────────────────────────────────────────────
+    janalai(){
+      let s=bg('rect')+compass()+phaseLabel("JAN'ALAI",'CONTROL EGGS · DODGE BOMBS');
+      const cx=W/2, cy=H/2;
+      // Two egg banks (left + right)
+      s+=zoneRect(28,40,70,H-80,'EGG BANK W','rgba(180,140,40,.14)',true);
+      s+=zoneRect(W-98,40,70,H-80,'EGG BANK E','rgba(180,140,40,.14)',true);
+      // Fire bomb tiles (center floor)
+      s+=zoneCircle(cx-30,cy-50,18,'BOMB','rgba(200,80,40,.2)',true);
+      s+=zoneCircle(cx+40,cy+55,18,'BOMB','rgba(200,80,40,.2)',true);
+      // Boss center, MT faces away (frontal Flame Breath)
+      s+=bossNode(cx,cy,'J',17);
+      s+=node(cx-30,cy,'MT',RC.Tank,13);
+      // Add tank for hatchlings
+      s+=node(cx+34,cy+8,'OT',RC.Tank,13);
+      // Melee
+      [[cx-10,cy-22],[cx+14,cy+20],[cx-22,cy+18]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers
+      [[cx-70,cy-30],[cx+70,cy-30],[cx,cy+70]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged along worked egg bank
+      [[140,cy-70],[150,cy],[140,cy+70],[cx,cy-80],[cx+30,cy-30]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx,H-24,'Control hatchers · AoE hatchlings · move off bomb tiles · 35% mass hatch');
+      s+=legend();
+      return s;
+    },
+
+    // ── HALAZZI ──────────────────────────────────────────────────────────
+    halazzi(){
+      let s=bg('oval')+compass()+phaseLabel('HALAZZI','SPLIT: TANK BOTH');
+      const cx=W/2, cy=H/2;
+      // Halazzi left
+      s+=bossNode(cx-80,cy,'H',16);
+      s+=node(cx-50,cy,'MT',RC.Tank,13);
+      // Lynx Spirit right (separate tank)
+      s+=bossNode(cx+90,cy,'LX',15);
+      s+=node(cx+60,cy,'OT',RC.Tank,13);
+      s+=goldLabel(cx+90,cy-28,'LYNX SPIRIT');
+      // Melee (swap to spirit on split)
+      [[cx-56,cy-24],[cx-54,cy+24],[cx-30,cy-6]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers cover both
+      [[cx,cy-60],[cx-10,cy+62],[cx-100,cy+40],[cx+100,cy+40]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged spread
+      [[cx-130,cy-50],[cx-120,cy+10],[cx+130,cy-50],[cx+120,cy+10],[cx-60,cy-80],[cx+60,cy-80]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx,H-22,'Tank Halazzi + Lynx Spirit apart · kill spirit · burn merge windows');
+      s+=legend();
+      return s;
+    },
+
+    // ── HEX LORD MALACRASS ───────────────────────────────────────────────
+    malacrass(){
+      let s=bg('rect')+compass()+phaseLabel('HEX LORD MALACRASS','KILL ADDS FIRST');
+      const cx=W/2, cy=H/2;
+      // Boss left, faced area
+      s+=bossNode(110,cy,'HX',17);
+      s+=node(143,cy,'MT',RC.Tank,13);
+      // 4 adds tanked together right
+      s+=zoneRect(330,cy-70,150,140,'ADDS — CC / KILL','rgba(100,60,160,.14)',true);
+      s+=node(360,cy,'OT',RC.Tank,13);
+      [[400,cy-35],[440,cy-35],[400,cy+35],[440,cy+35]].forEach(([x,y])=>s+=addNode(x,y,'AR',12));
+      // Melee on adds
+      [[380,cy-8],[420,cy+8]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers
+      [[180,cy-55],[185,cy+50],[250,cy]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged (CC + dispel Drain Power)
+      [[150,cy-80],[110,cy-55],[110,cy+55],[150,cy+80],[230,cy-70],[230,cy+70]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx,H-22,'CC + kill the 4 adds · dispel Drain Power · heal Spirit Bolts · then burn');
+      s+=legend();
+      return s;
+    },
+
+    // ── ZUL'JIN ──────────────────────────────────────────────────────────
+    zuljin(){
+      let s=bg('oval')+compass()+phaseLabel("ZUL'JIN",'5 PHASES');
+      const cx=W/2, cy=H/2;
+      // Eagle-phase cyclones + dragonhawk fire patches
+      s+=zoneCircle(cx-110,cy-60,20,'CYCLONE','rgba(120,160,200,.18)',true);
+      s+=zoneCircle(cx+120,cy+50,20,'CYCLONE','rgba(120,160,200,.18)',true);
+      s+=zoneCircle(cx+60,cy-80,18,'FIRE','rgba(200,90,40,.2)',true);
+      // Boss center
+      s+=bossNode(cx,cy,'Z',17);
+      s+=node(cx-30,cy,'MT',RC.Tank,13);
+      s+=node(cx-30,cy+26,'OT',RC.Tank,13);
+      // Melee
+      [[cx-8,cy-22],[cx+12,cy+20],[cx-22,cy+12]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Healers (Grievous Throw = heal to full)
+      [[cx-62,cy-30],[cx+56,cy-28],[cx,cy+62]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Ranged spread
+      [[cx-120,cy+10],[cx-70,cy+70],[cx+110,cy-30],[cx+80,cy+62],[cx+40,cy-78],[cx-40,cy-78]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(cx,H-22,'Heal Grievous Throw to full · dispel Paralysis · dodge cyclones/fire');
+      s+=legend();
+      return s;
+    },
+
   };
 
   // ── dispatch ─────────────────────────────────────────────────────────
@@ -4719,6 +4852,12 @@ function roomSVG(bossId, role, phase, viewMode, resType){
     kazrogal:()=>builders.kazrogal(),
     azgalor:()=>builders.azgalor(),
     archimonde:()=>builders.archimonde(),
+    akilzon:()=>builders.akilzon(),
+    nalorakk:()=>builders.nalorakk(),
+    janalai:()=>builders.janalai(),
+    halazzi:()=>builders.halazzi(),
+    malacrass:()=>builders.malacrass(),
+    zuljin:()=>builders.zuljin(),
   };
 
   const buildFn = builderMap[bossId];
