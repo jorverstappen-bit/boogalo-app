@@ -675,6 +675,11 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <div style="font-size:12px;color:var(--t2);margin-bottom:8px">Set which tank has each resistance set for this week's raids:</div>
     <div id="res-weekly"></div>
   </div>
+  <div class="card">
+    <div class="ct"><i class="ti ti-gauge" style="color:var(--gold)"></i>Resistance Readiness</div>
+    <div style="font-size:12px;color:var(--t2);margin-bottom:8px">Per-fight check against each player's actual resistance from gear (before raid buffs). Enter values below.</div>
+    <div id="res-readiness"></div>
+  </div>
 </div>
 
 <div class="page" id="page-loot">
@@ -1549,7 +1554,7 @@ tk:[
 ],
 ssc:[
   {id:'hydross',name:'Hydross the Unstable',bl:'5 sec after pull',note:"Res tanks required. Swap at 4 stacks — move boss behind flags for phase. STOP all damage on phase call. Faerie Fire critical. Cadbaladin picks up adds.",
-   resist:[{school:'Nature',amount:'as high as possible (~300+)',who:'Poison-phase (Nature) tank',req:'required'},{school:'Frost',amount:'as high as possible (~300+)',who:'Frost-phase tank',req:'required'}],
+   resist:[{school:'Nature',amount:'as high as possible (~300+)',who:'Poison-phase (Nature) tank',req:'required',min:300},{school:'Frost',amount:'as high as possible (~300+)',who:'Frost-phase tank',req:'required',min:300}],
    tanks:[{role:'Nature Res MT',name:'Holsteinbeef'},{role:'Frost Res OT',name:'Xullue'},{role:'Adds (Paladin)',name:'Cadbaladin'}],
    healers:['Unholysparkz','Leundeadpres','Sappheal','Swagmon','Vvambull'],
    special:[{label:'Faerie Fire',players:['Zyuu','Holsteinbeef']}],
@@ -1561,7 +1566,7 @@ ssc:[
    tactics:{Tank:"Tank on inner platform, back to pillar. At Spout: jump in water. Return immediately after — boss AoEs if no melee.",Healer:"Heal through submersion. Split between inner platform and outer ring for P2 adds.",Melee:"P1: DPS on inner platform. At Spout: jump in. P2: kill melee adds fast. CC ranged adds — leave them CC'd.",Ranged:"Spread outer ring. At Spout: jump in. P2: CC Guardians immediately. Focus melee adds with assist."},
    position:{Tank:"Inner circle platform. Stand with back to pillar so knockback doesn't send you off edge.",Healer:"Half on inner circle with tank, half on outer ring. Swap positions at P2.",Melee:"Inner platform in melee range. Step back at Spout, jump in water, return fast.",Ranged:"Outer ring evenly spread. Jump in at Spout. In P2 stay outer ring for add CC."}},
   {id:'leo',name:'Leotheras the Blind',bl:'Phase 3 at 15%',note:"P1: Whirlwind — move out. P2 Demon: threat drops, WL tank picks up. Kill your own Inner Demon — failure = mind-controlled. P3 at 15%: MT retakes boss. Paladin tank is backup if no WL available.",
-   resist:[{school:'Fire',amount:'360',who:'Warlock tank (demon phase — Chaos Blast)',req:'required'}],
+   resist:[{school:'Fire',amount:'360',who:'Warlock tank (demon phase — Chaos Blast)',req:'required',min:360}],
    tanks:[{role:'MT',name:'Holsteinbeef'},{role:'OT',name:'Frostor'},{role:'OT',name:'Palastuff'},{role:'WL tank',name:'Macknetron'}],
    healers:['Unholysparkz','Leundeadpres','Sappheal','Swagmon','Vvambull'],
    special:[{label:'WL tank healer',players:['Sappheal']}],
@@ -1695,7 +1700,7 @@ bt:[
    tactics:{Tank:"P1 (Suffering): tank with as much HP as possible — little healing comes. P2 (Desire): standard tanking but beware Rune Shield reflect — don't overcommit. P3 (Anger): hold threat through the burn.",Healer:"P1: conserve — you can barely heal (Aura of Suffering). P2: heal aggressively but avoid casting into Rune Shield reflect; manage Deaden damage amp. P3: triage hard and outpace the enrage with the raid.",Melee:"P1: full burn, mind Fixate/Frenzy. P2: DPS but watch spell-reflect if you have casts. P3: Bloodlust and burn before enrage.",Ranged:"P1: heavy DPS. P2: stop casting into Rune Shield when it's up. P3: all-in burn. Reposition during each run-back between Essences."},
    position:{Tank:"Each Essence tanked roughly center; raid resets position each phase.",Healer:"Spread within range; reposition on each run-back.",Melee:"On the active Essence.",Ranged:"Spread at range; mind spell reflect in the Desire phase."}},
   {id:'shahraz',name:'Mother Shahraz',bl:'On pull',note:"A healing and movement check. Fatal Attraction teleports three random players together and applies a stacking debuff that ramps damage the longer they stay near each other — they must instantly sprint far apart. Saber Lash splits a huge frontal hit across stacked tanks, so multiple tanks stack to share it. Prismatic Aura cycles random resistance auras, so the raid wants all-resist (Shadow Resistance) gear. Silencing Shriek interrupts casters. Spread is everything.",
-   resist:[{school:'Shadow',amount:'≥100 from gear (before priest Shadow Protection)',who:'Whole raid',req:'required'}],
+   resist:[{school:'Shadow',amount:'≥100 from gear (before priest Shadow Protection)',who:'Whole raid',req:'required',min:100}],
    tanks:[{role:'MT',name:''},{role:'Saber Lash OT',name:''}],
    healers:[],
    special:[{label:'Fatal Attraction spread',players:[]}],
@@ -1708,7 +1713,7 @@ bt:[
    tactics:{Tank:"Pick up your assigned council member and keep them separated. Gathios tank watches Reflective Shield/Blessing of Spell Warding. Move Zerevor and Gathios out of each other's AoE.",Healer:"Spread raid healing across all four pulls. Avoid casting into Lady Malande's Reflective Shield. Stay out of Consecration and Blizzard.",Melee:"DPS evenly so the shared health pool drops together. Interrupt Lady Malande's heals. Move out of Consecration and Flamestrike.",Ranged:"Interrupt Zerevor's Arcane Bolt and Malande's heals on assignment. Spread for Blizzard/Flamestrike. Keep damage balanced across the four."},
    position:{Tank:"Four bosses tanked apart, each in their own corner/zone to separate AoE.",Healer:"Central-ish with line of sight to all four tank spots; mobile for AoE.",Melee:"Rotate/cleave to keep the shared pool even; interrupters on Malande.",Ranged:"Spread between casters; interrupters cover Zerevor and Malande."}},
   {id:'illidan',name:'Illidan Stormrage',bl:'Phase 2 (Flames) / final phase',note:"The endgame fight, multiple phases. P1: tank Illidan, swap or cooldown for Shear (a massive tank hit), spread for Flame Crash and Parasitic Shadowfiend. P2: Illidan flies up and drops his Warglaives, then summons two Flames of Azzinoth — two tanks pick up the Flame elementals near the glaives and kite them out of Blaze patches while the raid burns them. P3: ground phase again. P4 Demon Form: the raid uses the fallen Warglaives to break his Demon transformation; dodge Eye Beam sweeps and Shadow Demons (ranged kill the demons before they trap players). P5: final burn. Heavy coordination — assign Flame tanks and demon handling.",
-   resist:[{school:'Fire',amount:'~365 (soft cap)',who:'Flames of Azzinoth tanks (P2)',req:'required'}],
+   resist:[{school:'Fire',amount:'~365 (soft cap)',who:'Flames of Azzinoth tanks (P2)',req:'required',min:365}],
    tanks:[{role:'MT (Illidan)',name:''},{role:'Flame of Azzinoth tank 1',name:''},{role:'Flame of Azzinoth tank 2',name:''}],
    healers:[],
    special:[{label:'Warglaive / Demon-form handlers',players:[]},{label:'Shadow Demon killers',players:[]}],
@@ -3337,6 +3342,74 @@ function renderRes(){
         </div>`;
       }).join('')}
     </div>`;
+
+  renderResReadiness();
+}
+
+// ── Resistance readiness (per-fight check vs. each player's gear resist) ──
+function getResVal(p,school){ return (p&&p.resVals&&typeof p.resVals[school]==='number')?p.resVals[school]:null; }
+function resistCandidates(entry){
+  const present=ROSTER.filter(p=>p.present);
+  const who=(entry.who||'').toLowerCase();
+  if(who.includes('raid')) return present;
+  if(who.includes('warlock')) return present.filter(p=>p.cls==='Warlock');
+  return present.filter(p=>p.type==='Tank'||p.type==='Mage Tank');
+}
+function setResVal(name,school,value){
+  if(!isRL()) return;
+  const p=gp(name); if(!p) return;
+  if(!p.resVals) p.resVals={};
+  const n=parseInt(value,10);
+  if(isNaN(n)||n<=0) delete p.resVals[school]; else p.resVals[school]=n;
+  saveRoster();
+  renderRes();
+}
+function renderResReadiness(){
+  const el=document.getElementById('res-readiness'); if(!el) return;
+  const rl=isRL();
+  const reqs=[];
+  Object.values(BOSSES).flat().forEach(b=>{
+    (b.resist||[]).forEach(e=>{ if(e.req==='required'&&e.min>0) reqs.push({boss:b,e}); });
+  });
+  const summaries=reqs.map(({boss,e})=>{
+    const m=RESIST_META[e.school]||{c:'var(--gold)',bg:'rgba(201,164,53,.12)',i:'◆'};
+    const cands=resistCandidates(e);
+    const below=[], notset=[], ok=[];
+    cands.forEach(p=>{ const v=getResVal(p,e.school); if(v===null) notset.push(p); else if(v<e.min) below.push(p); else ok.push(p); });
+    const problem=below.length+notset.length;
+    return `<div style="background:var(--bg3);border-radius:var(--r);padding:10px;margin-bottom:8px;border-left:3px solid ${m.c}">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+        <strong style="font-size:12px">${boss.name}</strong>
+        <span class="badge" style="background:${m.bg};color:${m.c}">${m.i} ${e.school} ≥ ${e.min}</span>
+        <span style="font-size:10px;color:var(--t3)">${e.who}</span>
+        <span style="margin-left:auto;font-size:11px;color:${problem?'var(--red)':'#5DCAA5'}">${problem?`⚠ ${problem} not ready`:'✓ All set'}</span>
+      </div>
+      ${below.length?`<div style="font-size:11px;color:var(--red);margin-bottom:3px"><strong>Below ${e.min}:</strong> ${below.map(p=>`${p.name} (${getResVal(p,e.school)})`).join(', ')}</div>`:''}
+      ${notset.length?`<div style="font-size:11px;color:var(--t3)"><strong>Not recorded:</strong> ${notset.map(p=>p.name).join(', ')}</div>`:''}
+      ${ok.length&&!problem?`<div style="font-size:11px;color:#5DCAA5">${ok.map(p=>p.name).join(', ')}</div>`:''}
+    </div>`;
+  }).join('');
+  const schools=['Shadow','Fire','Nature','Frost'];
+  const present=ROSTER.filter(p=>p.present);
+  const gridRows=present.map(p=>`<tr>
+    <td style="padding:2px 6px;font-size:11px;white-space:nowrap">${p.name} <span style="color:var(--t3);font-size:10px">${p.cls}</span></td>
+    ${schools.map(sc=>{ const v=getResVal(p,sc); const m=RESIST_META[sc];
+      return `<td style="padding:2px 4px;text-align:center">${rl
+        ? `<input type="number" min="0" value="${v??''}" placeholder="—" onchange="setResVal('${p.name}','${sc}',this.value)" style="width:52px;font-size:11px;padding:2px 4px;text-align:center;background:var(--bg2);border:1px solid var(--borderl);color:${v!=null?m.c:'var(--t3)'};border-radius:4px">`
+        : `<span style="font-size:11px;color:${v!=null?m.c:'var(--t3)'}">${v??'—'}</span>`}</td>`;
+    }).join('')}
+  </tr>`).join('');
+  const grid=`<div style="overflow-x:auto;margin-top:6px">
+    <table style="border-collapse:collapse;width:100%">
+      <thead><tr style="border-bottom:1px solid var(--border)">
+        <th style="text-align:left;padding:4px 6px;font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.06em">Player</th>
+        ${schools.map(sc=>{const m=RESIST_META[sc];return `<th style="padding:4px;font-size:10px;color:${m.c}">${m.i} ${sc}</th>`;}).join('')}
+      </tr></thead>
+      <tbody>${gridRows}</tbody>
+    </table>
+  </div>`;
+  el.innerHTML=(summaries||'<div style="font-size:11px;color:var(--t3)">No required resistance fights.</div>')
+    +`<div class="sht" style="margin:14px 0 4px">Player resistance from gear${rl?'':' (view only)'}</div>`+grid;
 }
 
 function removeRes(name, key){
@@ -5564,6 +5637,24 @@ function resistReqHTML(boss){
   }).join(' ');
   return `<div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px;align-items:center"><span style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em"><i class="ti ti-shield-half"></i> Resistance gear</span>${rows}</div>`;
 }
+// Shared room-diagram block (used by the strategy boss card; POV has its own
+// player-aware variant). role token also keeps phase-map container ids unique.
+function bossDiagramBlock(boss, role, resType, viewMode){
+  if(PHASE_LABELS[boss.id]){
+    const pLabels=PHASE_LABELS[boss.id];
+    const phases=pLabels.map((_,i)=>i+1);
+    const svgId=boss.id+'-'+role+(resType||'');
+    return `<div style="margin-top:10px">
+      <div class="sht" style="margin-bottom:6px">Room diagram — select phase</div>
+      <div style="display:flex;gap:4px;margin-bottom:4px;flex-wrap:wrap">
+        ${phases.map((ph,i)=>`<button onclick="showPhaseMap(this,'${boss.id}','${role}',${ph},'${resType||''}')" class="btn btn-sm" style="font-size:10px;padding:2px 8px;${i===0?'background:var(--bg4)':''}">${pLabels[i]}</button>`).join('')}
+      </div>
+      <div id="phasemap-${svgId}">${roomSVG(boss.id,role,1,viewMode,resType)}</div>
+    </div>`;
+  }
+  const svg1=roomSVG(boss.id,role,null,viewMode,resType);
+  return svg1?`<div class="rdiag" style="margin-top:10px"><div class="rdiag-title">Room diagram — all positions</div>${svg1}</div>`:'';
+}
 function renderBossCard(boss,raidKey){
   const asgn=getActiveBossAssignment(boss);
   const tanks=asgn.tanks;const healers=asgn.healers;const special=asgn.special;
@@ -5656,6 +5747,7 @@ function renderBossCard(boss,raidKey){
     ${specialHTML}
     ${cubeHTML}
     ${tacHTML}
+    ${bossDiagramBlock(boss,'strat',null,'all')}
     <div style="margin-top:10px">
       <div class="sht" style="margin-bottom:6px">MRT Note (copy to chat)</div>
       <div class="mrt">${mrt}</div>
@@ -7472,7 +7564,7 @@ function applyFirebaseKey(key,data){
     else if(key==='vortexRequests'){const d=_fbArr(data);_fbSync(vortexRequests,d);try{localStorage.setItem('boogalo-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}renderVortex?.();}
     else if(key==='healerTanks'){const d=_fbArr(data);if(d.length){_fbSync(healerTanks,d);try{localStorage.setItem('boogalo-healerTanks',JSON.stringify(healerTanks));}catch(e){}}renderRoles?.();}
     else if(key==='groups'){if(data){const outer=_fbArr(data);if(outer.length){groups.length=0;outer.forEach(g=>groups.push(_fbArr(g)));try{localStorage.setItem('boogalo-groups',JSON.stringify(groups));}catch(e){}}}renderRoles?.();}
-    else if(key==='bossAssignments'){if(data&&typeof data==='object'){Object.keys(bossAssignments).forEach(k=>delete bossAssignments[k]);Object.assign(bossAssignments,data);try{localStorage.setItem('boogalo-bossAssignments',JSON.stringify(bossAssignments));}catch(e){}}['gruul','mag','tk','ssc','kara'].forEach(rk=>{const el=document.getElementById(rk+'-content');if(el&&el.children.length)renderBossPage(rk);});}
+    else if(key==='bossAssignments'){if(data&&typeof data==='object'){Object.keys(bossAssignments).forEach(k=>delete bossAssignments[k]);Object.assign(bossAssignments,data);try{localStorage.setItem('boogalo-bossAssignments',JSON.stringify(bossAssignments));}catch(e){}}Object.keys(BOSSES).forEach(rk=>{const el=document.getElementById(rk+'-content');if(el&&el.children.length)renderBossPage(rk);});}
     else if(key==='killLog'){if(data&&typeof data==='object'){Object.keys(killLog).forEach(k=>delete killLog[k]);Object.assign(killLog,data);try{localStorage.setItem('boogalo-killLog',JSON.stringify(killLog));}catch(e){}}const pe=document.getElementById('progression-content');if(pe&&pe.children.length)renderProgression?.();}
   }finally{_fbIgnore=false;}
 }
