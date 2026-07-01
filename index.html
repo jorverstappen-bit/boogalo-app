@@ -2390,6 +2390,19 @@ function openProfile(name){
               </div>`).join('')}
           </div>
 
+          <div class="ct" style="margin:14px 0 8px"><i class="ti ti-shield-half" style="color:var(--acc)"></i>Resistance (from gear)</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            ${['Shadow','Fire','Nature','Frost'].map(sc=>{const m=RESIST_META[sc];const v=getResVal(p,sc);const canEdit=canEditRes(name);
+              return `<div style="display:flex;align-items:center;gap:5px;background:var(--bg3);border-radius:var(--r);padding:5px 8px">
+                <span style="font-size:11px;color:${m.c};white-space:nowrap">${m.i} ${sc}</span>
+                ${canEdit
+                  ? `<input type="number" min="0" value="${v??''}" placeholder="0" onchange="setResVal('${name}','${sc}',this.value)" style="width:56px;font-size:11px;padding:2px 4px;text-align:center;background:var(--bg2);border:1px solid var(--borderl);color:var(--t1);border-radius:4px">`
+                  : `<strong style="font-size:11px;color:var(--t1)">${v??'—'}</strong>`}
+              </div>`;
+            }).join('')}
+          </div>
+          ${canEditRes(name)?'<div style="font-size:10px;color:var(--t3);margin-top:4px">Your resistance from gear only (before priest/raid buffs).</div>':''}
+
           <div class="ct" style="margin:14px 0 8px">
             <i class="ti ti-hammer" style="color:var(--acc)"></i>Professions
             ${(isRL()||(isNamed()&&CURRENT_USER?.name===name))?`<button id="prof-edit-btn-${name}" class="btn btn-sm" style="margin-left:auto;font-size:10px;padding:2px 7px" onclick="toggleProfEdit('${name}')"><i class="ti ti-pencil"></i></button>`:''}
@@ -3355,14 +3368,18 @@ function resistCandidates(entry){
   if(who.includes('warlock')) return present.filter(p=>p.cls==='Warlock');
   return present.filter(p=>p.type==='Tank'||p.type==='Mage Tank');
 }
+// RL can edit anyone's resistances; a signed-in player can edit their own.
+function canEditRes(name){ return isRL() || (isNamed() && CURRENT_USER && CURRENT_USER.name===name); }
 function setResVal(name,school,value){
-  if(!isRL()) return;
+  if(!canEditRes(name)) return;
   const p=gp(name); if(!p) return;
   if(!p.resVals) p.resVals={};
   const n=parseInt(value,10);
   if(isNaN(n)||n<=0) delete p.resVals[school]; else p.resVals[school]=n;
   saveRoster();
   renderRes();
+  // Refresh the profile view too if it's the one being edited
+  if(document.getElementById('page-profiles')?.classList.contains('active')) openProfile(name);
 }
 function renderResReadiness(){
   const el=document.getElementById('res-readiness'); if(!el) return;
@@ -3391,14 +3408,18 @@ function renderResReadiness(){
   }).join('');
   const schools=['Shadow','Fire','Nature','Frost'];
   const present=ROSTER.filter(p=>p.present);
-  const gridRows=present.map(p=>`<tr>
-    <td style="padding:2px 6px;font-size:11px;white-space:nowrap">${p.name} <span style="color:var(--t3);font-size:10px">${p.cls}</span></td>
+  const gridRows=present.map(p=>{
+    const canEdit=canEditRes(p.name);
+    const isMe=CURRENT_USER&&CURRENT_USER.name===p.name;
+    return `<tr${isMe?' style="background:rgba(124,111,224,.06)"':''}>
+    <td style="padding:2px 6px;font-size:11px;white-space:nowrap">${p.name}${isMe?' <span style="color:var(--acc);font-size:9px">(you)</span>':''} <span style="color:var(--t3);font-size:10px">${p.cls}</span></td>
     ${schools.map(sc=>{ const v=getResVal(p,sc); const m=RESIST_META[sc];
-      return `<td style="padding:2px 4px;text-align:center">${rl
+      return `<td style="padding:2px 4px;text-align:center">${canEdit
         ? `<input type="number" min="0" value="${v??''}" placeholder="—" onchange="setResVal('${p.name}','${sc}',this.value)" style="width:52px;font-size:11px;padding:2px 4px;text-align:center;background:var(--bg2);border:1px solid var(--borderl);color:${v!=null?m.c:'var(--t3)'};border-radius:4px">`
         : `<span style="font-size:11px;color:${v!=null?m.c:'var(--t3)'}">${v??'—'}</span>`}</td>`;
     }).join('')}
-  </tr>`).join('');
+  </tr>`;
+  }).join('');
   const grid=`<div style="overflow-x:auto;margin-top:6px">
     <table style="border-collapse:collapse;width:100%">
       <thead><tr style="border-bottom:1px solid var(--border)">
@@ -3408,8 +3429,10 @@ function renderResReadiness(){
       <tbody>${gridRows}</tbody>
     </table>
   </div>`;
+  const gridHint=rl?'RL can edit everyone; players can edit their own row.'
+    :(isNamed()?'Edit your own row; enter resistance from gear only (before raid buffs).':'Sign in with your character name to record your resistances.');
   el.innerHTML=(summaries||'<div style="font-size:11px;color:var(--t3)">No required resistance fights.</div>')
-    +`<div class="sht" style="margin:14px 0 4px">Player resistance from gear${rl?'':' (view only)'}</div>`+grid;
+    +`<div class="sht" style="margin:14px 0 4px">Player resistance from gear</div><div style="font-size:10px;color:var(--t3);margin-bottom:4px">${gridHint}</div>`+grid;
 }
 
 function removeRes(name, key){
@@ -6689,7 +6712,7 @@ function fullRaidCard(r,highlight){
       <div style="display:flex;gap:6px">
         <button class="btn btn-p btn-sm" onclick="saveRaidEdit('${r.id}')"><i class="ti ti-check"></i> Save</button>
         <button class="btn btn-sm" onclick="toggleRaidEdit('${r.id}')"><i class="ti ti-x"></i> Cancel</button>
-        ${!past?`<button class="btn btn-d btn-sm" onclick="deleteRaid('${r.id}')" style="margin-left:auto"><i class="ti ti-trash"></i> Delete raid</button>`:''}
+        ${canManageRaids()?`<button class="btn btn-d btn-sm" onclick="deleteRaid('${r.id}')" style="margin-left:auto"><i class="ti ti-trash"></i> Delete raid${past?" (didn't happen)":''}</button>`:''}
       </div>
     </div>
     <div class="rec-meta">
@@ -6825,9 +6848,18 @@ function deleteRaid(raidId){
   if(!canManageRaids()) return;
   const r=raidSchedule.find(x=>x.id===raidId);
   if(!r) return;
-  if(!confirm('Delete "'+r.name+'" on '+fmtKey(r.date)+'? This cannot be undone.')) return;
+  const wasPast=isPast(r.date)&&r.date!==todayKey();
+  const msg='Delete "'+r.name+'" on '+fmtKey(r.date)+'?'
+    +(wasPast?'\n\nThis past raid will be removed from raid history and attendance counts (use this for raids that never happened).':'')
+    +'\n\nThis cannot be undone.';
+  if(!confirm(msg)) return;
   raidSchedule=raidSchedule.filter(x=>x.id!==raidId);
   saveRaids();renderRaids();renderCalendar();
+  // Refresh any attendance/history panels that are currently populated
+  const refreshIfActive=(pageId,fn)=>{const pg=document.getElementById(pageId);if(pg&&pg.classList.contains('active')&&typeof fn==='function')fn();};
+  refreshIfActive('page-attendance',window.renderAttendance);
+  refreshIfActive('page-profiles',window.renderProfiles);
+  refreshIfActive('page-stats',window.renderStats);
   toast('Raid deleted','ok');
 }
 
