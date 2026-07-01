@@ -1524,6 +1524,7 @@ mag:[
 ],
 tk:[
   {id:'alar',name:"Al'ar",bl:'Phase 2 start',note:"P1: tanks swap every 30s at platform nests. When Al'ar flies center, move down one level. P2: OT picks up at Melt Armor. Paladin tank picks up phoenix adds — kill phoenix, then burn the egg hatchling immediately before it evolves.",
+   resist:[{school:'Fire',amount:'some FR eases Melt Armor / Flame Buffet',who:'Tanks & melee',req:'recommended'}],
    tanks:[{role:'MT (P1 left)',name:'Holsteinbeef'},{role:'OT (P1 right)',name:'Frostor'},{role:'Adds tank',name:'Unholysparkz'}],
    healers:['Sappheal','Palastuff','Kalaveijo','Vvambull'],special:[],
    tactics:{Tank:"P1: tank nest, swap every 30s. P2: MT holds boss. OT at Melt Armor. Paladin picks up phoenix adds — kill phoenix → kill hatchling immediately before it evolves.",Healer:"P1: heavy nest tank damage. P2: major healing check. Cover Rebirth of Fire AoE.",Melee:"P1: kill nest adds. When Al'ar goes center — move down. P2: assist Paladin on phoenix adds — kill phoenix then hatchling fast. Spread for Rebirth of Fire.",Ranged:"P2: spread wide — Rebirth hits random. Focus boss. When airborne: everyone spreads."},
@@ -1548,6 +1549,7 @@ tk:[
 ],
 ssc:[
   {id:'hydross',name:'Hydross the Unstable',bl:'5 sec after pull',note:"Res tanks required. Swap at 4 stacks — move boss behind flags for phase. STOP all damage on phase call. Faerie Fire critical. Cadbaladin picks up adds.",
+   resist:[{school:'Nature',amount:'as high as possible (~300+)',who:'Poison-phase (Nature) tank',req:'required'},{school:'Frost',amount:'as high as possible (~300+)',who:'Frost-phase tank',req:'required'}],
    tanks:[{role:'Nature Res MT',name:'Holsteinbeef'},{role:'Frost Res OT',name:'Xullue'},{role:'Adds (Paladin)',name:'Cadbaladin'}],
    healers:['Unholysparkz','Leundeadpres','Sappheal','Swagmon','Vvambull'],
    special:[{label:'Faerie Fire',players:['Zyuu','Holsteinbeef']}],
@@ -1559,6 +1561,7 @@ ssc:[
    tactics:{Tank:"Tank on inner platform, back to pillar. At Spout: jump in water. Return immediately after — boss AoEs if no melee.",Healer:"Heal through submersion. Split between inner platform and outer ring for P2 adds.",Melee:"P1: DPS on inner platform. At Spout: jump in. P2: kill melee adds fast. CC ranged adds — leave them CC'd.",Ranged:"Spread outer ring. At Spout: jump in. P2: CC Guardians immediately. Focus melee adds with assist."},
    position:{Tank:"Inner circle platform. Stand with back to pillar so knockback doesn't send you off edge.",Healer:"Half on inner circle with tank, half on outer ring. Swap positions at P2.",Melee:"Inner platform in melee range. Step back at Spout, jump in water, return fast.",Ranged:"Outer ring evenly spread. Jump in at Spout. In P2 stay outer ring for add CC."}},
   {id:'leo',name:'Leotheras the Blind',bl:'Phase 3 at 15%',note:"P1: Whirlwind — move out. P2 Demon: threat drops, WL tank picks up. Kill your own Inner Demon — failure = mind-controlled. P3 at 15%: MT retakes boss. Paladin tank is backup if no WL available.",
+   resist:[{school:'Fire',amount:'360',who:'Warlock tank (demon phase — Chaos Blast)',req:'required'}],
    tanks:[{role:'MT',name:'Holsteinbeef'},{role:'OT',name:'Frostor'},{role:'OT',name:'Palastuff'},{role:'WL tank',name:'Macknetron'}],
    healers:['Unholysparkz','Leundeadpres','Sappheal','Swagmon','Vvambull'],
    special:[{label:'WL tank healer',players:['Sappheal']}],
@@ -1692,6 +1695,7 @@ bt:[
    tactics:{Tank:"P1 (Suffering): tank with as much HP as possible — little healing comes. P2 (Desire): standard tanking but beware Rune Shield reflect — don't overcommit. P3 (Anger): hold threat through the burn.",Healer:"P1: conserve — you can barely heal (Aura of Suffering). P2: heal aggressively but avoid casting into Rune Shield reflect; manage Deaden damage amp. P3: triage hard and outpace the enrage with the raid.",Melee:"P1: full burn, mind Fixate/Frenzy. P2: DPS but watch spell-reflect if you have casts. P3: Bloodlust and burn before enrage.",Ranged:"P1: heavy DPS. P2: stop casting into Rune Shield when it's up. P3: all-in burn. Reposition during each run-back between Essences."},
    position:{Tank:"Each Essence tanked roughly center; raid resets position each phase.",Healer:"Spread within range; reposition on each run-back.",Melee:"On the active Essence.",Ranged:"Spread at range; mind spell reflect in the Desire phase."}},
   {id:'shahraz',name:'Mother Shahraz',bl:'On pull',note:"A healing and movement check. Fatal Attraction teleports three random players together and applies a stacking debuff that ramps damage the longer they stay near each other — they must instantly sprint far apart. Saber Lash splits a huge frontal hit across stacked tanks, so multiple tanks stack to share it. Prismatic Aura cycles random resistance auras, so the raid wants all-resist (Shadow Resistance) gear. Silencing Shriek interrupts casters. Spread is everything.",
+   resist:[{school:'Shadow',amount:'≥100 from gear (before priest Shadow Protection)',who:'Whole raid',req:'required'}],
    tanks:[{role:'MT',name:''},{role:'Saber Lash OT',name:''}],
    healers:[],
    special:[{label:'Fatal Attraction spread',players:[]}],
@@ -1704,6 +1708,7 @@ bt:[
    tactics:{Tank:"Pick up your assigned council member and keep them separated. Gathios tank watches Reflective Shield/Blessing of Spell Warding. Move Zerevor and Gathios out of each other's AoE.",Healer:"Spread raid healing across all four pulls. Avoid casting into Lady Malande's Reflective Shield. Stay out of Consecration and Blizzard.",Melee:"DPS evenly so the shared health pool drops together. Interrupt Lady Malande's heals. Move out of Consecration and Flamestrike.",Ranged:"Interrupt Zerevor's Arcane Bolt and Malande's heals on assignment. Spread for Blizzard/Flamestrike. Keep damage balanced across the four."},
    position:{Tank:"Four bosses tanked apart, each in their own corner/zone to separate AoE.",Healer:"Central-ish with line of sight to all four tank spots; mobile for AoE.",Melee:"Rotate/cleave to keep the shared pool even; interrupters on Malande.",Ranged:"Spread between casters; interrupters cover Zerevor and Malande."}},
   {id:'illidan',name:'Illidan Stormrage',bl:'Phase 2 (Flames) / final phase',note:"The endgame fight, multiple phases. P1: tank Illidan, swap or cooldown for Shear (a massive tank hit), spread for Flame Crash and Parasitic Shadowfiend. P2: Illidan flies up and drops his Warglaives, then summons two Flames of Azzinoth — two tanks pick up the Flame elementals near the glaives and kite them out of Blaze patches while the raid burns them. P3: ground phase again. P4 Demon Form: the raid uses the fallen Warglaives to break his Demon transformation; dodge Eye Beam sweeps and Shadow Demons (ranged kill the demons before they trap players). P5: final burn. Heavy coordination — assign Flame tanks and demon handling.",
+   resist:[{school:'Fire',amount:'~365 (soft cap)',who:'Flames of Azzinoth tanks (P2)',req:'required'}],
    tanks:[{role:'MT (Illidan)',name:''},{role:'Flame of Azzinoth tank 1',name:''},{role:'Flame of Azzinoth tank 2',name:''}],
    healers:[],
    special:[{label:'Warglaive / Demon-form handlers',players:[]},{label:'Shadow Demon killers',players:[]}],
@@ -3516,6 +3521,15 @@ function setDiagView(mode){
   if(name&&gp(name)) renderPOV();
 }
 
+// Bosses with multiple room-diagram phases → tab labels (phase index = position+1)
+const PHASE_LABELS={
+  kaelthas:['P1 Advisors','P2 Weapons','P4-5 Kael'],
+  opera:['Wizard of Oz','Romulo & Jul.','Big Bad Wolf'],
+  supremus:['Tank Phase','Chase Phase'],
+  ros:['P1 Suffering','P2 Desire','P3 Anger'],
+  zuljin:['Troll','Lynx','Bear','Eagle','Dragonhawk'],
+  illidan:['P1/3 Ground','P2 Flames','P4 Demon'],
+};
 function showPhaseMap(btn, bossId, role, phase, resType){
   const container=document.getElementById('phasemap-'+bossId+'-'+role+(resType||''));
   if(container) container.innerHTML=roomSVG(bossId,role,phase,diagView,resType);
@@ -4802,23 +4816,73 @@ function roomSVG(bossId, role, phase, viewMode, resType){
 
     // ── ZUL'JIN ──────────────────────────────────────────────────────────
     zuljin(){
-      let s=bg('oval')+compass()+phaseLabel("ZUL'JIN",'5 PHASES');
+      const p=phase||1;
       const cx=W/2, cy=H/2;
-      // Eagle-phase cyclones + dragonhawk fire patches
-      s+=zoneCircle(cx-110,cy-60,20,'CYCLONE','rgba(120,160,200,.18)',true);
-      s+=zoneCircle(cx+120,cy+50,20,'CYCLONE','rgba(120,160,200,.18)',true);
-      s+=zoneCircle(cx+60,cy-80,18,'FIRE','rgba(200,90,40,.2)',true);
-      // Boss center
-      s+=bossNode(cx,cy,'Z',17);
-      s+=node(cx-30,cy,'MT',RC.Tank,13);
-      s+=node(cx-30,cy+26,'OT',RC.Tank,13);
-      // Melee
-      [[cx-8,cy-22],[cx+12,cy+20],[cx-22,cy+12]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
-      // Healers (Grievous Throw = heal to full)
-      [[cx-62,cy-30],[cx+56,cy-28],[cx,cy+62]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
-      // Ranged spread
-      [[cx-120,cy+10],[cx-70,cy+70],[cx+110,cy-30],[cx+80,cy+62],[cx+40,cy-78],[cx-40,cy-78]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
-      s+=goldLabel(cx,H-22,'Heal Grievous Throw to full · dispel Paralysis · dodge cyclones/fire');
+      // shared: boss + tanks + basic melee, plus phase-specific hazards
+      function base(label,dur){ return bg('oval')+compass()+phaseLabel(label,dur); }
+      let s;
+      if(p===1){
+        // ── TROLL ──
+        s=base("ZUL'JIN — TROLL PHASE",'Grievous Throw');
+        s+=bossNode(cx,cy,'Z',17);
+        s+=node(cx-30,cy,'MT',RC.Tank,13);
+        // Grievous Throw target
+        s+=addNode(cx+70,cy-60,'GT',13);
+        s+=goldLabel(cx+70,cy-78,'GRIEVOUS — heal to FULL');
+        [[cx-8,cy-22],[cx+12,cy+20],[cx-22,cy+12]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+        [[cx-62,cy-30],[cx+56,cy+28],[cx,cy+62]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+        [[cx-120,cy+10],[cx-70,cy+70],[cx+110,cy+30],[cx+40,cy-78],[cx-50,cy-78]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+        s+=goldLabel(cx,H-22,'Heal Grievous Throw target to full to clear the debuff · spread for Whirlwind');
+      } else if(p===2){
+        // ── LYNX ──
+        s=base("ZUL'JIN — LYNX PHASE",'Claw Rage frenzy');
+        s+=bossNode(cx,cy,'Z',17);
+        s+=node(cx-30,cy,'MT',RC.Tank,13);
+        s+=goldLabel(cx-30,cy-24,'FRENZY — big heals');
+        [[cx-8,cy-22],[cx+12,cy+20],[cx-22,cy+12]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+        [[cx-62,cy-30],[cx+56,cy-28],[cx,cy+62],[cx-60,cy+50]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+        [[cx-120,cy+10],[cx+118,cy],[cx+40,cy-78],[cx-50,cy-78]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+        s+=goldLabel(cx,H-22,'Claw Rage / Lynx Rush — heavy tank & raid damage · cooldowns');
+      } else if(p===3){
+        // ── BEAR ──
+        s=base("ZUL'JIN — BEAR PHASE",'tank swap · dispel');
+        s+=bossNode(cx,cy,'Z',17);
+        s+=node(cx-30,cy-10,'MT',RC.Tank,13);
+        s+=node(cx-30,cy+18,'OT',RC.Tank,13);
+        s+=goldLabel(cx-30,cy-30,'SWAP — Overpower');
+        [[cx-8,cy-22],[cx+12,cy+20],[cx-22,cy+12]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+        [[cx-62,cy-30],[cx+56,cy-28],[cx,cy+62]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+        [[cx-120,cy+10],[cx+118,cy],[cx+40,cy-78],[cx-50,cy-78]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+        s+=goldLabel(cx,H-22,'Tank swap on Overpower · DISPEL Creeping Paralysis before it stuns');
+      } else if(p===4){
+        // ── EAGLE ──
+        s=base("ZUL'JIN — EAGLE PHASE",'cyclones · Energy Storm');
+        // Energy Storm radius around boss (no casting inside)
+        s+=`<circle cx="${cx}" cy="${cy}" r="60" fill="rgba(120,160,200,.1)" stroke="rgba(120,160,200,.5)" stroke-width="1.4" stroke-dasharray="4 3"/>`;
+        s+=goldLabel(cx,cy-70,'ENERGY STORM — no casting inside');
+        s+=bossNode(cx,cy,'Z',16);
+        // Roaming cyclones
+        s+=zoneCircle(cx-120,cy-50,20,'CYCLONE','rgba(120,160,200,.2)',true);
+        s+=zoneCircle(cx+120,cy+40,20,'CYCLONE','rgba(120,160,200,.2)',true);
+        s+=zoneCircle(cx+40,cy+80,18,'CYCLONE','rgba(120,160,200,.2)',true);
+        // Casters stay OUT of the storm radius
+        [[cx-135,cy+10],[cx+135,cy-20],[cx,cy+110],[cx-60,cy-95],[cx+70,cy-90]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+        [[cx-70,cy+70],[cx+80,cy+70]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+        s+=goldLabel(cx,H-22,'Stay OUT of Energy Storm radius · dodge roaming cyclones');
+      } else {
+        // ── DRAGONHAWK ──
+        s=base("ZUL'JIN — DRAGONHAWK PHASE",'fire patches');
+        s+=bossNode(cx,cy,'Z',17);
+        s+=node(cx-30,cy,'MT',RC.Tank,13);
+        // Pillar of Fire patches
+        s+=zoneCircle(cx-80,cy-60,18,'FIRE','rgba(200,90,40,.22)',true);
+        s+=zoneCircle(cx+90,cy+40,18,'FIRE','rgba(200,90,40,.22)',true);
+        s+=zoneCircle(cx+30,cy-80,16,'FIRE','rgba(200,90,40,.22)',true);
+        [[cx-8,cy-22],[cx+12,cy+20],[cx-22,cy+12]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+        [[cx-62,cy-30],[cx+56,cy-28],[cx,cy+62]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+        [[cx-120,cy+10],[cx+118,cy],[cx-50,cy+72],[cx+60,cy+72]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+        s+=goldLabel(cx,H-22,'Spread & dodge Flame Whirl / Pillar of Fire patches · burn to finish');
+      }
       s+=legend();
       return s;
     },
@@ -4850,24 +4914,41 @@ function roomSVG(bossId, role, phase, viewMode, resType){
 
     // ── SUPREMUS ─────────────────────────────────────────────────────────
     supremus(){
-      let s=bg('oval')+compass()+phaseLabel('SUPREMUS','TANK / CHASE PHASES');
+      const p=phase||1;
       const cx=W/2, cy=H/2;
-      // Kite circle for chase phase
-      s+=`<circle cx="${cx}" cy="${cy}" r="120" fill="none" stroke="rgba(201,164,53,.35)" stroke-width="1.4" stroke-dasharray="6 5"/>`;
-      s+=goldLabel(cx,cy-128,'CHASE-PHASE KITE PATH');
-      // Volcanic geysers
-      s+=zoneCircle(cx-70,cy+40,18,'GEYSER','rgba(200,80,40,.2)',true);
-      s+=zoneCircle(cx+80,cy-30,18,'GEYSER','rgba(200,80,40,.2)',true);
-      // Boss center (tank phase)
-      s+=bossNode(cx,cy,'S',17);
-      s+=node(cx+30,cy,'MT',RC.Tank,13);
-      // Melee
-      [[cx-22,cy-18],[cx-18,cy+22],[cx+8,cy+24]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
-      // Healers
-      [[cx-58,cy-26],[cx+52,cy+26],[cx,cy-58]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
-      // Ranged on the kite ring
-      [[cx-110,cy-45],[cx-110,cy+45],[cx+110,cy-45],[cx+110,cy+45],[cx,cy+95],[cx,cy-95]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
-      s+=goldLabel(cx,H-22,'Tank phase: burn & dodge flame · Chase: kite circle, avoid geysers');
+      let s;
+      if(p===1){
+        // ── TANK PHASE ──
+        s=bg('oval')+compass()+phaseLabel('SUPREMUS — TANK PHASE','stand & burn');
+        // Molten Flame under/near boss
+        s+=zoneCircle(cx-40,cy+30,20,'MOLTEN FLAME','rgba(200,80,40,.2)',true);
+        s+=zoneCircle(cx+55,cy-35,18,'FLAME','rgba(200,80,40,.2)',true);
+        s+=bossNode(cx,cy,'S',17);
+        s+=node(cx+30,cy,'MT',RC.Tank,13);
+        [[cx-22,cy-18],[cx-18,cy+22],[cx+8,cy+24]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+        [[cx-58,cy-26],[cx+52,cy+26],[cx,cy-58]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+        [[cx-105,cy-40],[cx-108,cy+30],[cx+105,cy-40],[cx+108,cy+30],[cx,cy+92]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+        s+=goldLabel(cx,H-22,'MT holds boss · everyone dodges Molten Flame pools · burn hard');
+      } else {
+        // ── CHASE PHASE ──
+        s=bg('oval')+compass()+phaseLabel('SUPREMUS — CHASE PHASE','fixate + kite');
+        s+=`<circle cx="${cx}" cy="${cy}" r="118" fill="none" stroke="rgba(201,164,53,.4)" stroke-width="1.6" stroke-dasharray="6 5"/>`;
+        s+=`<path d="M${cx+118},${cy} A118,118 0 0 1 ${cx+60},${cy+102}" fill="none" stroke="rgba(220,120,40,.6)" stroke-width="2.5" marker-end=""/>`;
+        s+=goldLabel(cx,cy-128,'KITE PATH — slow circle');
+        // Volcanic geysers erupt under raid
+        s+=zoneCircle(cx-70,cy+40,18,'GEYSER','rgba(200,80,40,.22)',true);
+        s+=zoneCircle(cx+80,cy-30,18,'GEYSER','rgba(200,80,40,.22)',true);
+        s+=zoneCircle(cx+30,cy+80,16,'GEYSER','rgba(200,80,40,.22)',true);
+        // Boss chasing the fixated runner (no tank)
+        s+=bossNode(cx-70,cy-70,'S',16);
+        s+=node(cx-30,cy-100,'RUN',RC.Ranged,13);
+        s+=goldLabel(cx-30,cy-118,'FIXATED — RUN');
+        // Everyone else on the ring, moving with the kite
+        [[cx+110,cy-40],[cx+112,cy+30],[cx+70,cy+95],[cx,cy+108],[cx-100,cy+55]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+        [[cx+40,cy+40],[cx+60,cy]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+        [[cx+90,cy-70],[cx-40,cy+90]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+        s+=goldLabel(cx,H-22,"Boss un-tankable — fixated player kites the circle · everyone dodges geysers");
+      }
       s+=legend();
       return s;
     },
@@ -4948,20 +5029,44 @@ function roomSVG(bossId, role, phase, viewMode, resType){
 
     // ── RELIQUARY OF SOULS ───────────────────────────────────────────────
     ros(){
-      let s=bg('oval')+compass()+phaseLabel('RELIQUARY OF SOULS','3 ESSENCES');
+      const p=phase||1;
       const cx=W/2, cy=H/2;
-      // Phase banner
-      s+=zoneRect(cx-150,38,300,22,'P1 SUFFERING (no heal) → P2 DESIRE → P3 ANGER (BL)','rgba(100,60,160,.14)');
-      // Boss center
-      s+=bossNode(cx,cy,'RoS',16);
-      s+=node(cx+30,cy,'MT',RC.Tank,13);
-      // Melee
-      [[cx-22,cy-18],[cx-18,cy+22],[cx+8,cy+24]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
-      // Healers
-      [[cx-58,cy-26],[cx+52,cy+26],[cx,cy+62]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
-      // Ranged spread (mind spell reflect in P2)
-      [[cx-110,cy-50],[cx-118,cy+10],[cx+110,cy-50],[cx+118,cy+10],[cx-50,cy-80],[cx+50,cy-80]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
-      s+=goldLabel(cx,H-22,'P1 conserve mana · P2 no casting into Rune Shield · P3 burn before enrage');
+      let s;
+      if(p===1){
+        // ── ESSENCE OF SUFFERING (no-heal DPS phase) ──
+        s=bg('oval')+compass()+phaseLabel('ESSENCE OF SUFFERING','no heal — DPS race');
+        s+=bossNode(cx,cy,'ES',16);
+        s+=node(cx+30,cy,'MT',RC.Tank,13);
+        s+=goldLabel(cx+30,cy-24,'HIGH-HP TANK');
+        [[cx-22,cy-18],[cx-18,cy+22],[cx+8,cy+24],[cx-30,cy]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+        // Healers dimmed — barely heal
+        [[cx-58,cy-26],[cx+52,cy+26]].forEach(([x,y])=>s+='<g opacity="0.4">'+node(x,y,'H',RC.Healer,12)+'</g>');
+        [[cx-110,cy-50],[cx+110,cy-50],[cx-118,cy+10],[cx+118,cy+10],[cx-50,cy-80],[cx+50,cy-80]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+        s+=goldLabel(cx,H-22,'Aura of Suffering — healing near-useless · high-HP tank · pure burn');
+      } else if(p===2){
+        // ── ESSENCE OF DESIRE (heal + spell reflect) ──
+        s=bg('oval')+compass()+phaseLabel('ESSENCE OF DESIRE','heal · Rune Shield reflects');
+        s+=bossNode(cx,cy,'ED',16);
+        // Reflect shield ring
+        s+=`<circle cx="${cx}" cy="${cy}" r="34" fill="none" stroke="rgba(200,120,220,.5)" stroke-width="1.6" stroke-dasharray="3 3"/>`;
+        s+=goldLabel(cx,cy-42,'RUNE SHIELD — stop casts');
+        s+=node(cx+30,cy,'MT',RC.Tank,13);
+        [[cx-22,cy-18],[cx-18,cy+22],[cx+8,cy+24]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+        [[cx-58,cy-26],[cx+52,cy+26],[cx,cy+62]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+        [[cx-110,cy-50],[cx+110,cy-50],[cx-118,cy+10],[cx+118,cy+10],[cx-50,cy-80],[cx+50,cy-80]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+        s+=goldLabel(cx,H-22,'Heal aggressively · STOP casting when Rune Shield is up (reflect) · manage Deaden');
+      } else {
+        // ── ESSENCE OF ANGER (burn before enrage) ──
+        s=bg('oval')+compass()+phaseLabel('ESSENCE OF ANGER','BLOODLUST — burn');
+        s+=bossNode(cx,cy,'EA',16);
+        s+=node(cx+30,cy,'MT',RC.Tank,13);
+        // Spite/Seethe AoE hints
+        s+=zoneCircle(cx-60,cy+50,16,'SPITE','rgba(200,80,40,.18)',true);
+        [[cx-22,cy-18],[cx-18,cy+22],[cx+8,cy+24],[cx-30,cy]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+        [[cx-58,cy-26],[cx+52,cy+26],[cx,cy+62]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+        [[cx-112,cy-45],[cx+112,cy-45],[cx-118,cy+15],[cx+118,cy+15],[cx,cy-82]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+        s+=goldLabel(cx,H-22,'Bloodlust · burn through Soul Scream / Spite before the enrage');
+      }
       s+=legend();
       return s;
     },
@@ -5007,27 +5112,58 @@ function roomSVG(bossId, role, phase, viewMode, resType){
 
     // ── ILLIDAN STORMRAGE ────────────────────────────────────────────────
     illidan(){
-      let s=bg('oval')+compass()+phaseLabel('ILLIDAN STORMRAGE','P2: FLAMES OF AZZINOTH');
+      const p=phase||1;
       const cx=W/2, cy=H/2;
-      // Two Warglaive markers (used to break demon form)
-      s+=`<g><rect x="${cx-130}" y="${cy-8}" width="8" height="26" rx="2" fill="rgba(120,200,220,.5)" stroke="#7fd8e8"/><text x="${cx-126}" y="${cy-14}" text-anchor="middle" fill="#7fd8e8" font-size="7" font-family="sans-serif">glaive</text></g>`;
-      s+=`<g><rect x="${cx+122}" y="${cy-8}" width="8" height="26" rx="2" fill="rgba(120,200,220,.5)" stroke="#7fd8e8"/></g>`;
-      // Boss center (P1/P3)
-      s+=bossNode(cx,cy,'IL',17);
-      s+=node(cx+28,cy,'MT',RC.Tank,13);
-      // Two Flame of Azzinoth tanks (apart, near glaives) + flame adds
-      s+=node(cx-100,cy,'OT1',RC.Tank,12);
-      s+=addNode(cx-125,cy+30,'FL',12);
-      s+=node(cx+98,cy,'OT2',RC.Tank,12);
-      s+=addNode(cx+125,cy+30,'FL',12);
-      s+=goldLabel(cx,cy-70,'FLAMES SPLIT APART · KITE FROM BLAZE');
-      // Melee
-      [[cx-22,cy-18],[cx-18,cy+22],[cx+8,cy+24]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
-      // Healers
-      [[cx-58,cy-30],[cx+52,cy-30],[cx,cy+60]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
-      // Ranged
-      [[cx-90,cy+60],[cx+90,cy+60],[cx,cy-90],[cx-60,cy+80],[cx+60,cy+80]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
-      s+=goldLabel(cx,H-22,'Flame tanks split P2 · break Demon form with glaives · kill Shadow Demons');
+      let s;
+      if(p===1){
+        // ── GROUND PHASE (P1/P3) ──
+        s=bg('oval')+compass()+phaseLabel('ILLIDAN — GROUND (P1/P3)','Shear · Flame Crash');
+        s+=bossNode(cx,cy,'IL',17);
+        s+=node(cx+28,cy,'MT',RC.Tank,13);
+        s+=goldLabel(cx+28,cy-24,'CD/SWAP on Shear');
+        // Flame Crash pool
+        s+=zoneCircle(cx-55,cy+40,18,'FLAME CRASH','rgba(200,80,40,.2)',true);
+        [[cx-22,cy-18],[cx-18,cy+22],[cx+8,cy+24]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+        [[cx-58,cy-30],[cx+52,cy-30],[cx,cy+60]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+        [[cx-110,cy-40],[cx+110,cy-40],[cx-118,cy+20],[cx+118,cy+20],[cx,cy-88]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+        s+=goldLabel(cx,H-22,'Cooldown/swap on Shear · spread for Parasitic · dodge Flame Crash');
+      } else if(p===2){
+        // ── FLAMES OF AZZINOTH (P2) ──
+        s=bg('oval')+compass()+phaseLabel('ILLIDAN — FLAMES (P2)','2 flame tanks');
+        // Warglaive markers
+        s+=`<g><rect x="${cx-130}" y="${cy-8}" width="8" height="26" rx="2" fill="rgba(120,200,220,.5)" stroke="#7fd8e8"/><text x="${cx-126}" y="${cy-14}" text-anchor="middle" fill="#7fd8e8" font-size="7" font-family="sans-serif">glaive</text></g>`;
+        s+=`<g><rect x="${cx+122}" y="${cy-8}" width="8" height="26" rx="2" fill="rgba(120,200,220,.5)" stroke="#7fd8e8"/></g>`;
+        // Blaze patches
+        s+=zoneCircle(cx-70,cy+55,16,'BLAZE','rgba(200,80,40,.2)',true);
+        s+=zoneCircle(cx+70,cy+55,16,'BLAZE','rgba(200,80,40,.2)',true);
+        // Two Flames tanked apart
+        s+=node(cx-100,cy,'OT1',RC.Tank,12);
+        s+=addNode(cx-125,cy+30,'FL',12);
+        s+=node(cx+98,cy,'OT2',RC.Tank,12);
+        s+=addNode(cx+125,cy+30,'FL',12);
+        s+=goldLabel(cx,cy-70,'FLAMES SPLIT APART · KITE FROM BLAZE');
+        [[cx-70,cy-20],[cx+70,cy-20]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+        [[cx-60,cy+40],[cx+60,cy+40]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+        [[cx-30,cy-80],[cx+30,cy-80],[cx,cy+90]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+        s+=goldLabel(cx,H-22,'Two tanks split the Flames · burn each · avoid Blaze patches');
+      } else {
+        // ── DEMON FORM (P4) ──
+        s=bg('oval')+compass()+phaseLabel('ILLIDAN — DEMON FORM (P4)','glaives · Shadow Demons');
+        // Warglaive on the ground (break demon form)
+        s+=`<g><rect x="${cx-8}" y="${cy+55}" width="8" height="26" rx="2" fill="rgba(120,200,220,.7)" stroke="#7fd8e8"/><text x="${cx-4}" y="${cy+50}" text-anchor="middle" fill="#7fd8e8" font-size="7" font-family="sans-serif">WARGLAIVE</text></g>`;
+        s+=bossNode(cx,cy,'IL',17);
+        s+=node(cx+30,cy,'MT',RC.Tank,13);
+        // Eye Beam sweep line
+        s+=`<line x1="${cx-110}" y1="${cy-70}" x2="${cx+110}" y2="${cy+70}" stroke="rgba(160,80,200,.4)" stroke-width="3" stroke-dasharray="5 4"/>`;
+        s+=goldLabel(cx+90,cy-72,'EYE BEAM');
+        // Shadow Demons (trap players — ranged kill)
+        [[cx-90,cy+30],[cx+90,cy-40]].forEach(([x,y])=>s+=addNode(x,y,'SD',12));
+        s+=goldLabel(cx-90,cy+48,'SHADOW DEMON');
+        [[cx-22,cy-18],[cx+8,cy+24]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+        [[cx-58,cy-30],[cx+52,cy-30]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+        [[cx-115,cy+15],[cx+115,cy+15],[cx,cy-88],[cx-55,cy+75]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+        s+=goldLabel(cx,H-22,'Break Demon form with a Warglaive · ranged kill Shadow Demons · dodge Eye Beam');
+      }
       s+=legend();
       return s;
     },
@@ -5214,10 +5350,11 @@ if(boss.id==='vashj'){
     ${inRoster?'':`<div style="font-size:10px;color:var(--ora);margin-bottom:4px"><i class="ti ti-info-circle"></i> ${playerName} isn't in this raid's confirmed roster yet — get confirmed to get a spot.</div>`}
     ${buildVashjSVG(computeVashjSpread(sr), playerName)}
   </div>`:`<div style="margin-top:8px;font-size:11px;color:var(--t3)"><i class="ti ti-arrows-shuffle"></i> Phase 2 raid spread appears here once a Serpent Shrine raid has a confirmed roster.</div>`;
-} else if(boss.id==='kaelthas'||boss.id==='opera'){
-  const phases=[1,2,3];
-  const pLabels=boss.id==='opera'?['Wizard of Oz','Romulo & Jul.','Big Bad Wolf']:['P1 Advisors','P2 Weapons','P4-5 Kael'];
+} else if(PHASE_LABELS[boss.id]){
+  const pLabels=PHASE_LABELS[boss.id];
+  const phases=pLabels.map((_,i)=>i+1);
   svgHtml=`<div style="margin-top:8px">
+    <div class="rdiag-title" style="margin-bottom:4px">Room diagram — select phase</div>
     <div style="display:flex;gap:4px;margin-bottom:4px;flex-wrap:wrap">
       ${phases.map((ph,i)=>`<button onclick="showPhaseMap(this,'${boss.id}','${effRole}',${ph},'${resType||''}')"
         class="btn btn-sm" style="font-size:10px;padding:2px 8px;${i===0?'background:var(--bg4)':''}">${pLabels[i]}</button>`).join('')}
@@ -5240,6 +5377,7 @@ const svg=svgHtml;
           <strong style="font-size:13px">${boss.name}</strong>
           ${hasSomething?'<span class="badge" style="background:rgba(26,158,114,.1);color:#5DCAA5;border:0.5px solid rgba(26,158,114,.25)"><i class="ti ti-alert-circle"></i> Active role</span>':'<span class="badge" style="background:rgba(100,100,100,.08);color:var(--t3)">No direct assignment</span>'}
         </div>
+        ${resistReqHTML(boss)}
         ${tankAssign?`<div class="pov-task"><i class="ti ti-shield" style="color:#e07060"></i><span><strong>Tank role:</strong> ${tankAssign.role}</span></div>`:''}
         ${healerAssign?`<div class="pov-task"><i class="ti ti-heart" style="color:#5DCAA5"></i><span><strong>Healer:</strong> Assigned healer for this encounter${healerTarget?' — <strong style="color:#5DCAA5">Target: '+healerTarget+'</strong>':''}</span></div>`:''}
         ${specialAssign?`<div class="pov-task"><i class="ti ti-star" style="color:var(--gold)"></i><span><strong>${specialAssign.label}</strong></span></div>`:''}
@@ -5408,6 +5546,24 @@ function renderBossPage(raidKey){
   el.innerHTML=bossList.map(boss=>renderBossCard(boss,raidKey)).join('');
 }
 
+// Resistance-gear requirement rendering (per-fight resist needs)
+const RESIST_META={
+  Shadow:{c:'#b48ce0',bg:'rgba(160,110,220,.14)',i:'🌑'},
+  Fire:  {c:'#ff8060',bg:'rgba(255,100,50,.14)',i:'🔥'},
+  Nature:{c:'#ABD473',bg:'rgba(171,212,115,.14)',i:'🌿'},
+  Frost: {c:'#69CCF0',bg:'rgba(105,204,240,.14)',i:'❄'},
+};
+function resistReqHTML(boss){
+  if(!boss.resist||!boss.resist.length) return '';
+  const rows=boss.resist.map(r=>{
+    const m=RESIST_META[r.school]||{c:'var(--gold)',bg:'rgba(201,164,53,.12)',i:'◆'};
+    const reqTag=r.req==='recommended'
+      ?'<span style="opacity:.75;font-style:italic">recommended</span>'
+      :'<strong>required</strong>';
+    return `<span class="badge" style="background:${m.bg};color:${m.c};border:0.5px solid ${m.c}55;display:inline-flex;align-items:center;gap:5px">${m.i} ${r.school} Res — ${r.amount} · ${r.who} · ${reqTag}</span>`;
+  }).join(' ');
+  return `<div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px;align-items:center"><span style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.07em"><i class="ti ti-shield-half"></i> Resistance gear</span>${rows}</div>`;
+}
 function renderBossCard(boss,raidKey){
   const asgn=getActiveBossAssignment(boss);
   const tanks=asgn.tanks;const healers=asgn.healers;const special=asgn.special;
@@ -5485,6 +5641,7 @@ function renderBossCard(boss,raidKey){
       ${boss.bl?`<span class="badge" style="background:var(--redd);color:#e07b72;border:0.5px solid rgba(192,57,43,.3);margin-left:auto;font-family:Inter,sans-serif"><i class="ti ti-bolt"></i> BL: ${boss.bl}</span>`:''}
     </div>
     ${boss.note?`<div class="bnote">${boss.note}</div>`:''}
+    ${resistReqHTML(boss)}
     <div class="g2">
       <div>
         <div class="sht" style="margin-bottom:6px">Tanks</div>
@@ -5514,7 +5671,8 @@ function buildMRT(boss,rk,asgn){
   const special=asgn.special.map(s=>`${s.label}: ${(s.players||[]).join(', ')}`).join('\n');
   let cubeNote='';
   if(rk==='mag'&&boss.autoAssign){const c=getMagCubeAssignments();cubeNote=`\nCUBES:\n💀 Skull (entrance): ${c.skull}\n✗ X (far left): ${c.xmark}\n☽ Moon (far right): ${c.moon}\n${c.nearCubes.map(x=>x.marker+' '+x.role+': '+x.name).join('\n')}\nBlast Nova Clickers: ${c.kickers.map(k=>k.name).join(', ')}\nDark Mending Interrupt: ${c.darkMend.map(k=>k.name).join(', ')}\nBanish: ${c.banishes.map(b=>b.name).join(', ')}\nBackups: ${c.backups.map(b=>b.name).join(', ')}`;}
-  return `=== ${boss.name.toUpperCase()} ===\nTANKS:\n${tanks}\nHEALERS: ${healers}\n${special?'SPECIAL:\n'+special:''}${cubeNote}`;
+  const resistNote=(boss.resist&&boss.resist.length)?'\nRESIST: '+boss.resist.map(r=>`${r.school} ${r.amount} (${r.who})`).join(' | '):'';
+  return `=== ${boss.name.toUpperCase()} ===${resistNote}\nTANKS:\n${tanks}\nHEALERS: ${healers}\n${special?'SPECIAL:\n'+special:''}${cubeNote}`;
 }
 
 function copyMRT(btn,text){navigator.clipboard.writeText(text).then(()=>{toast('MRT note copied!','ok');btn.innerHTML='<i class="ti ti-check"></i> Copied';setTimeout(()=>btn.innerHTML='<i class="ti ti-copy"></i> Copy MRT',2000);});}
