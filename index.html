@@ -433,8 +433,8 @@ tr:hover td{background:rgba(255,255,255,.013)}
     </div>
     <div class="sbs"><div class="sbl">Tools</div>
       <div class="ni" onclick="nav(this,'loot')"><i class="ti ti-trophy"></i><span>Loot Priority</span></div>
+      <div class="ni" onclick="nav(this,'guild-effort')"><i class="ti ti-shopping-cart"></i><span>Guild Effort</span></div>
       <div class="ni" onclick="nav(this,'pov')"><i class="ti ti-user-circle"></i><span>Player POV</span></div>
-      <div class="ni" onclick="nav(this,'buffs')"><i class="ti ti-checklist"></i><span>Buff Coverage</span></div>
       <div class="ni" onclick="nav(this,'specreq')"><i class="ti ti-refresh"></i><span>Spec Requests<span class="nbadge" id="sr-badge">0</span></span></div>
     </div>
     <div class="sbs"><div class="sbl">Sign-up</div>
@@ -455,7 +455,6 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <div class="sbs"><div class="sbl">Analysis</div>
       <div class="ni" onclick="nav(this,'profiles')"><i class="ti ti-user-circle"></i><span>Profiles</span></div>
       <div class="ni" onclick="nav(this,'stats')"><i class="ti ti-chart-bar"></i><span>Statistics</span></div>
-      <div class="ni" onclick="nav(this,'reviews')"><i class="ti ti-star"></i><span>Reviews<span class="nbadge" id="rev-badge">0</span></span></div>
     </div>
   </div>
 
@@ -463,9 +462,9 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <div class="sbs"><div class="sbl">Raid Info</div>
       <div class="ni" onclick="nav(this,'roster')"><i class="ti ti-users"></i><span>Roster (view)</span></div>
       <div class="ni" onclick="nav(this,'loot')"><i class="ti ti-trophy"></i><span>Loot Priority</span></div>
+      <div class="ni" onclick="nav(this,'guild-effort')"><i class="ti ti-shopping-cart"></i><span>Guild Effort</span></div>
       <div class="ni" onclick="nav(this,'pov')"><i class="ti ti-user-circle"></i><span>Player POV</span></div>
       <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
-      <div class="ni" onclick="nav(this,'buffs')"><i class="ti ti-checklist"></i><span>Buff Coverage</span></div>
     </div>
     <div class="sbs"><div class="sbl">Schedule</div>
       <div class="ni" onclick="nav(this,'calendar')"><i class="ti ti-calendar"></i><span>Calendar</span></div>
@@ -482,7 +481,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'pov')"><i class="ti ti-user-circle"></i><span>Player POV</span></div>
       <div class="ni" onclick="nav(this,'roster')"><i class="ti ti-users"></i><span>Roster (view)</span></div>
       <div class="ni" onclick="nav(this,'loot')"><i class="ti ti-trophy"></i><span>Loot Priority</span></div>
-      <div class="ni" onclick="nav(this,'buffs')"><i class="ti ti-checklist"></i><span>Buff Coverage</span></div>
+      <div class="ni" onclick="nav(this,'guild-effort')"><i class="ti ti-shopping-cart"></i><span>Guild Effort</span></div>
     </div>
     <div class="sbs"><div class="sbl">Raids</div>
       <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
@@ -523,7 +522,6 @@ tr:hover td{background:rgba(255,255,255,.013)}
     </div>
     <div class="sbs"><div class="sbl">Analysis</div>
       <div class="ni" onclick="nav(this,'profiles')"><i class="ti ti-user-circle"></i><span>Profiles</span></div>
-      <div class="ni" onclick="nav(this,'reviews')"><i class="ti ti-star"></i><span>Reviews</span></div>
     </div>
   </div>
   </div><!-- end sb-nav -->
@@ -882,25 +880,20 @@ tr:hover td{background:rgba(255,255,255,.013)}
   <div id="profiles-content"></div>
 </div>
 
+<div class="page" id="page-guild-effort">
+  <div class="ph"><div class="pt">Guild Effort</div><div class="ps">Consumable shopping list · Guild bank stock · Member contributions</div></div>
+  <div id="guild-effort-content"></div>
+</div>
+
 <div class="page" id="page-stats">
   <div class="ph"><div class="pt">Attendance Statistics</div><div class="ps">Based on completed raid history</div></div>
   <div class="tabs"><div class="tab active" onclick="switchStTab(this,'overview')">Overview</div><div class="tab" onclick="switchStTab(this,'players')">By Player</div><div class="tab" onclick="switchStTab(this,'raids-st')">By Raid</div></div>
   <div id="stats-content"></div>
 </div>
 
-<div class="page" id="page-reviews">
-  <div class="ph"><div class="pt">Raid Reviews</div><div class="ps">Post-raid feedback · Write reviews for completed raids</div></div>
-  <div id="reviews-content"></div>
-</div>
-
 <div class="page" id="page-progression">
   <div class="ph"><div class="pt">Progression</div><div class="ps">Boss kill log · First kills · Instance progress</div></div>
   <div id="progression-content"></div>
-</div>
-
-<div class="page" id="page-buffs">
-  <div class="ph"><div class="pt">Buff Coverage</div><div class="ps">Based on present players — red = not covered tonight</div></div>
-  <div id="buffs-content"></div>
 </div>
 
 </div></div><!-- end content/main -->
@@ -1997,6 +1990,7 @@ function setView(v, user){
     if(reviews.length) seedIfEmpty('reviews',saveReviews);
     if(leaves.length) seedIfEmpty('leaves',saveLeaves);
     if(vortexRequests.length) seedIfEmpty('vortexRequests',saveVortexRequests);
+    if(Object.keys(guildEffortData).length||Object.keys(guildBankStock).length||guildExtraItems.length||Object.keys(playerProfessions).length) seedIfEmpty('guildEffort',saveGE);
   }
   else if(v==='officer'){
     document.querySelector('#nav-officer .ni')?.click();
@@ -2009,6 +2003,7 @@ function setView(v, user){
     if(reviews.length) seedIfEmpty('reviews',saveReviews);
     if(leaves.length) seedIfEmpty('leaves',saveLeaves);
     if(vortexRequests.length) seedIfEmpty('vortexRequests',saveVortexRequests);
+    if(Object.keys(guildEffortData).length||Object.keys(guildBankStock).length||guildExtraItems.length||Object.keys(playerProfessions).length) seedIfEmpty('guildEffort',saveGE);
   }
   else if(v==='guest') document.querySelector('#nav-guest .ni[onclick*="roster"]')?.click();
   else document.querySelector('#nav-par .ni')?.click();
@@ -2223,6 +2218,430 @@ function startRaidTimer(){
   }
   tick();
   timerInterval=setInterval(tick,1000);
+}
+
+// ============================================================
+// GUILD EFFORT — consumable shopping list & contributions
+// ============================================================
+const CONSUMABLES = {
+  battle: [
+    {id:'elx_shadow',  name:'Elixir of Major Shadow Power', stat:'+55 Shadow Spell Dmg',
+     url:'https://www.wowhead.com/tbc/item=22835', roles:['Ranged'],
+     recipe:{skill:'Alchemy 360', reagents:['Netherbloom x2','Nightmare Vine x1']}},
+    {id:'elx_agility', name:'Elixir of Major Agility',      stat:'+35 Agi, +20 Crit',
+     url:'https://www.wowhead.com/tbc/item=22831', roles:['Melee','Ranged','Tank'],
+     recipe:{skill:'Alchemy 340', reagents:['Felweed x2','Dreaming Glory x1']}},
+    {id:'elx_firepower',name:'Elixir of Major Firepower',   stat:'+55 Fire Spell Dmg',
+     url:'https://www.wowhead.com/tbc/item=22833', roles:['Ranged'],
+     recipe:{skill:'Alchemy 340', reagents:['Felweed x1','Flame Cap x2']}},
+    {id:'elx_frost',   name:'Elixir of Major Frost Power',  stat:'+55 Frost Spell Dmg',
+     url:'https://www.wowhead.com/tbc/item=22827', roles:['Ranged'],
+     recipe:{skill:'Alchemy 335', reagents:['Felweed x2','Ancient Lichen x1']}},
+    {id:'elx_healing', name:'Elixir of Healing Power',      stat:'+50 Healing',
+     url:'https://www.wowhead.com/tbc/item=22825', roles:['Healer'],
+     recipe:{skill:'Alchemy 325', reagents:['Dreaming Glory x2','Felweed x1']}},
+    {id:'elx_strength',name:'Elixir of Major Strength',     stat:'+35 Strength',
+     url:'https://www.wowhead.com/tbc/item=22824', roles:['Melee','Tank'],
+     recipe:{skill:'Alchemy 325', reagents:['Ragveil x2','Felweed x1']}},
+    {id:'elx_onslaught',name:'Onslaught Elixir',            stat:'+60 Attack Power',
+     url:'https://www.wowhead.com/tbc/item=28102', roles:['Melee','Ranged'],
+     recipe:{skill:'Alchemy 350', reagents:['Terocone x2','Mana Thistle x1']}},
+    {id:'elx_adept',   name:"Adept's Elixir",               stat:'+24 Spell Dmg/Heal, +24 Spell Crit',
+     url:'https://www.wowhead.com/tbc/item=28103', roles:['Ranged','Healer'],
+     recipe:{skill:'Alchemy 350', reagents:['Dreaming Glory x2','Felweed x1']}},
+    {id:'elx_mastery', name:'Elixir of Mastery',            stat:'+15 All Stats',
+     url:'https://www.wowhead.com/tbc/item=28104', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Alchemy 350', reagents:['Terocone x2','Ancient Lichen x1']}},
+    {id:'elx_mongoose',name:'Elixir of the Mongoose',       stat:'+25 Agi, +28 Crit',
+     url:'https://www.wowhead.com/tbc/item=13452', roles:['Melee','Ranged'],
+     recipe:{skill:'Alchemy 285', reagents:['Gromsblood x1','Ghost Mushroom x1']}},
+    {id:'elx_demonslaying',name:'Elixir of Demonslaying',   stat:'+265 AP vs Demons (5 min)',
+     url:'https://www.wowhead.com/tbc/item=9224', roles:['Melee','Ranged'],
+     recipe:{skill:'Alchemy 250', reagents:['Gromsblood x1','Ghost Mushroom x1']}},
+    {id:'elx_felstrength',name:'Fel Strength Elixir',       stat:'+90 AP, -10 Stamina',
+     url:'https://www.wowhead.com/tbc/item=31679', roles:['Melee'],
+     recipe:{skill:'Alchemy 360', reagents:['Mana Thistle x1','Fel Lotus x1']}},
+    {id:'elx_arcane',  name:'Greater Arcane Elixir',        stat:'+35 Spell Dmg/Heal',
+     url:'https://www.wowhead.com/tbc/item=13454', roles:['Ranged','Healer'],
+     recipe:{skill:'Alchemy 300', reagents:['Dreamfoil x2','Icecap x1','Crystal Vial x1']}},
+  ],
+  guardian: [
+    {id:'gelx_mageblood',name:'Elixir of Major Mageblood',  stat:'+16 MP5',
+     url:'https://www.wowhead.com/tbc/item=22840', roles:['Healer','Ranged'],
+     recipe:{skill:'Alchemy 340', reagents:['Ragveil x2','Felweed x1']}},
+    {id:'gelx_defense', name:'Elixir of Major Defense',     stat:'+550 Armor',
+     url:'https://www.wowhead.com/tbc/item=22834', roles:['Tank'],
+     recipe:{skill:'Alchemy 340', reagents:['Ancient Lichen x2','Felweed x1']}},
+    {id:'gelx_fortitude',name:'Elixir of Major Fortitude',  stat:'+250 HP, +10 HP5',
+     url:'https://www.wowhead.com/tbc/item=32062', roles:['Tank','Healer'],
+     recipe:{skill:'Alchemy 365', reagents:['Ancient Lichen x2','Mana Thistle x1']}},
+    {id:'gelx_wisdom',  name:'Elixir of Draenic Wisdom',    stat:'+30 Int, +30 Spirit',
+     url:'https://www.wowhead.com/tbc/item=32067', roles:['Healer','Ranged'],
+     recipe:{skill:'Alchemy 365', reagents:['Terocone x2','Mana Thistle x1']}},
+    {id:'gelx_empowerment',name:'Elixir of Empowerment',    stat:'-30 Target Magic Resist',
+     url:'https://www.wowhead.com/tbc/item=22848', roles:['Ranged'],
+     recipe:{skill:'Alchemy 360', reagents:['Terocone x3']}},
+    {id:'gelx_ironskin', name:'Elixir of Ironskin',         stat:'+30 Resilience',
+     url:'https://www.wowhead.com/tbc/item=32068', roles:['Tank'],
+     recipe:{skill:'Alchemy 365', reagents:['Felweed x2','Ancient Lichen x1']}},
+    {id:'gelx_earthen', name:'Earthen Elixir',              stat:'-20 Phys/Magic Dmg taken',
+     url:'https://www.wowhead.com/tbc/item=32063', roles:['Tank'],
+     recipe:{skill:'Alchemy 365', reagents:['Ragveil x2','Felweed x1']}},
+    {id:'gelx_arthas',  name:'Gift of Arthas',               stat:'+10 Shadow Resist, disease debuff on attackers',
+     url:'https://www.wowhead.com/tbc/item=9088', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Alchemy 285', reagents:["Arthas' Tears x1",'Ghost Mushroom x1']}},
+  ],
+  potion: [
+    {id:'pot_supermana',  name:'Super Mana Potion',          stat:'+1800-3001 Mana',
+     url:'https://www.wowhead.com/tbc/item=22832', roles:['Healer','Ranged'],
+     recipe:{skill:'Alchemy 340', reagents:['Felweed x2','Dreaming Glory x1']}},
+    {id:'pot_superhealth',name:'Super Healing Potion',       stat:'+1500-2501 HP',
+     url:'https://www.wowhead.com/tbc/item=22829', roles:['Tank','Melee','Healer'],
+     recipe:{skill:'Alchemy 325', reagents:['Dreaming Glory x2','Felweed x1']}},
+    {id:'pot_destruction',name:'Destruction Potion',         stat:'+2% Crit, +120 Spell Dmg (15s)',
+     url:'https://www.wowhead.com/tbc/item=22839', roles:['Ranged'],
+     recipe:{skill:'Alchemy 335', reagents:['Netherbloom x1','Nightmare Vine x1']}},
+    {id:'pot_haste',      name:'Haste Potion',               stat:'+400 Haste (15s)',
+     url:'https://www.wowhead.com/tbc/item=22838', roles:['Melee','Ranged'],
+     recipe:{skill:'Alchemy 335', reagents:['Terocone x1','Ancient Lichen x1']}},
+    {id:'pot_heroic',     name:'Heroic Potion',              stat:'+70 Str, +700 HP (15s)',
+     url:'https://www.wowhead.com/tbc/item=22837', roles:['Melee','Tank'],
+     recipe:{skill:'Alchemy 335', reagents:['Ragveil x1','Ancient Lichen x1']}},
+    {id:'pot_insanestr',  name:'Insane Strength Potion',     stat:'+120 Str, -75 Defense (15s)',
+     url:'https://www.wowhead.com/tbc/item=22828', roles:['Melee'],
+     recipe:{skill:'Alchemy 330', reagents:['Ragveil x2']}},
+    {id:'pot_shadow',     name:'Major Shadow Protection Potion', stat:'Absorbs 2800-4001 Shadow',
+     url:'https://www.wowhead.com/tbc/item=22846', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Alchemy 340', reagents:['Netherbloom x2','Ancient Lichen x1']}},
+    {id:'pot_fire',       name:'Major Fire Protection Potion',   stat:'Absorbs 2800-4001 Fire',
+     url:'https://www.wowhead.com/tbc/item=22841', roles:['Tank','Melee','Ranged'],
+     recipe:{skill:'Alchemy 335', reagents:['Flame Cap x2','Ancient Lichen x1']}},
+    {id:'pot_nature',     name:'Major Nature Protection Potion', stat:'Absorbs 2800-4001 Nature',
+     url:'https://www.wowhead.com/tbc/item=22844', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Alchemy 335', reagents:['Ancient Lichen x2','Felweed x1']}},
+    {id:'pot_frost',      name:'Major Frost Protection Potion',  stat:'Absorbs 2800-4001 Frost',
+     url:'https://www.wowhead.com/tbc/item=22842', roles:['Tank','Melee','Ranged'],
+     recipe:{skill:'Alchemy 335', reagents:['Ancient Lichen x2','Icecap x1']}},
+    {id:'pot_arcane',     name:'Major Arcane Protection Potion', stat:'Absorbs 2800-4001 Arcane',
+     url:'https://www.wowhead.com/tbc/item=22845', roles:['Ranged','Healer'],
+     recipe:{skill:'Alchemy 340', reagents:['Netherbloom x2','Felweed x1']}},
+    {id:'pot_holy',       name:'Major Holy Protection Potion',   stat:'Absorbs 2800-4001 Holy',
+     url:'https://www.wowhead.com/tbc/item=22847', roles:['Tank','Healer'],
+     recipe:{skill:'Alchemy 340', reagents:['Dreaming Glory x2','Felweed x1']}},
+    {id:'pot_mightyrage', name:'Mighty Rage Potion',         stat:'+30-90 Rage, +25 Str (20s)',
+     url:'https://www.wowhead.com/tbc/item=13442', roles:['Tank','Melee'],
+     recipe:{skill:'Alchemy 275', reagents:['Gromsblood x2','Bloodvine x1']}},
+    {id:'pot_rejuv',      name:'Super Rejuvenation Potion',  stat:'+1650-2751 Mana & HP',
+     url:'https://www.wowhead.com/tbc/item=22850', roles:['Healer'],
+     recipe:{skill:'Alchemy 360', reagents:['Netherbloom x1','Nightmare Vine x1']}},
+  ],
+  weapon: [
+    {id:'oil_mana',  name:'Superior Mana Oil',         stat:'+14 MP5',
+     url:'https://www.wowhead.com/tbc/item=22521', roles:['Healer','Ranged'],
+     recipe:{skill:'Enchanting 300', reagents:['Arcane Dust x3','Greater Planar Essence x1']}},
+    {id:'oil_wizard',name:'Superior Wizard Oil',       stat:'+42 Spell Dmg',
+     url:'https://www.wowhead.com/tbc/item=22522', roles:['Ranged'],
+     recipe:{skill:'Enchanting 300', reagents:['Arcane Dust x3','Greater Planar Essence x1']}},
+    {id:'stone_sharp',name:'Adamantite Sharpening Stone', stat:'+12 Weapon Dmg, +14 Crit',
+     url:'https://www.wowhead.com/tbc/item=23529', roles:['Melee'],
+     recipe:{skill:'Blacksmithing 350', reagents:['Adamantite Bar x2']}},
+    {id:'stone_weight',name:'Adamantite Weightstone',  stat:'+12 Weapon Dmg, +14 Crit',
+     url:'https://www.wowhead.com/tbc/item=28421', roles:['Melee'],
+     recipe:{skill:'Blacksmithing 360', reagents:['Adamantite Bar x2','Eternium Bar x1']}},
+  ],
+};
+const CONSUMABLE_BY_ID = {};
+Object.values(CONSUMABLES).flat().forEach(c=>CONSUMABLE_BY_ID[c.id]=c);
+
+// Player professions { playerName: [{prof, spec}, {prof, spec}] }
+let playerProfessions = {};
+const WOW_PROFESSIONS = {
+  Alchemy:         ['Potion Master','Elixir Master','Transmutation Master'],
+  Blacksmithing:   ['Armorsmith','Weaponsmith','→ Axesmith','→ Hammersmith','→ Swordsmith'],
+  Enchanting:      [],
+  Engineering:     ['Gnomish Engineering','Goblin Engineering'],
+  Herbalism:       [],
+  Jewelcrafting:   [],
+  Leatherworking:  ['Dragonscale Leatherworker','Elemental Leatherworker','Tribal Leatherworker'],
+  Mining:          [],
+  Skinning:        [],
+  Tailoring:       ['Mooncloth Tailoring','Shadoweave Tailoring','Spellfire Tailoring'],
+  'First Aid':     [],
+  Cooking:         [],
+  Fishing:         [],
+};
+
+// Guild Effort state
+let guildEffortData = {};   // { name: { isGEMember, requests:[{id,qty}], note, lastContrib } }
+let guildBankStock = {};    // { consumableId: qty }
+let guildExtraItems = [];   // [{ id, name, qty, note }]
+
+function getGEData(name){
+  if(!guildEffortData[name]) guildEffortData[name]={isGEMember:false,requests:[],note:'',lastContrib:''};
+  return guildEffortData[name];
+}
+function saveGE(){
+  const payload={data:guildEffortData,bank:guildBankStock,extra:guildExtraItems,profs:playerProfessions};
+  try{localStorage.setItem('boogalo-guildEffort',JSON.stringify(payload));}catch(e){}
+  try{fbSet('guildEffort',payload);}catch(e){}
+}
+
+function renderGEProfileSection(name){
+  const ged=getGEData(name);
+  if(!ged.isGEMember) return '<div style="font-size:11px;color:var(--t3)">Not a Guild Effort member. Check the box above to enroll.</div>';
+  const catLabels={battle:'Battle Elixir',guardian:'Guardian Elixir',potion:'Mana/Health Potion',weapon:'Weapon Enhancement'};
+  const catKeys=['battle','guardian','potion','weapon'];
+  const canEdit=isRL()||(isNamed()&&CURRENT_USER&&CURRENT_USER.name===name);
+  let html='<div style="font-size:11px;color:var(--t3);margin-bottom:10px">Select which consumables you need each raid night and how many.</div>';
+  catKeys.forEach(cat=>{
+    const items=CONSUMABLES[cat];
+    html+=`<div style="margin-bottom:10px">
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--acc);margin-bottom:6px">${catLabels[cat]}</div>
+      <div style="display:flex;flex-direction:column;gap:5px">
+      ${items.map(item=>{
+        const req=ged.requests.find(r=>r.id===item.id);
+        const qty=req?req.qty:0;
+        return`<div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:var(--r);padding:5px 10px">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:11px;font-weight:500;color:var(--t1)">${item.name}</div>
+            <div style="font-size:10px;color:var(--t3)">${item.stat}</div>
+          </div>
+          ${canEdit
+            ? `<input type="number" min="0" max="60" value="${qty}" style="width:55px;text-align:center;font-size:12px"
+                onchange="setGERequest('${name}','${item.id}',parseInt(this.value)||0)">`
+            : `<span style="width:55px;text-align:center;font-size:12px;color:${qty?'var(--t1)':'var(--t3)'}">${qty||'—'}</span>`}
+        </div>`;
+      }).join('')}
+      </div>
+    </div>`;
+  });
+  return html;
+}
+
+function renderProfSection(name){
+  const profs=playerProfessions[name]||[];
+  const canEdit=isRL()||(isNamed()&&CURRENT_USER&&CURRENT_USER.name===name);
+  let html='';
+  [0,1].forEach(i=>{
+    const cur=profs[i]||{prof:'',spec:''};
+    const specs=WOW_PROFESSIONS[cur.prof]||[];
+    if(!canEdit){
+      html+=`<div style="display:flex;gap:8px;font-size:11px"><span style="color:var(--t2);width:52px;flex-shrink:0">Prof ${i+1}</span><span style="color:var(--t1)">${cur.prof||'—'}${cur.spec?' · '+cur.spec:''}</span></div>`;
+      return;
+    }
+    html+=`<div style="display:flex;flex-direction:column;gap:4px;background:var(--bg3);border-radius:var(--r);padding:7px 10px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:10px;color:var(--t2);width:52px;flex-shrink:0">Prof ${i+1}</span>
+        <select style="flex:1;font-size:11px" onchange="setPlayerProf('${name}',${i},'prof',this.value)">
+          <option value="">— None —</option>
+          ${Object.keys(WOW_PROFESSIONS).map(pr=>`<option value="${pr}" ${pr===cur.prof?'selected':''}>${pr}</option>`).join('')}
+        </select>
+      </div>
+      ${specs.length?`<div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:10px;color:var(--t3);width:52px;flex-shrink:0">Spec</span>
+        <select style="flex:1;font-size:11px;color:var(--t2)" onchange="setPlayerProf('${name}',${i},'spec',this.value)">
+          <option value="">— No specialisation —</option>
+          ${specs.map(sp=>`<option value="${sp}" ${sp===cur.spec?'selected':''}>${sp}</option>`).join('')}
+        </select>
+      </div>`:''}
+    </div>`;
+  });
+  return html;
+}
+function setPlayerProf(name, idx, field, val){
+  if(!(isRL()||(isNamed()&&CURRENT_USER&&CURRENT_USER.name===name))) return;
+  if(!playerProfessions[name]) playerProfessions[name]=[];
+  if(!playerProfessions[name][idx]) playerProfessions[name][idx]={prof:'',spec:''};
+  playerProfessions[name][idx][field]=val;
+  if(field==='prof') playerProfessions[name][idx].spec='';
+  saveGE();
+  const el=document.getElementById('prof-section-'+name);
+  if(el) el.innerHTML=renderProfSection(name);
+  toast(name+': professions updated','ok');
+}
+function toggleGEProfile(name){
+  const panel=document.getElementById('ge-profile-'+name);
+  const chev=document.getElementById('ge-chevron-'+name);
+  if(!panel) return;
+  const open=panel.style.display==='none';
+  panel.style.display=open?'block':'none';
+  if(chev) chev.style.transform=open?'rotate(180deg)':'';
+}
+function setGEMember(name, val){
+  if(!(isRL()||(isNamed()&&CURRENT_USER&&CURRENT_USER.name===name))) return;
+  getGEData(name).isGEMember=val;
+  saveGE();
+  const el=document.getElementById('ge-profile-'+name);
+  if(el){
+    el.innerHTML=renderGEProfileSection(name);
+    if(val){ el.style.display='block'; const chev=document.getElementById('ge-chevron-'+name); if(chev) chev.style.transform='rotate(180deg)'; }
+  }
+  toast(name+(val?' enrolled in':" removed from")+' Guild Effort','ok');
+}
+function setGERequest(name, itemId, qty){
+  if(!(isRL()||(isNamed()&&CURRENT_USER&&CURRENT_USER.name===name))) return;
+  const ged=getGEData(name);
+  const existing=ged.requests.find(r=>r.id===itemId);
+  if(qty<=0){ ged.requests=ged.requests.filter(r=>r.id!==itemId); }
+  else if(existing){ existing.qty=qty; }
+  else ged.requests.push({id:itemId,qty});
+  saveGE();
+}
+function renderGuildEffort(){
+  const el=document.getElementById('guild-effort-content');
+  if(!el) return;
+  const totals={};
+  ROSTER.forEach(p=>{
+    const ged=guildEffortData[p.name];
+    if(!ged?.isGEMember) return;
+    ged.requests.forEach(r=>{ totals[r.id]=(totals[r.id]||0)+r.qty; });
+  });
+  guildExtraItems.forEach(ex=>{ totals[ex.id]=(totals[ex.id]||0)+ex.qty; });
+  const members=ROSTER.filter(p=>guildEffortData[p.name]?.isGEMember);
+  const catLabels={battle:'⚔ Battle Elixirs',guardian:'🛡 Guardian Elixirs',potion:'⚗ Potions',weapon:'🗡 Weapon Enhancements'};
+  const catBorders={battle:'rgba(200,80,60,.3)',guardian:'rgba(41,128,185,.3)',potion:'rgba(26,158,114,.3)',weapon:'rgba(200,121,65,.3)'};
+  const activeTab=window._geTab||'shopping';
+  let html=`
+    <div class="tabs" style="margin-bottom:14px">
+      <div class="tab ${activeTab==='shopping'?'active':''}" onclick="window._geTab='shopping';renderGuildEffort()">Shopping List</div>
+      <div class="tab ${activeTab==='members'?'active':''}" onclick="window._geTab='members';renderGuildEffort()">Members (${members.length})</div>
+    </div>`;
+  if(activeTab==='shopping'){
+    if(isRL()){
+      html+=`<div class="card" style="margin-bottom:12px">
+        <div class="ct"><i class="ti ti-building-bank" style="color:var(--gold)"></i>Guild Bank Stock
+          <span style="font-size:10px;font-weight:400;color:var(--t3);margin-left:6px">— Enter current quantities in bank</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+          ${Object.values(CONSUMABLES).flat().filter(c=>totals[c.id]>0).map(c=>{
+            const stock=guildBankStock[c.id]||0;
+            const needed=totals[c.id];
+            const ok=stock>=needed;
+            return`<div style="background:var(--bg3);border-radius:var(--r);padding:5px 8px;display:flex;align-items:center;gap:6px;border:1px solid ${ok?'rgba(26,158,114,.3)':'rgba(192,57,43,.3)'}">
+              <span style="font-size:11px;color:var(--t1);flex:1">${c.name}</span>
+              <input type="number" min="0" value="${stock}" style="width:55px;font-size:11px;text-align:center"
+                onchange="guildBankStock['${c.id}']=parseInt(this.value)||0;saveGE();renderGuildEffort()" title="Current bank stock">
+              <span style="font-size:10px;color:${ok?'var(--gre)':'var(--red)'}">/ ${needed} needed</span>
+            </div>`;
+          }).join('')||'<span style="font-size:11px;color:var(--t3)">No requests yet.</span>'}
+        </div>
+        <div class="ct" style="margin-bottom:8px"><i class="ti ti-plus-circle" style="color:var(--acc)"></i>Add Extra Item
+          <span style="font-size:10px;font-weight:400;color:var(--t3);margin-left:6px">— RL can add items not requested by members</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
+          <select id="ge-extra-cat" style="width:auto;font-size:11px" onchange="updateGEExtraItems()">
+            <option value="battle">Battle Elixir</option>
+            <option value="guardian">Guardian Elixir</option>
+            <option value="potion">Potion</option>
+            <option value="weapon">Weapon Enh.</option>
+          </select>
+          <select id="ge-extra-item" style="flex:1;font-size:11px"></select>
+          <input id="ge-extra-qty" type="number" min="1" value="5" style="width:60px;font-size:11px" placeholder="Qty">
+          <input id="ge-extra-note" placeholder="Note (optional)" style="width:140px;font-size:11px">
+          <button class="btn btn-s btn-sm" onclick="addGEExtraItem()"><i class="ti ti-plus"></i> Add</button>
+        </div>
+        ${guildExtraItems.length?`<div style="display:flex;flex-wrap:wrap;gap:4px">
+          ${guildExtraItems.map((ex,i)=>`<span style="background:var(--bg3);border:1px solid var(--borderl);border-radius:20px;padding:2px 10px;font-size:10px;color:var(--t2)">
+            ${ex.name} ×${ex.qty}${ex.note?' ('+ex.note+')':''}
+            <span onclick="guildExtraItems.splice(${i},1);saveGE();renderGuildEffort()" style="cursor:pointer;color:var(--t3);margin-left:4px">✕</span>
+          </span>`).join('')}
+        </div>`:''}
+      </div>`;
+    }
+    const cats=['battle','guardian','potion','weapon'];
+    const hasAny=cats.some(cat=>CONSUMABLES[cat].some(c=>totals[c.id]>0));
+    if(!hasAny){
+      html+='<div class="empty"><i class="ti ti-shopping-cart-off"></i><p>No consumables requested yet.<br>Members set their needs in their player profile.</p></div>';
+    } else {
+      cats.forEach(cat=>{
+        const items=CONSUMABLES[cat].filter(c=>totals[c.id]>0);
+        if(!items.length) return;
+        html+=`<div style="background:var(--bg2);border:1px solid ${catBorders[cat]};border-radius:var(--rl);padding:12px 14px;margin-bottom:10px">
+          <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em">${catLabels[cat]}</div>
+          ${items.map(c=>{
+            const needed=totals[c.id];
+            const stock=guildBankStock[c.id]||0;
+            const diff=needed-stock;
+            const pct=Math.min(100,Math.round((stock/needed)*100));
+            const requesters=ROSTER.filter(p=>{const req=guildEffortData[p.name]?.requests?.find(r=>r.id===c.id);return req?.qty>0;});
+            const extraReq=guildExtraItems.filter(e=>e.id===c.id);
+            return`<div style="background:var(--bg3);border-radius:var(--r);padding:10px 12px;margin-bottom:6px;cursor:pointer" onclick="toggleGERecipe('${c.id}')" title="Click to see recipe">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <div style="flex:1;min-width:120px">
+                  <div style="font-size:13px;font-weight:600;color:var(--t1)">${c.name}
+                    <a href="${c.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-size:9px;color:var(--acc);margin-left:5px;text-decoration:none">[wowhead]</a>
+                  </div>
+                  <div style="font-size:10px;color:var(--t3)">${c.stat}</div>
+                  <div style="font-size:10px;color:var(--t3);margin-top:2px">Needed by: ${requesters.map(p=>p.name).join(', ')||'—'}${extraReq.length?' + RL extra':''}</div>
+                </div>
+                <div style="text-align:center;min-width:60px"><div style="font-size:18px;font-weight:700;color:${diff>0?'var(--red)':'var(--gre)'}">${needed}</div><div style="font-size:9px;color:var(--t3);text-transform:uppercase">Needed</div></div>
+                <div style="text-align:center;min-width:60px"><div style="font-size:18px;font-weight:700;color:var(--t1)">${stock}</div><div style="font-size:9px;color:var(--t3);text-transform:uppercase">In Bank</div></div>
+                <div style="text-align:center;min-width:60px"><div style="font-size:18px;font-weight:700;color:${diff>0?'var(--red)':diff===0?'var(--gre)':'var(--acc)'}">${diff>0?'+'+diff:diff===0?'✓':diff}</div><div style="font-size:9px;color:var(--t3);text-transform:uppercase">${diff>0?'Still need':'Surplus'}</div></div>
+              </div>
+              <div style="height:4px;background:var(--bg4);border-radius:2px;margin-top:8px"><div style="height:4px;width:${pct}%;background:${pct>=100?'var(--gre)':pct>=50?'var(--ora)':'var(--red)'};border-radius:2px;transition:width .3s"></div></div>
+              <div id="ge-recipe-${c.id}" style="display:none;margin-top:10px;padding:8px;background:var(--bg4);border-radius:var(--r);font-size:11px">
+                <div style="font-weight:600;color:var(--t2);margin-bottom:4px"><i class="ti ti-flask"></i> Recipe — ${c.recipe.skill}</div>
+                <div style="color:var(--t3)">${c.recipe.reagents.map(r=>'• '+r).join('<br>')}</div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`;
+      });
+    }
+  } else {
+    html+=`<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+      ${members.length?members.map(p=>{
+        const ged=guildEffortData[p.name];
+        const totalReqs=ged.requests.reduce((s,r)=>s+r.qty,0);
+        const hasNote=!!ged.note;
+        const inactive=ged.lastContrib&&(new Date()-new Date(ged.lastContrib))>14*86400000;
+        return`<div class="card" style="flex:1;min-width:200px;cursor:pointer;${hasNote?'border-color:var(--ora)':''}${inactive?'border-color:var(--red)':''}" onclick="openProfile('${p.name}')">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            ${pill(p.name,!p.present)}
+            ${hasNote?`<span title="${ged.note}" style="color:var(--ora);font-size:13px" class="ti ti-alert-triangle"></span>`:''}
+            ${inactive?'<span style="color:var(--red);font-size:10px">Inactive</span>':''}
+          </div>
+          <div style="font-size:10px;color:var(--t3)">${totalReqs} items/night · ${ged.requests.length} types</div>
+          ${ged.note&&isRL()?`<div style="font-size:10px;color:var(--ora);margin-top:4px;font-style:italic">"${ged.note}"</div>`:''}
+          ${isRL()?`<div style="display:flex;gap:4px;margin-top:6px">
+            <input placeholder="Contribution note…" value="${ged.note||''}" style="flex:1;font-size:10px;padding:3px 6px" onclick="event.stopPropagation()" oninput="getGEData('${p.name}').note=this.value;saveGE()">
+            <button class="btn btn-sm" style="font-size:10px;padding:2px 6px" onclick="event.stopPropagation();markGEContrib('${p.name}')">✓ Contributed</button>
+          </div>`:''}
+        </div>`;
+      }).join(''):'<div class="empty"><i class="ti ti-users-group"></i><p>No Guild Effort members yet.<br>RL or members can enroll via their player profile.</p></div>'}
+    </div>`;
+  }
+  el.innerHTML=html;
+  updateGEExtraItems();
+}
+function toggleGERecipe(id){const el=document.getElementById('ge-recipe-'+id);if(el) el.style.display=el.style.display==='none'?'block':'none';}
+function updateGEExtraItems(){
+  const cat=document.getElementById('ge-extra-cat')?.value||'battle';
+  const sel=document.getElementById('ge-extra-item');
+  if(!sel) return;
+  sel.innerHTML=CONSUMABLES[cat].map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+}
+function addGEExtraItem(){
+  if(!isRL()) return;
+  const cat=document.getElementById('ge-extra-cat')?.value||'battle';
+  const itemId=document.getElementById('ge-extra-item')?.value;
+  const qty=parseInt(document.getElementById('ge-extra-qty')?.value)||1;
+  const note=document.getElementById('ge-extra-note')?.value.trim()||'';
+  const item=CONSUMABLE_BY_ID[itemId];
+  if(!item){toast('Select an item first','err');return;}
+  const ex=guildExtraItems.find(e=>e.id===itemId);
+  if(ex){ex.qty+=qty;ex.note=note;} else guildExtraItems.push({id:itemId,name:item.name,qty,note});
+  saveGE();
+  renderGuildEffort();
+  toast('Added '+item.name+' ×'+qty+' to shopping list','ok');
+}
+function markGEContrib(name){
+  if(!isRL()) return;
+  getGEData(name).lastContrib=new Date().toISOString().slice(0,10);
+  getGEData(name).note='';
+  saveGE();
+  renderGuildEffort();
+  toast(name+' contribution recorded','ok');
 }
 
 // ============================================================
@@ -2448,6 +2867,18 @@ function openProfile(name){
           <div class="ct" style="margin:14px 0 8px"><i class="ti ti-star" style="color:var(--acc)"></i>Assignment Weights</div>
           ${weightRows||'<div style="font-size:11px;color:var(--t3)">No eligible roles</div>'}
 
+          <div class="ct" style="margin:14px 0 8px;cursor:pointer" onclick="toggleGEProfile('${name}')">
+            <i class="ti ti-shopping-cart" style="color:var(--gold)"></i>Guild Effort
+            <label style="margin-left:auto;display:flex;align-items:center;gap:6px;cursor:pointer;font-size:11px;font-weight:400" onclick="event.stopPropagation()">
+              <input type="checkbox" id="ge-member-${name}" ${getGEData(name).isGEMember?'checked':''} onchange="setGEMember('${name}',this.checked)" style="width:14px;height:14px" ${(isRL()||(isNamed()&&CURRENT_USER?.name===name))?'':'disabled'}>
+              <span style="color:var(--t2)">GE Member</span>
+            </label>
+            <i class="ti ti-chevron-down" id="ge-chevron-${name}" style="color:var(--t3);margin-left:6px;transition:transform .2s"></i>
+          </div>
+          <div id="ge-profile-${name}" style="display:none">
+            ${renderGEProfileSection(name)}
+          </div>
+
           <div class="ct" style="margin:14px 0 8px"><i class="ti ti-device-gamepad-2" style="color:var(--acc)"></i>Alt Characters
             ${canManageAlts(name)?`<button class="btn btn-sm" style="margin-left:auto;font-size:10px" onclick="addAlt('${name}')"><i class="ti ti-plus"></i> Add alt</button>`:''}
           </div>
@@ -2666,7 +3097,7 @@ function nav(el,page){
   if(window.innerWidth<=768) collapseSidebar();
   updateMobTitle(page);
   updateMobNav(page);
-  ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),za:()=>renderBossPage('za'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles,progression:renderProgression,buffs:renderBuffs})[page]?.();
+  ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),za:()=>renderBossPage('za'),stats:renderStats,profiles:renderProfiles,progression:renderProgression,'guild-effort':renderGuildEffort})[page]?.();
 }
 
 // ============================================================
@@ -6724,6 +7155,10 @@ function fullRaidCard(r,highlight){
           <input type="text" id="re-srtoken-${r.id}" value="${r.srToken||''}" placeholder="Token…" style="width:100%">
         </div>
       </div>
+      <div class="fg" style="margin-bottom:8px">
+        <span class="fl"><i class="ti ti-external-link"></i> Warcraft Logs URL <span style="font-size:9px;color:var(--t3)">(optional)</span></span>
+        <input type="url" id="re-wcl-${r.id}" value="${r.wclUrl||''}" placeholder="https://classic.warcraftlogs.com/reports/…" style="width:100%">
+      </div>
       <div style="display:flex;gap:6px">
         <button class="btn btn-p btn-sm" onclick="saveRaidEdit('${r.id}')"><i class="ti ti-check"></i> Save</button>
         <button class="btn btn-sm" onclick="toggleRaidEdit('${r.id}')"><i class="ti ti-x"></i> Cancel</button>
@@ -6755,7 +7190,7 @@ function fullRaidCard(r,highlight){
       ${canManageRaids()&&!past?`<button class="btn btn-sm" onclick="togglePUG('${r.id}')"><i class="ti ti-users"></i>${r.pug?'Remove PUG':'Mark PUG'}</button>`:''}
       ${canManageRaids()&&!past?`<button class="btn btn-sm" onclick="toggleCleanup('${r.id}')" style="${r.cleanup?'background:rgba(41,128,185,.15);border-color:rgba(41,128,185,.35);color:#6ab4e8':''}"><i class="ti ti-broom"></i>${r.cleanup?'Remove Cleanup':'Mark Cleanup'}</button>`:''}
       ${canManageRaids()&&past?`<button class="btn btn-sm btn-s" onclick="createCleanupRaid('${r.id}')" style="background:rgba(41,128,185,.12);border-color:rgba(41,128,185,.35);color:#6ab4e8"><i class="ti ti-broom"></i>Create cleanup raid</button>`:''}
-      ${(canManageRaids()||isNamed())&&past&&!isKaraRaid(r)&&!reviews.find(rv=>rv.raidId===r.id)?`<button class="btn btn-g btn-sm" onclick="openReviewForm('${r.id}')"><i class="ti ti-star"></i>Write review</button>`:''}
+      ${r.wclUrl?`<a href="${r.wclUrl}" target="_blank" rel="noopener" class="btn btn-g btn-sm" style="text-decoration:none"><i class="ti ti-external-link"></i>Warcraft Logs</a>`:(canManageRaids()&&past?`<button class="btn btn-sm" onclick="if(document.getElementById('raid-edit-${r.id}').style.display==='none')toggleRaidEdit('${r.id}');setTimeout(()=>{const el=document.getElementById('re-wcl-${r.id}');if(el){el.focus();el.select();}},50)"><i class="ti ti-link"></i>+ Logs link</button>`:'')}
     </div>
   </div>`;
 }
@@ -6843,6 +7278,7 @@ function saveRaidEdit(raidId){
   const notes   = document.getElementById('re-notes-'+raidId)?.value?.trim()||'';
   const srLink  = document.getElementById('re-srlink-'+raidId)?.value?.trim()||'';
   const srToken = document.getElementById('re-srtoken-'+raidId)?.value?.trim()||'';
+  const wclUrl  = document.getElementById('re-wcl-'+raidId)?.value?.trim()||'';
   if(!date){ toast('Date is required','err'); return; }
   r.name    = name||r.name;
   r.date    = date;
@@ -6854,6 +7290,7 @@ function saveRaidEdit(raidId){
   r.notes   = notes;
   r.srLink  = srLink;
   r.srToken = srToken;
+  r.wclUrl  = wclUrl;
   r.status= isPast(date)&&date!==todayKey()?'completed':'upcoming';
   saveRaids();renderRaids();renderCalendar();
   toast('Raid updated','ok');
@@ -7214,11 +7651,12 @@ function renderStatsRaids(){
 function isKaraRaid(r){return r.name.toLowerCase().includes('kara')||r.max<=10;}
 function updateRevBadge(){const n=raidSchedule.filter(r=>r.status==='completed'&&!isKaraRaid(r)&&!reviews.find(rv=>rv.raidId===r.id)).length;const b=document.getElementById('rev-badge');if(b){b.textContent=n;b.style.display=n>0?'inline':'none';}}
 function renderReviews(){
+  const el=document.getElementById('reviews-content');
+  if(!el) return; // Reviews page removed — nothing to render
   updateRevBadge();
   // Ensure all reviews have an id (migration for old entries)
   reviews.forEach(rv=>{if(!rv.id)rv.id=genId();});
   const needsReview=raidSchedule.filter(r=>r.status==='completed'&&!isKaraRaid(r)&&!reviews.find(rv=>rv.raidId===r.id));
-  const el=document.getElementById('reviews-content');
   let html='';
   if(needsReview.length){html+=`<div class="card ab" style="margin-bottom:12px"><div class="ct"><i class="ti ti-edit" style="color:var(--acc)"></i>Raids awaiting review (${needsReview.length})</div>${needsReview.map(r=>`<div class="rrow"><div><div style="font-size:12px;font-weight:600">${r.name}</div><div style="font-size:10px;color:var(--t3)">${fmtKey(r.date)}</div></div><button class="btn btn-g btn-sm" style="margin-left:auto" onclick="openReviewForm('${r.id}')"><i class="ti ti-star"></i>Review</button></div>`).join('')}</div>`;}
   html+=reviews.slice().reverse().map(rv=>{
@@ -7522,7 +7960,7 @@ function restoreSidebarState(){
     }
   }catch(e){}
 }
-const MOB_PAGE_NAMES={attendance:'Attendance',roster:'Roster',roles:'Roles & Groups',dispels:'Dispels & CCs',res:'Resistances',loot:'Loot Priority',pov:'Player POV',specreq:'Spec Requests',signup:'Apply for Raid','rl-review':'RL Review',calendar:'Calendar',raids:'Upcoming Raids','create-raid':'Create Raid',leave:'Leave of Absence',gruul:"Gruul's Lair",mag:'Magtheridon',tk:'Tempest Keep',ssc:'Serpent Shrine',kara:'Karazhan',hyjal:'Mount Hyjal',bt:'Black Temple',za:"Zul'Aman",stats:'Statistics',reviews:'Reviews',profiles:'Profiles',progression:'Progression',buffs:'Buff Coverage'};
+const MOB_PAGE_NAMES={attendance:'Attendance',roster:'Roster',roles:'Roles & Groups',dispels:'Dispels & CCs',res:'Resistances',loot:'Loot Priority',pov:'Player POV',specreq:'Spec Requests',signup:'Apply for Raid','rl-review':'RL Review',calendar:'Calendar',raids:'Upcoming Raids','create-raid':'Create Raid',leave:'Leave of Absence',gruul:"Gruul's Lair",mag:'Magtheridon',tk:'Tempest Keep',ssc:'Serpent Shrine',kara:'Karazhan',hyjal:'Mount Hyjal',bt:'Black Temple',za:"Zul'Aman",stats:'Statistics',profiles:'Profiles',progression:'Progression','guild-effort':'Guild Effort'};
 function updateMobTitle(page){
   const el=document.getElementById('mob-title');
   if(el) el.textContent=MOB_PAGE_NAMES[page]||'Boogalo';
@@ -7542,7 +7980,7 @@ function mobNav(page){
     if(pg)pg.classList.add('active');
     const mainEl=document.querySelector('.main');if(mainEl)mainEl.scrollTop=0;
     collapseSidebar();updateMobTitle(page);updateMobNav(page);
-    ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),za:()=>renderBossPage('za'),stats:renderStats,reviews:renderReviews,profiles:renderProfiles,progression:renderProgression,buffs:renderBuffs})[page]?.();
+    ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),za:()=>renderBossPage('za'),stats:renderStats,profiles:renderProfiles,progression:renderProgression,'guild-effort':renderGuildEffort})[page]?.();
   }
 }
 function initSwipeGesture(){
@@ -7613,6 +8051,7 @@ function applyFirebaseKey(key,data){
     else if(key==='groups'){if(data){const outer=_fbArr(data);if(outer.length){groups.length=0;outer.forEach(g=>groups.push(_fbArr(g)));try{localStorage.setItem('boogalo-groups',JSON.stringify(groups));}catch(e){}}}renderRoles?.();}
     else if(key==='bossAssignments'){if(data&&typeof data==='object'){Object.keys(bossAssignments).forEach(k=>delete bossAssignments[k]);Object.assign(bossAssignments,data);try{localStorage.setItem('boogalo-bossAssignments',JSON.stringify(bossAssignments));}catch(e){}}Object.keys(BOSSES).forEach(rk=>{const el=document.getElementById(rk+'-content');if(el&&el.children.length)renderBossPage(rk);});}
     else if(key==='killLog'){if(data&&typeof data==='object'){Object.keys(killLog).forEach(k=>delete killLog[k]);Object.assign(killLog,data);try{localStorage.setItem('boogalo-killLog',JSON.stringify(killLog));}catch(e){}}const pe=document.getElementById('progression-content');if(pe&&pe.children.length)renderProgression?.();}
+    else if(key==='guildEffort'){if(data&&typeof data==='object'){guildEffortData=(data.data&&typeof data.data==='object')?data.data:{};guildBankStock=(data.bank&&typeof data.bank==='object')?data.bank:{};guildExtraItems=Array.isArray(data.extra)?data.extra:_fbArr(data.extra);playerProfessions=(data.profs&&typeof data.profs==='object')?data.profs:{};try{localStorage.setItem('boogalo-guildEffort',JSON.stringify({data:guildEffortData,bank:guildBankStock,extra:guildExtraItems,profs:playerProfessions}));}catch(e){}}const ge=document.getElementById('guild-effort-content');if(ge&&ge.children.length)renderGuildEffort?.();}
   }finally{_fbIgnore=false;}
 }
 
@@ -7666,6 +8105,7 @@ window.onload=function(){
   try{const sba=localStorage.getItem('boogalo-bossAssignments');if(sba){const b=JSON.parse(sba);if(b&&typeof b==='object')Object.assign(bossAssignments,b);}}catch(e){}
   try{const skl=localStorage.getItem('boogalo-killLog');if(skl){const k=JSON.parse(skl);if(k&&typeof k==='object')Object.assign(killLog,k);}}catch(e){}
   try{const scl=localStorage.getItem('boogalo-checklist');if(scl){const c=JSON.parse(scl);if(c&&typeof c==='object')Object.assign(checklistState,c);}}catch(e){}
+  try{const sge=localStorage.getItem('boogalo-guildEffort');if(sge){const g=JSON.parse(sge);if(g&&typeof g==='object'){if(g.data&&typeof g.data==='object')guildEffortData=g.data;if(g.bank&&typeof g.bank==='object')guildBankStock=g.bank;if(Array.isArray(g.extra))guildExtraItems=g.extra;if(g.profs&&typeof g.profs==='object')playerProfessions=g.profs;}}}catch(e){}
   // Initialise app — Firebase SDK listeners fire within ~100ms and update all views
   if(window.innerWidth<=768) collapseSidebar();
   initSwipeGesture();
