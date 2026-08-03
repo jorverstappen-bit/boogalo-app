@@ -2385,6 +2385,8 @@ function saveGE(){
   try{localStorage.setItem('boogalo-guildEffort',JSON.stringify(payload));}catch(e){}
   try{fbSet('guildEffort',payload);}catch(e){}
 }
+// RL, or any enrolled Guild Effort member, may edit guild bank quantities.
+function canEditGuildBank(){ return isRL() || (isNamed() && CURRENT_USER && !!guildEffortData[CURRENT_USER.name]?.isGEMember); }
 
 function renderGEProfileSection(name){
   const ged=getGEData(name);
@@ -2507,10 +2509,10 @@ function renderGuildEffort(){
       <div class="tab ${activeTab==='members'?'active':''}" onclick="window._geTab='members';renderGuildEffort()">Members (${members.length})</div>
     </div>`;
   if(activeTab==='shopping'){
-    if(isRL()){
+    if(canEditGuildBank()){
       html+=`<div class="card" style="margin-bottom:12px">
         <div class="ct"><i class="ti ti-building-bank" style="color:var(--gold)"></i>Guild Bank Stock
-          <span style="font-size:10px;font-weight:400;color:var(--t3);margin-left:6px">— Enter current quantities in bank</span>
+          <span style="font-size:10px;font-weight:400;color:var(--t3);margin-left:6px">— Enter current quantities in bank${isRL()?'':' (GE member)'}</span>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
           ${Object.values(CONSUMABLES).flat().filter(c=>totals[c.id]>0).map(c=>{
@@ -2525,6 +2527,7 @@ function renderGuildEffort(){
             </div>`;
           }).join('')||'<span style="font-size:11px;color:var(--t3)">No requests yet.</span>'}
         </div>
+        ${isRL()?`
         <div class="ct" style="margin-bottom:8px"><i class="ti ti-plus-circle" style="color:var(--acc)"></i>Add Extra Item
           <span style="font-size:10px;font-weight:400;color:var(--t3);margin-left:6px">— RL can add items not requested by members</span>
         </div>
@@ -2545,7 +2548,7 @@ function renderGuildEffort(){
             ${ex.name} ×${ex.qty}${ex.note?' ('+ex.note+')':''}
             <span onclick="guildExtraItems.splice(${i},1);saveGE();renderGuildEffort()" style="cursor:pointer;color:var(--t3);margin-left:4px">✕</span>
           </span>`).join('')}
-        </div>`:''}
+        </div>`:''}`:''}
       </div>`;
     }
     const cats=['battle','guardian','potion','weapon'];
