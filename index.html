@@ -2418,8 +2418,22 @@ let guildEffortData = {};   // { name: { isGEMember, requests:[{id,qty}], note, 
 let guildBankStock = {};    // { consumableId: qty }
 let guildExtraItems = [];   // [{ id, name, qty, note }]
 
+// Firebase drops empty arrays, so a member's `requests` can come back as
+// undefined or an object — normalise every member to a real requests array.
+function _asArr(v){ return Array.isArray(v)?v:(v&&typeof v==='object'?Object.values(v):[]); }
+function normalizeGE(){
+  Object.keys(guildEffortData||{}).forEach(n=>{
+    const m=guildEffortData[n]; if(!m||typeof m!=='object') { guildEffortData[n]={isGEMember:false,requests:[],note:'',lastContrib:''}; return; }
+    m.requests=_asArr(m.requests).filter(r=>r&&r.id).map(r=>({id:r.id,qty:Number(r.qty)||0}));
+    m.isGEMember=!!m.isGEMember; m.note=m.note||''; m.lastContrib=m.lastContrib||'';
+  });
+  if(!Array.isArray(guildExtraItems)) guildExtraItems=_asArr(guildExtraItems);
+  if(!guildBankStock||typeof guildBankStock!=='object') guildBankStock={};
+  if(!playerProfessions||typeof playerProfessions!=='object') playerProfessions={};
+}
 function getGEData(name){
   if(!guildEffortData[name]) guildEffortData[name]={isGEMember:false,requests:[],note:'',lastContrib:''};
+  if(!Array.isArray(guildEffortData[name].requests)) guildEffortData[name].requests=_asArr(guildEffortData[name].requests);
   return guildEffortData[name];
 }
 function saveGE(){
@@ -2534,11 +2548,12 @@ function setGERequest(name, itemId, qty){
 function renderGuildEffort(){
   const el=document.getElementById('guild-effort-content');
   if(!el) return;
+  normalizeGE();
   const totals={};
   ROSTER.forEach(p=>{
     const ged=guildEffortData[p.name];
     if(!ged?.isGEMember) return;
-    ged.requests.forEach(r=>{ totals[r.id]=(totals[r.id]||0)+r.qty; });
+    _asArr(ged.requests).forEach(r=>{ totals[r.id]=(totals[r.id]||0)+r.qty; });
   });
   guildExtraItems.forEach(ex=>{ totals[ex.id]=(totals[ex.id]||0)+ex.qty; });
   const members=ROSTER.filter(p=>guildEffortData[p.name]?.isGEMember);
@@ -2611,7 +2626,7 @@ function renderGuildEffort(){
             const stock=guildBankStock[c.id]||0;
             const diff=needed-stock;
             const pct=Math.min(100,Math.round((stock/needed)*100));
-            const requesters=ROSTER.filter(p=>{const req=guildEffortData[p.name]?.requests?.find(r=>r.id===c.id);return req?.qty>0;});
+            const requesters=ROSTER.filter(p=>{const req=_asArr(guildEffortData[p.name]?.requests).find(r=>r.id===c.id);return req?.qty>0;});
             const extraReq=guildExtraItems.filter(e=>e.id===c.id);
             return`<div style="background:var(--bg3);border-radius:var(--r);padding:10px 12px;margin-bottom:6px;cursor:pointer" onclick="toggleGERecipe('${c.id}')" title="Click to see recipe">
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
@@ -8099,7 +8114,7 @@ function applyFirebaseKey(key,data){
     else if(key==='groups'){if(data){const outer=_fbArr(data);if(outer.length){groups.length=0;outer.forEach(g=>groups.push(_fbArr(g)));try{localStorage.setItem('boogalo-groups',JSON.stringify(groups));}catch(e){}}}renderRoles?.();}
     else if(key==='bossAssignments'){if(data&&typeof data==='object'){Object.keys(bossAssignments).forEach(k=>delete bossAssignments[k]);Object.assign(bossAssignments,data);try{localStorage.setItem('boogalo-bossAssignments',JSON.stringify(bossAssignments));}catch(e){}}Object.keys(BOSSES).forEach(rk=>{const el=document.getElementById(rk+'-content');if(el&&el.children.length)renderBossPage(rk);});}
     else if(key==='killLog'){if(data&&typeof data==='object'){Object.keys(killLog).forEach(k=>delete killLog[k]);Object.assign(killLog,data);try{localStorage.setItem('boogalo-killLog',JSON.stringify(killLog));}catch(e){}}const pe=document.getElementById('progression-content');if(pe&&pe.children.length)renderProgression?.();}
-    else if(key==='guildEffort'){if(data&&typeof data==='object'){guildEffortData=(data.data&&typeof data.data==='object')?data.data:{};guildBankStock=(data.bank&&typeof data.bank==='object')?data.bank:{};guildExtraItems=Array.isArray(data.extra)?data.extra:_fbArr(data.extra);playerProfessions=(data.profs&&typeof data.profs==='object')?data.profs:{};try{localStorage.setItem('boogalo-guildEffort',JSON.stringify({data:guildEffortData,bank:guildBankStock,extra:guildExtraItems,profs:playerProfessions}));}catch(e){}}const ge=document.getElementById('guild-effort-content');if(ge&&ge.children.length)renderGuildEffort?.();}
+    else if(key==='guildEffort'){if(data&&typeof data==='object'){guildEffortData=(data.data&&typeof data.data==='object')?data.data:{};guildBankStock=(data.bank&&typeof data.bank==='object')?data.bank:{};guildExtraItems=Array.isArray(data.extra)?data.extra:_fbArr(data.extra);playerProfessions=(data.profs&&typeof data.profs==='object')?data.profs:{};normalizeGE();try{localStorage.setItem('boogalo-guildEffort',JSON.stringify({data:guildEffortData,bank:guildBankStock,extra:guildExtraItems,profs:playerProfessions}));}catch(e){}}const ge=document.getElementById('guild-effort-content');if(ge&&ge.children.length)renderGuildEffort?.();}
   }finally{_fbIgnore=false;}
 }
 
@@ -8153,7 +8168,7 @@ window.onload=function(){
   try{const sba=localStorage.getItem('boogalo-bossAssignments');if(sba){const b=JSON.parse(sba);if(b&&typeof b==='object')Object.assign(bossAssignments,b);}}catch(e){}
   try{const skl=localStorage.getItem('boogalo-killLog');if(skl){const k=JSON.parse(skl);if(k&&typeof k==='object')Object.assign(killLog,k);}}catch(e){}
   try{const scl=localStorage.getItem('boogalo-checklist');if(scl){const c=JSON.parse(scl);if(c&&typeof c==='object')Object.assign(checklistState,c);}}catch(e){}
-  try{const sge=localStorage.getItem('boogalo-guildEffort');if(sge){const g=JSON.parse(sge);if(g&&typeof g==='object'){if(g.data&&typeof g.data==='object')guildEffortData=g.data;if(g.bank&&typeof g.bank==='object')guildBankStock=g.bank;if(Array.isArray(g.extra))guildExtraItems=g.extra;if(g.profs&&typeof g.profs==='object')playerProfessions=g.profs;}}}catch(e){}
+  try{const sge=localStorage.getItem('boogalo-guildEffort');if(sge){const g=JSON.parse(sge);if(g&&typeof g==='object'){if(g.data&&typeof g.data==='object')guildEffortData=g.data;if(g.bank&&typeof g.bank==='object')guildBankStock=g.bank;if(Array.isArray(g.extra))guildExtraItems=g.extra;if(g.profs&&typeof g.profs==='object')playerProfessions=g.profs;normalizeGE();}}}catch(e){}
   // Initialise app — Firebase SDK listeners fire within ~100ms and update all views
   if(window.innerWidth<=768) collapseSidebar();
   initSwipeGesture();
