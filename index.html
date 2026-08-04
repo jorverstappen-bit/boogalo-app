@@ -2349,6 +2349,48 @@ const CONSUMABLES = {
      url:'https://www.wowhead.com/tbc/item=28421', roles:['Melee'],
      recipe:{skill:'Blacksmithing 360', reagents:['Adamantite Bar x2','Eternium Bar x1']}},
   ],
+  // ── FOOD (well-fed buffs) ─────────────────────────────────────────────
+  food: [
+    {id:'food_crawdad',   name:'Spicy Crawdad',      stat:'+30 Stamina, +20 Spirit — Tank food',
+     url:'https://www.wowhead.com/tbc/item=27859', roles:['Tank','Healer'],
+     recipe:{skill:'Cooking 350', reagents:['Furious Crawdad x1','Hot Spices x1']}},
+    {id:'food_fishsticks',name:'Golden Fish Sticks', stat:'+44 Healing, +20 Spirit — Healer food',
+     url:'https://www.wowhead.com/tbc/item=27661', roles:['Healer'],
+     recipe:{skill:'Cooking 275', reagents:['Golden Darter x1','Mild Spices x1']}},
+    {id:'food_warpburger', name:'Warp Burger',       stat:'+20 Agility, +20 Stamina — Melee food',
+     url:'https://www.wowhead.com/tbc/item=27658', roles:['Melee'],
+     recipe:{skill:'Cooking 275', reagents:['Warped Flesh x1','Mild Spices x1']}},
+    {id:'food_ravagerdog', name:'Ravager Dog',       stat:'+20 Attack Power, +20 Stamina — Melee food',
+     url:'https://www.wowhead.com/tbc/item=27655', roles:['Melee'],
+     recipe:{skill:'Cooking 275', reagents:['Ravager Flesh x1','Mild Spices x1']}},
+    {id:'food_ranged',    name:'Ranged DPS Food (Blackened Basilisk)', stat:'+23 Spell Dmg, +20 Spirit — Ranged/caster food',
+     url:'https://www.wowhead.com/tbc/item=27657', roles:['Ranged'],
+     recipe:{skill:'Cooking 300', reagents:["Chunk o' Basilisk x1",'Hot Spices x1']}},
+  ],
+  // ── ENGINEERING GADGETS ───────────────────────────────────────────────
+  engineering: [
+    {id:'eng_sapper',    name:'Super Sapper Charge',  stat:'~900-1300 Fire AoE (thrown)',
+     url:'https://www.wowhead.com/tbc/item=23827', roles:['Tank','Melee','Ranged'],
+     recipe:{skill:'Engineering 375', reagents:['Fel Iron Casing x1','Adamantite Frame x1','Mote of Fire x4']}},
+    {id:'eng_repairbot', name:'Field Repair Bot 110G (Repair Bot)', stat:'Repairs & sells — raid utility',
+     url:'https://www.wowhead.com/tbc/item=23767', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Engineering 350', reagents:['Handful of Fel Iron Bolts x4','Fel Iron Casing x4','Elemental Blasting Powder x6']}},
+    {id:'eng_arcanebomb',name:'Arcane Bomb',          stat:'Silences enemy casters in area',
+     url:'https://www.wowhead.com/tbc/item=4394', roles:['Ranged'],
+     recipe:{skill:'Engineering 305', reagents:['Arcanite Bar x1','Arcane Crystal x1']}},
+  ],
+  // ── RUNES & TANK WARDS ────────────────────────────────────────────────
+  runes: [
+    {id:'rune_dark',     name:'Dark Rune',            stat:'Restore 900-1500 mana (costs health) — Healers & RDPS',
+     url:'https://www.wowhead.com/tbc/item=20520', roles:['Healer','Ranged'],
+     recipe:{skill:'World drop / Auction House', reagents:['Not crafted — farmed or purchased']}},
+    {id:'ward_warding',  name:'Warding (tank-applied)', stat:'Tank mitigation — apply before pull',
+     url:'https://www.wowhead.com/tbc/search?q=warding', roles:['Tank'],
+     recipe:{skill:'Consumable', reagents:['Applied by tanks before the pull']}},
+    {id:'ward_shielding',name:'Shielding (tank-applied)', stat:'Tank damage absorb — apply before pull',
+     url:'https://www.wowhead.com/tbc/search?q=shielding', roles:['Tank'],
+     recipe:{skill:'Consumable', reagents:['Applied by tanks before the pull']}},
+  ],
 };
 const CONSUMABLE_BY_ID = {};
 Object.values(CONSUMABLES).flat().forEach(c=>CONSUMABLE_BY_ID[c.id]=c);
@@ -2391,8 +2433,8 @@ function canEditGuildBank(){ return isRL() || (isNamed() && CURRENT_USER && !!gu
 function renderGEProfileSection(name){
   const ged=getGEData(name);
   if(!ged.isGEMember) return '<div style="font-size:11px;color:var(--t3)">Not a Guild Effort member. Check the box above to enroll.</div>';
-  const catLabels={battle:'Battle Elixir',guardian:'Guardian Elixir',potion:'Mana/Health Potion',weapon:'Weapon Enhancement'};
-  const catKeys=['battle','guardian','potion','weapon'];
+  const catLabels={battle:'Battle Elixir',guardian:'Guardian Elixir',potion:'Mana/Health Potion',weapon:'Weapon Enhancement',food:'Food',engineering:'Engineering',runes:'Runes & Wards'};
+  const catKeys=['battle','guardian','potion','weapon','food','engineering','runes'];
   const canEdit=isRL()||(isNamed()&&CURRENT_USER&&CURRENT_USER.name===name);
   let html='<div style="font-size:11px;color:var(--t3);margin-bottom:10px">Select which consumables you need each raid night and how many.</div>';
   catKeys.forEach(cat=>{
@@ -2500,8 +2542,8 @@ function renderGuildEffort(){
   });
   guildExtraItems.forEach(ex=>{ totals[ex.id]=(totals[ex.id]||0)+ex.qty; });
   const members=ROSTER.filter(p=>guildEffortData[p.name]?.isGEMember);
-  const catLabels={battle:'⚔ Battle Elixirs',guardian:'🛡 Guardian Elixirs',potion:'⚗ Potions',weapon:'🗡 Weapon Enhancements'};
-  const catBorders={battle:'rgba(200,80,60,.3)',guardian:'rgba(41,128,185,.3)',potion:'rgba(26,158,114,.3)',weapon:'rgba(200,121,65,.3)'};
+  const catLabels={battle:'⚔ Battle Elixirs',guardian:'🛡 Guardian Elixirs',potion:'⚗ Potions',weapon:'🗡 Weapon Enhancements',food:'🍖 Food',engineering:'🛠 Engineering',runes:'🔮 Runes & Wards'};
+  const catBorders={battle:'rgba(200,80,60,.3)',guardian:'rgba(41,128,185,.3)',potion:'rgba(26,158,114,.3)',weapon:'rgba(200,121,65,.3)',food:'rgba(214,160,60,.3)',engineering:'rgba(150,150,160,.3)',runes:'rgba(150,90,200,.3)'};
   const activeTab=window._geTab||'shopping';
   let html=`
     <div class="tabs" style="margin-bottom:14px">
@@ -2537,6 +2579,9 @@ function renderGuildEffort(){
             <option value="guardian">Guardian Elixir</option>
             <option value="potion">Potion</option>
             <option value="weapon">Weapon Enh.</option>
+            <option value="food">Food</option>
+            <option value="engineering">Engineering</option>
+            <option value="runes">Runes & Wards</option>
           </select>
           <select id="ge-extra-item" style="flex:1;font-size:11px"></select>
           <input id="ge-extra-qty" type="number" min="1" value="5" style="width:60px;font-size:11px" placeholder="Qty">
@@ -2551,7 +2596,7 @@ function renderGuildEffort(){
         </div>`:''}`:''}
       </div>`;
     }
-    const cats=['battle','guardian','potion','weapon'];
+    const cats=['battle','guardian','potion','weapon','food','engineering','runes'];
     const hasAny=cats.some(cat=>CONSUMABLES[cat].some(c=>totals[c.id]>0));
     if(!hasAny){
       html+='<div class="empty"><i class="ti ti-shopping-cart-off"></i><p>No consumables requested yet.<br>Members set their needs in their player profile.</p></div>';
@@ -8078,7 +8123,7 @@ function initFirebaseSync(){
   setSyncDot('syncing');
   let synced=false;
   const keys=['raids','roster','vortex','weights','alts','roleOverrides','applications',
-   'specRequests','reviews','vortexRequests','healerTanks','groups','bossAssignments','killLog','leaves'];
+   'specRequests','reviews','vortexRequests','healerTanks','groups','bossAssignments','killLog','leaves','guildEffort'];
   keys.forEach(key=>{
     _fbDB.ref(key).on('value', snap=>{
       const data=snap.val();
