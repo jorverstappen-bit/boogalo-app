@@ -1753,6 +1753,226 @@ za:[
 ]
 };
 
+// ============================================================
+// BLACK TEMPLE — raid strategy doc (trash + per-boss checklist + tips)
+// Separate from BOSSES so it can be shown in Player POV and the Raids tab.
+// source: 'notes' = from our raid instructions; 'draft' = standard tactics
+// pending review; 'mixed' = trash from notes, boss checklist still draft.
+// ============================================================
+const BT_STRATEGY = {
+  overview: "Black Temple plan from our raid notes — trash and boss callouts per pull below.",
+  tips: [
+    "Fire Resistance sets for the Flame of Azzinoth tanks (Illidan P2) and the Warlock demon tank (Illidan P4 uses Shadow Res).",
+    "Shadow Resistance ≥100 from gear raid-wide for Mother Shahraz.",
+    "Free Action Potions — Illidari Fearbringer AoE stun before Supremus.",
+    "Arcane Bombs to interrupt Aqueous Spawn volleys before Naj'entus.",
+    "A Mage with Invisibility pulls the Ashtongue Feral Spirit Dogs before Shade.",
+    "Warlocks: Curse of Tongues (Malande, RoS P2), Death Coil pre-pull on Shield Disciples, demon tank for Illidan P4.",
+    "Hunters: Tranquilizing Shot removes Seethe (RoS P3); Misdirect the Flames to the FR tanks (Illidan P2).",
+    "Priests: Power Word: Shield the Promenade Sentinel's Arcane Charge target. Mages: spellsteal Rune Shield (RoS P2).",
+    "Repair Bot, Healthstones, Soulstones, flasks/food/pots. BigWigs/DBM on.",
+  ],
+  bosses: {
+    najentus: { source:'notes',
+      trash:[
+        "2 Aqueous Spawns — kick the AoE volleys or use Arcane Bombs to interrupt.",
+        "1 Aqueous Lord + 2 Coilscar Seacallers — tanks face all adds away (frontal cone). Seacallers are immune to taunt → kill Seacallers first. Any Aqueous Spawns that appear become the priority kill.",
+        "2 Coilscar Wranglers + 1 Leviathan — Wranglers are immune to taunt & cleave → kill Wranglers first. Leviathan's tail knocks back (stand to the side); cleanse the poison spit.",
+        "Mixed packs — Coilscar Generals first (they cleanse CC on other mobs). Dragon Turtles spell-reflect → melee prio turtles after the Generals.",
+      ],
+      todo:[
+        "Everyone spreads ~6 yards (see positioning).",
+        "Impaling Spine hits a random player — a DIFFERENT player grabs the dropped spine from them and uses it on the boss to break Tidal Shield.",
+        "Heal the raid to full BEFORE breaking Tidal Shield — the break triggers Tidal Burst (raid AoE).",
+        "Be quick — Naj'entus heals himself while shielded.",
+      ],
+      position:"Boss center, faced away. Raid in a ring ~6 yds apart: melee on the boss, healers mid, ranged outer." },
+    supremus: { source:'notes',
+      trash:[
+        "Bonechewer pack — nothing special, AoE them down.",
+        "Illidari Fearbringer — AoE stun; break out with a Free Action Potion.",
+        "Wyrmcallers — 360° cleave hitting the 3 closest. Tanks stack in close, melee at max melee range.",
+        "Skystalkers & Windreavers — ranged pull them down.",
+      ],
+      todo:[
+        "Double-check the floor is clear before pulling.",
+        "Phases swap every 60s. Melee to the back-right foot; ranged spread (see positioning).",
+        "P1: Molten Flame follows a target — move out of it. Hateful Strike hits the highest-HP tank — keep all 3 tanks up with assigned healers.",
+        "P2: everyone spread for the fixate — if fixated, run, but stay under 40 yds or he charges. Stay VERY far from the volcanoes (the AoE is bigger than it looks).",
+        "Threat resets when he returns to P1.",
+      ],
+      position:"Melee at the back-right foot; ranged spread wide around the room." },
+    akama: { source:'notes',
+      trash:[
+        "Illidari Centurion / Defiler / Boneslicer / Heartseeker — face all away (each has a frontal attack). Any of these can be Banished to be safe.",
+        "Illidari Nightlord — keep Tremor Totems down at all times (AoE Fear); it also deals AoE damage around it.",
+        "Ashtongue Feral Spirit Dogs — a Mage with Invisibility pulls ONLY the dog by walking up. Don't forget to pull them.",
+        "Ashtongue Stormcallers / Mystics / Primalists / Battlelords — Battlelords cleave (face away, kill first), then kill Mystics. Always prioritise the totems. Mages re-pull the dogs after.",
+      ],
+      todo:[
+        "1 tank on each side of the boss room to pick up incoming adds.",
+        "Focus down all Sorcerers.",
+        "Bloodlust when the Shade is fighting the real Akama.",
+      ],
+      position:"A tank on each side of the room; casters focus the Sorcerers." },
+    teron: { source:'notes',
+      trash:[
+        "Shadowmoon Champion / Reaver / Bloodmage / Weapon Master / Deathshaper — kill Shadowmoon Reavers first (they absorb spells, then explode).",
+        "Hand of Gorefiend — hits really hard and can't be taunted.",
+      ],
+      todo:[
+        "Everyone practise the ghost mini-game FIRST.",
+        "Tank-and-spank apart from the ghost mechanic. Run to the BACK CORNERS of the room.",
+        "When taken to be a ghost, use the pet-bar buttons in priority order: Button 5 → Button 4 → Button 3 (tab through all targets).",
+      ],
+      position:"Boss held still; raid uses the back corners. Ghosts act from wherever they died." },
+    gurtogg: { source:'notes',
+      trash:["Same trash as before Reliquary of Souls (Behemoth soak / Blade Fury / Blood Prophet / Shield Disciple / Mutant War Hound)."],
+      todo:[
+        "All 3 tanks stay top-threat; the boss is untauntable. Aggro-swap after 7 stacks of Acidic Wound.",
+        "Bloodboil: 3 groups of 5 ranged/healers — use the 'Bloodboil Groups' button on the raid card (each player sees their group in Player POV). G1 starts OUT of the water, G2+G3 IN. When G1 is hit → G1 in, G2 out, G3 stays. When G2 is hit → G2 in, G3 out, G1 stays. Repeat.",
+        "P2: spread around. If you get Fel Rage you become the new Bloodboil target AND the main tank — go to the tank position, pop max defensives, get spam-healed. Mages DO NOT Ice Block; Hunters DO NOT Feign Death.",
+      ],
+      position:"See the soak-positioning image — tanks/soak spot set; ranged & healers run the 3 rotating Bloodboil groups." },
+    ros: { source:'notes',
+      trash:[
+        "Pay attention — it gets harder here.",
+        "Bonechewer Behemoth — stack up and SOAK the meteors.",
+        "Bonechewer Blade Fury — can Whirlwind; kill these first.",
+        "Bonechewer Blood Prophet.",
+        "Bonechewer Shield Disciple — Warlocks pre-cast Death Coil on these.",
+        "Mutant War Hound — drops a poison cloud on death.",
+        "Ghost-room gauntlet — stack up and stay together. Melee kill the Angered Soul Fragments. PAUSE halfway down the ramp — NOT fully down!",
+      ],
+      todo:[
+        "3 phases; Bloodlust in P3.",
+        "P1 (Suffering): no healing, no armor. Threat is set by the player CLOSEST to the boss — tank-swap here; backup = a Rogue goes in with Evasion. Soul Drain must be dispelled IMMEDIATELY.",
+        "Adds spawn before P2 — nothing special.",
+        "P2 (Desire): Warlock Curse of Tongues. Warrior tank spell-reflects Deaden. Spirit Shock HAS TO BE KICKED (or the MT loses all threat). Mages spellsteal the Rune Shield.",
+        "P3 (Anger): Bloodlust. Hunters remove Seethe with Tranquilizing Shot.",
+      ],
+      position:"Each Essence tanked center; reposition per phase." },
+    shahraz: { source:'notes',
+      trash:[
+        "Trash we've already faced, plus:",
+        "Priestess of Delight + Priestess of Torment — kill Priestess of Delight FIRST.",
+        "Mistress of Dementia — spawns clones that Whirlwind.",
+        "Mistress of Woe — casts Curse of Vitality; decurse it.",
+      ],
+      todo:[
+        "Shadow Resistance fight (≥100 from gear).",
+        "Melee and ranged groups both stand DIRECTLY under the hands of the statues (see positioning image).",
+        "All 3 tanks stack in front of her.",
+        "Prismatic Aura grants resistance to a random school — swap your spell when the one you're using gets resisted.",
+      ],
+      position:"Casters under the lantern, melee under the Blood Elf statue (both under the statue hands); 3 tanks stacked in front." },
+    council: { source:'notes',
+      trash:[
+        "Promenade Sentinel — casts a 5-stack Arcane Charge; a Priest must Power Word: Shield the target or they die.",
+        "Illidari Archon / Assassin / Battle Mage (kill first) / Blood Lord (mass-dispel his Divine Shield).",
+      ],
+      todo:[
+        "6 healers. All 4 bosses share a health pool. Gathios (Paladin), Zerevor (Mage), Malande (Priest), Veras (Rogue).",
+        "Gathios: Bear tank on him.",
+        "Veras: least armor / most damage. If not under a BOP, DPS him; otherwise swap to Gathios. Off-tank holds Veras. When someone is poisoned, big-heal them — Envenom hits hard when Veras leaves Vanish.",
+        "Malande: Paladin tanks; Warlocks Curse of Tongues; Rogue + Warrior + Elemental Shaman on interrupts (Shaman can kick through BOPs).",
+        "Zerevor: mage-tanked. Don't stand close (Arcane Explosion). The mage tank kites up/down the stairs to Illidan's room for LoS.",
+        "Pull: the mage tank pulls Zerevor while he has a BOP on him.",
+      ],
+      position:"Kite Zerevor up and around the Illidan ramp; rotate out of Consecration / Flamestrike / Blizzard (see positioning image)." },
+    illidan: { source:'notes',
+      trash:["No trash — Illidan is pulled from the summit."],
+      todo:[
+        "5-6 healers. Warrior tank for Shear.",
+        "P1: on Parasitic Shadowfiend, move OUT of the raid. Kill the adds (not special).",
+        "P2 (at 65%): FR tanks up. Casters go to the MIDDLE of the grate circle. FR tanks sprint to the glaives to grab the Flames of Azzinoth; Hunters Misdirect to the tanks. Don't pull the elementals too far — stay around the grate circle.",
+        "P3: when the Flames die, back to P1 mechanics but the ranged group now SPREADS around. Bloodlust — burn to 30-35% to skip P4.",
+        "P4 (Demon): Warlock tank (Shadow Resistance up) stands out of the group. Melee can't act — bandage/self-heal. Everyone ≥15 yards apart. Kill adds if they spawn.",
+        "P5: same as P1/P3, but he Enrages — the tank drags Illidan over the laid-out traps.",
+      ],
+      position:"Ranged/healers top-left, melee & tank per the positioning images; P2 casters in the grate circle, FR tanks on the glaives." },
+  },
+};
+function isBTRaid(r){ return /black temple/i.test(r?.name||''); }
+function btStratBossHTML(bossId){
+  const b=BT_STRATEGY.bosses[bossId]; if(!b) return '';
+  let h='<div style="margin-top:8px;border-top:1px dashed var(--border);padding-top:8px">';
+  if(b.trash&&b.trash.length)
+    h+='<div class="pov-task"><i class="ti ti-skull" style="color:#b48ce0"></i><span style="line-height:1.6"><strong>Trash before:</strong><br>'+b.trash.map(t=>'• '+t).join('<br>')+'</span></div>';
+  if(b.todo&&b.todo.length)
+    h+='<div class="pov-task"><i class="ti ti-checklist" style="color:var(--gold)"></i><span style="line-height:1.6"><strong>What we do:</strong><br>'+b.todo.map(t=>'• '+t).join('<br>')+'</span></div>';
+  if(b.position)
+    h+='<div class="pov-task"><i class="ti ti-map-pin" style="color:var(--acc)"></i><span style="line-height:1.5"><strong>Positioning:</strong> '+b.position+'</span></div>';
+  return h+'</div>';
+}
+function btStratFullHTML(){
+  const S=BT_STRATEGY;
+  const nameOf=id=>(BOSSES.bt.find(b=>b.id===id)||{}).name||id;
+  let h='<div style="font-size:11px;color:var(--t3);margin-bottom:8px">'+S.overview+'</div>';
+  h+='<div class="ct" style="margin:8px 0 6px;font-size:12px"><i class="ti ti-bulb" style="color:var(--gold)"></i>Raid-wide prep</div>';
+  h+='<ul style="margin:0 0 10px 16px;font-size:11px;color:var(--t2);line-height:1.6">'+S.tips.map(t=>'<li>'+t+'</li>').join('')+'</ul>';
+  ['najentus','supremus','akama','teron','gurtogg','ros','shahraz','council','illidan'].forEach(id=>{
+    const b=S.bosses[id]; if(!b) return;
+    const tag=b.source==='draft'?' <span style="font-size:9px;color:var(--ora)">(draft)</span>':(b.source==='mixed'?' <span style="font-size:9px;color:var(--ora)">(fight = draft)</span>':'');
+    h+='<div style="background:var(--bg3);border-radius:var(--r);padding:8px 10px;margin-bottom:6px">';
+    h+='<div style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:4px">'+nameOf(id)+tag+'</div>';
+    if(b.trash&&b.trash.length) h+='<div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin:4px 0 2px">Trash</div><ul style="margin:0 0 4px 16px;font-size:11px;color:var(--t2);line-height:1.5">'+b.trash.map(t=>'<li>'+t+'</li>').join('')+'</ul>';
+    if(b.todo&&b.todo.length) h+='<div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin:4px 0 2px">What we do</div><ul style="margin:0 0 4px 16px;font-size:11px;color:var(--t2);line-height:1.5">'+b.todo.map(t=>'<li>'+t+'</li>').join('')+'</ul>';
+    if(b.position) h+='<div style="font-size:11px;color:var(--acc)"><i class="ti ti-map-pin"></i> '+b.position+'</div>';
+    h+='</div>';
+  });
+  return h;
+}
+function toggleBTStrat(raidId){ const el=document.getElementById('bt-strat-'+raidId); if(el) el.style.display=el.style.display==='none'?'block':'none'; }
+function toggleBloodboil(raidId){ const el=document.getElementById('bb-groups-'+raidId); if(el) el.style.display=el.style.display==='none'?'block':'none'; }
+
+// ── Gurtogg Bloodboil groups: 3 rotating groups of ranged + healers ──
+// Auto-built from a raid's confirmed roster (healers spread evenly), Vashj-style.
+function upcomingBTRaid(){
+  const todK=todayKey();
+  const up=raidSchedule.filter(r=>isBTRaid(r)&&(!isPast(r.date)||r.date===todK)).sort((a,b)=>a.date.localeCompare(b.date));
+  return up.find(r=>r.confirmed?.length) || up[0] || raidSchedule.filter(isBTRaid).sort((a,b)=>b.date.localeCompare(a.date))[0] || null;
+}
+function btRaidForPlayer(name){
+  const todK=todayKey();
+  const up=raidSchedule.filter(r=>isBTRaid(r)&&(!isPast(r.date)||r.date===todK)).sort((a,b)=>a.date.localeCompare(b.date));
+  return up.find(r=>r.confirmed?.includes(name)) || upcomingBTRaid();
+}
+function computeBloodboilGroups(raid){
+  const groups=[[],[],[]];
+  if(!raid) return groups;
+  const conf=(raid.confirmed||[]).map(n=>gp(n)).filter(Boolean);
+  const healers=conf.filter(p=>p.type==='Healer');
+  const ranged=conf.filter(p=>p.type==='Ranged');
+  // Spread healers across the three groups first, then ranged — keeps heals even.
+  let gi=0;
+  [...healers,...ranged].forEach(p=>{ groups[gi%3].push(p.name); gi++; });
+  return groups;
+}
+function playerBloodboilGroup(raid,name){
+  const g=computeBloodboilGroups(raid);
+  for(let i=0;i<3;i++) if(g[i].includes(name)) return i+1;
+  return null;
+}
+function bloodboilGroupsHTML(raid){
+  const g=computeBloodboilGroups(raid);
+  const colors=['#6ab4e8','#e09a65','#5DCAA5'];
+  const labels=['G1 — starts OUT','G2 — starts IN','G3 — starts IN'];
+  const cols=g.map((grp,i)=>`<div style="background:var(--bg3);border-radius:var(--r);padding:8px;border-top:2px solid ${colors[i]}">
+    <div style="font-size:11px;font-weight:700;color:${colors[i]};margin-bottom:5px">${labels[i]}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px">${grp.length?grp.map(n=>pill(n,!gp(n)?.present)).join(''):'<span style="font-size:10px;color:var(--t3)">—</span>'}</div>
+  </div>`).join('');
+  return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${cols}</div>
+    <div style="font-size:10px;color:var(--t3);margin-top:6px">Rotation: G1 out / G2+G3 in. When the OUT group is hit by Bloodboil they run IN and the next group runs OUT (G1→G2→G3 cycle). Auto-built from confirmed ranged & healers.</div>`;
+}
+function bloodboilPovHTML(name){
+  const raid=btRaidForPlayer(name);
+  if(!raid||!raid.confirmed?.length) return '';
+  const grp=playerBloodboilGroup(raid,name);
+  if(!grp) return '<div class="pov-task"><i class="ti ti-arrows-shuffle" style="color:#e09a65"></i><span>Bloodboil groups: melee/tank — you don\'t rotate. Stay on the boss and mind Fel Rage.</span></div>';
+  return `<div class="pov-task"><i class="ti ti-arrows-shuffle" style="color:#e09a65"></i><span><strong>Your Bloodboil group: G${grp}</strong> — starts ${grp===1?'OUT of the water':'IN the water'}. Swap in/out on the rotation when your group is hit.</span></div>`;
+}
+
 // Interruptible abilities per boss encounter
 // Used in Player POV to show interrupt duties for players with interrupt charges
 const BOSS_INTERRUPTS={
@@ -5977,6 +6197,8 @@ const svg=svgHtml;
         ${posNote?`<div class="pov-task"><i class="ti ti-map-pin" style="color:var(--acc)"></i><span style="line-height:1.5"><strong>Your position:</strong> ${posNote}</span></div>`:''}
         ${svg||''}
         ${trashHtml}
+        ${rk==='bt'?btStratBossHTML(boss.id):''}
+        ${rk==='bt'&&boss.id==='gurtogg'?bloodboilPovHTML(playerName):''}
       </div>`;
     }).join('');
 
@@ -7254,7 +7476,11 @@ function fullRaidCard(r,highlight){
       ${canManageRaids()&&!past?`<button class="btn btn-sm" onclick="toggleCleanup('${r.id}')" style="${r.cleanup?'background:rgba(41,128,185,.15);border-color:rgba(41,128,185,.35);color:#6ab4e8':''}"><i class="ti ti-broom"></i>${r.cleanup?'Remove Cleanup':'Mark Cleanup'}</button>`:''}
       ${canManageRaids()&&past?`<button class="btn btn-sm btn-s" onclick="createCleanupRaid('${r.id}')" style="background:rgba(41,128,185,.12);border-color:rgba(41,128,185,.35);color:#6ab4e8"><i class="ti ti-broom"></i>Create cleanup raid</button>`:''}
       ${r.wclUrl?`<a href="${r.wclUrl}" target="_blank" rel="noopener" class="btn btn-g btn-sm" style="text-decoration:none"><i class="ti ti-external-link"></i>Warcraft Logs</a>`:(canManageRaids()&&past?`<button class="btn btn-sm" onclick="if(document.getElementById('raid-edit-${r.id}').style.display==='none')toggleRaidEdit('${r.id}');setTimeout(()=>{const el=document.getElementById('re-wcl-${r.id}');if(el){el.focus();el.select();}},50)"><i class="ti ti-link"></i>+ Logs link</button>`:'')}
+      ${isBTRaid(r)?`<button class="btn btn-sm" onclick="toggleBTStrat('${r.id}')" style="background:rgba(122,95,176,.14);border-color:rgba(122,95,176,.4);color:#b48ce0"><i class="ti ti-map-2"></i>Raid Strategy</button>`:''}
+      ${isBTRaid(r)&&r.confirmed.length?`<button class="btn btn-sm" onclick="toggleBloodboil('${r.id}')" style="background:rgba(224,154,101,.14);border-color:rgba(224,154,101,.4);color:#e09a65"><i class="ti ti-arrows-shuffle"></i>Bloodboil Groups</button>`:''}
     </div>
+    ${isBTRaid(r)?`<div id="bt-strat-${r.id}" style="display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:10px">${btStratFullHTML()}</div>`:''}
+    ${isBTRaid(r)&&r.confirmed.length?`<div id="bb-groups-${r.id}" style="display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:10px"><div class="ct" style="font-size:12px;margin-bottom:8px"><i class="ti ti-arrows-shuffle" style="color:#e09a65"></i>Gurtogg Bloodboil Groups</div>${bloodboilGroupsHTML(r)}</div>`:''}
   </div>`;
 }
 function buildRosterPost(r){
