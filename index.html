@@ -1893,30 +1893,165 @@ const BT_STRATEGY = {
       position:"Ranged/healers top-left, melee & tank per the positioning images; P2 casters in the grate circle, FR tanks on the glaives." },
   },
 };
+// ============================================================
+// MOUNT HYJAL — raid strategy doc (from our cheat sheet)
+// ============================================================
+const HYJAL_STRATEGY = {
+  overview: "Mount Hyjal plan from our cheat sheet — 4 bosses each preceded by 8 trash waves (Alliance base: Winterchill, Anetheron · Horde base: Kaz'rogal, Azgalor), then Archimonde.",
+  tips: [
+    "Hyjal is an 'outside' raid — combat is not zone-wide, so you can drop combat between trash packs to rez / buff / drink.",
+    "If a trash pack is going badly, drag it into the centre of the base camp for NPC help.",
+    "Arcane Bombs / Blood Elf Arcane Torrent are great for silencing Shadowy Necromancers (and Fel Stalkers on Azgalor).",
+    "Free Action Potions: remove Frost Nova / Frost Armor and prevent Icebolt (Winterchill); tanks also use them vs Abomination stuns.",
+    "Jaina gives a windfury-like +100% Spirit buff near her — position the boss so ranged catch it (with Improved Divine Spirit).",
+    "Shamans stand near their groups for totem buffs. Bring Mana Pots / Demonic & Dark Runes (esp. Kaz'rogal & Azgalor).",
+    "General trash rules: never let a tank hold more than 2-3 Abominations; don't let Necromancers cast in sync on one target; Shadowy Necromancers are only dangerous at 4+.",
+    "Trash kill priority: Shadowy Necromancers & Abominations first (kick / dispel / stun), then Banshees (kick Wail, decurse the Curse), then Crypt Fiends, Ghouls last. Horde side adds Gargoyles (LoS with tents) and Frost Wyrms (ranged focus).",
+  ],
+  bosses: {
+    winterchill: { source:'notes',
+      trash:[
+        "8 Alliance (undead) waves:",
+        "1 — 10 Ghouls",
+        "2 — 10 Ghouls, 2 Crypt Fiends",
+        "3 — 6 Ghouls, 6 Crypt Fiends",
+        "4 — 6 Ghouls, 4 Crypt Fiends, 2 Shadowy Necromancers",
+        "5 — 2 Ghouls, 6 Crypt Fiends, 4 Shadowy Necromancers",
+        "6 — 6 Ghouls, 6 Abominations (split ~3 Aboms off to reduce AoE poison ticks)",
+        "7 — 4 Ghouls, 4 Shadowy Necromancers, 4 Abominations",
+        "8 — 6 Ghouls, 4 Crypt Fiends, 2 Abominations, 2 Shadowy Necromancers",
+        "If a Necro wave has deaths, MC the last Necromancer to drop combat and reset without triggering the next wave.",
+        "Positioning: LoS the caster mobs behind a building — option 1 (left) or option 2 (right). Paladin drops Consecration on the path for initial threat; ranged & healers stack behind cover.",
+      ],
+      todo:[
+        "Icebolt — 4-5k instant + ~10k over 5s on a random player; UNDISPELLABLE. PvP trinket & immunities (Divine Shield, Ice Block) break it — otherwise heal through.",
+        "Death and Decay — 20yd, 15% HP/sec, VERY hard to see (like Botanica). Step out instantly.",
+        "Frost Nova — 2500-3000 + 10s root within 20yds. Priests Mass Dispel rooted melee; Free Action Potion removes it.",
+        "Frost Armor — -25% attack / -50% movement to melee hitting the boss.",
+      ],
+      position:"Tank at the edge faced away; melee on the boss (mind Frost Armor); healers + ranged grouped and out of Death and Decay. Position for Jaina's Spirit buff if you can." },
+    anetheron: { source:'notes',
+      trash:[
+        "8 Alliance (undead) waves:",
+        "1 — 10 Ghouls",
+        "2 — 8 Ghouls, 4 Abominations",
+        "3 — 4 Ghouls, 4 Crypt Fiends, 4 Shadowy Necromancers",
+        "4 — 6 Crypt Fiends, 2 Banshees, 4 Shadowy Necromancers",
+        "5 — 6 Ghouls, 4 Banshees, 2 Shadowy Necromancers",
+        "6 — 6 Ghouls, 2 Abominations, 4 Shadowy Necromancers",
+        "7 — 2 Ghouls, 4 Crypt Fiends, 4 Banshees, 4 Abominations",
+        "8 — 3 Ghouls, 3 Crypt Fiends, 2 Banshees, 2 Shadowy Necromancers, 4 Abominations",
+        "Positioning: same LoS spots as Winterchill (option 1 left / option 2 right); paladin pre-Consecrate the path; ranged & healers behind cover.",
+      ],
+      todo:[
+        "Carrion Swarm — random target, 3-6k in a large frontal cone, -75% healing for 15s. Assign healers to swarm targets; don't leave tanks to die from the healing debuff.",
+        "Summon Infernal (~every 60s) — random target stunned 2s + ~3500 fire/2s. The Infernal offtank stages AWAY from the raid before the spawn; targeted players move TOWARDS the offtank but not on top of them (they'd get stunned too).",
+        "Sleep — 2-3 random players slept 10s (dispel / wake).",
+        "Vampiric Aura — heals the boss for 300% of melee damage taken; keep healing-reduction debuffs (Mortal Strike / Wound Poison) up.",
+      ],
+      position:"Infernal offtank staged away from the raid at the Infernal drop zone; raid spread. Physical DPS use Elixir of Demonslaying (demon boss). Infernal tank wears Fire Resistance (high Stamina + FR)." },
+    kazrogal: { source:'notes',
+      trash:[
+        "8 Horde-side waves (Note: wave 1 can bug & not spawn — if so, swap to Black Temple):",
+        "1 — 4 Ghouls, 2 Banshees, 4 Abominations, 2 Shadowy Necromancers",
+        "2 — 4 Ghouls, 10 Gargoyles",
+        "3 — 6 Ghouls, 6 Crypt Fiends, 2 Shadowy Necromancers",
+        "4 — 6 Crypt Fiends, 6 Gargoyles, 2 Shadowy Necromancers",
+        "5 — 4 Ghouls, 4 Abominations, 4 Shadowy Necromancers",
+        "6 — 8 Gargoyles, 1 Frost Wyrm (Gargoyles spawn LEFT above the mountains — use the Horde tower to LoS, then spread for the Frost Wyrm AoE)",
+        "7 — 6 Ghouls, 4 Abominations, 1 Frost Wyrm",
+        "8 — 6 Ghouls, 2 Crypt Fiends, 2 Banshees, 2 Shadowy Necromancers, 4 Abominations",
+        "Gargoyles: LoS with tents/buildings, ranged focus. Frost Wyrm: ranged focus until it lands. Necromancers can be Sheeped / Feared on the Horde side.",
+        "Positioning: LoS at the Horde Tower pillars (paladin pre-Consecrate). Send 1 tank + healer + ranged to LoS the Gargoyles behind the Tauren Tent. Frost Wyrm keeps ranged threat while airborne and only AoEs until it lands — spread once gathered.",
+      ],
+      todo:[
+        "Mark of Kaz'rogal — burns 3000 mana over 5s (600/s); if you hit 0 mana you explode for 11k and damage nearby. Cast at 60s, then 50 / 40 / 30 / 20 / 10s, then spammed. Immunities (Divine Shield) remove it.",
+        "Malevolent Cleave — 23000 split among targets → 3 tanks soak it in front.",
+        "Cripple — -75% movement & attack speed. War Stomp — 5s stun within 12yds.",
+        "Mana / DPS race — mana users manage mana (drop it intentionally / get the Mark dispelled) so the explosion happens while topped.",
+      ],
+      position:"Boss faced away, 3 tanks stacked in front for the Cleave; casters manage mana and spread for War Stomp." },
+    azgalor: { source:'notes',
+      trash:[
+        "8 Horde-side waves:",
+        "1 — 6 Abominations, 6 Shadowy Necromancers",
+        "2 — 5 Ghouls, 8 Gargoyles, 1 Frost Wyrm",
+        "3 — 6 Ghouls, 8 Infernals",
+        "4 — 8 Infernals, 6 Fel Hounds (one Infernal spawns far, near the Night Elf Village exit)",
+        "5 — 6 Fel Stalkers, 4 Abominations, 4 Shadowy Necromancers (Arcane Bombs for the Fel Stalkers + Necros)",
+        "6 — 6 Banshees, 6 Shadowy Necromancers",
+        "7 — 2 Ghouls, 2 Crypt Fiends, 2 Fel Stalkers, 8 Infernals",
+        "8 — 4 Crypt Fiends, 2 Fel Stalkers, 4 Banshees, 2 Shadowy Necromancers, 4 Abominations",
+        "Infernals: stun and nuke (they can be stunned). Fel Hounds: interrupt Mana Burn (or banish).",
+        "Positioning: LoS at the Horde Tower; Gargoyles use the Tauren Tent or the bunker. Infernals rain from the sky in the MIDDLE — gather them, stun, nuke. Fel Hunters & Gargoyles spawn on both sides.",
+      ],
+      todo:[
+        "Doom — 20s debuff that KILLS the target and summons a Doomguard (has War Stomp). Immunities (Divine Shield) remove it.",
+        "Rain of Fire — 10s AoE ~1700/2s within 30yds of the boss; it applies a DoT that persists after you leave the fire (this is what wipes raids). Ranged out-range it at max range.",
+        "Howl of Azgalor — 5s silence; can be RESISTED with Shadow Resistance (priests hand out the SR buff, healers wear their Shahraz SR gear).",
+        "Cleave — weapon + 1700 + knockback. Treat the whole fight like Magtheridon for the tank (full mitigation / avoidance).",
+      ],
+      position:"Tanks STACKED together throughout (requirement — bad tank positioning one-shots). Ranged at max range to out-range Rain of Fire. Run a 6th healer. Week 1: save health pots for the Rain of Fire DoT." },
+    archimonde: { source:'notes',
+      trash:["No trash — Archimonde is engaged after Azgalor."],
+      todo:[
+        "REQUIREMENT: EVERY player picks up Tears of the Goddess from Tyrande BEFORE the pull.",
+        "Air Burst — throws the target (and anyone near them) into the air; use Tears of the Goddess to survive the fall.",
+        "Doomfire Strike — a fire that roams randomly; standing in it applies a 45s ticking fire debuff — run away from it.",
+        "Grip of the Legion — curse, 2500 shadow/2s. DECURSING IS THE #1 PRIORITY.",
+        "Fear — fears everyone 8s. Soul Charge — each death deals 4500 to all + a class-based effect, so minimise deaths.",
+      ],
+      position:"Spread in 4-5 groups, a decurser + a shaman in each, loosely spread for Air Burst. Archimonde doesn't crush but swings ~10k; the tank keeps moving if Doomfire is bad." },
+  },
+};
+
 function isBTRaid(r){ return /black temple/i.test(r?.name||''); }
-function btStratBossHTML(bossId){
-  const b=BT_STRATEGY.bosses[bossId]; if(!b) return '';
+// Registry of raid strategy docs (Player POV keys them by raid key; Raids tab by name)
+const RAID_STRATEGIES = { bt: BT_STRATEGY, hyjal: HYJAL_STRATEGY };
+function raidStratKey(r){ const n=(r&&r.name||'').toLowerCase(); if(/black temple/.test(n)) return 'bt'; if(/hyjal/.test(n)) return 'hyjal'; return null; }
+// Render a trash list: numbered "N — composition" lines become distinct wave
+// rows; a "…waves:" line becomes a header; everything else is a muted note.
+function renderTrashList(arr){
+  let head='',waves='',notes='';
+  arr.forEach(t=>{
+    const m=/^(\d+)\s*[—-]\s*([\s\S]+)/.exec(t);
+    if(m){
+      waves+=`<div style="display:flex;align-items:flex-start;gap:8px;background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:4px 8px;margin-bottom:3px">
+        <span style="flex:0 0 auto;min-width:19px;height:19px;border-radius:50%;background:rgba(180,140,220,.18);color:#b48ce0;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center">${m[1]}</span>
+        <span style="font-size:11px;color:var(--t1);line-height:1.45">${m[2]}</span></div>`;
+    } else if(/waves:?\s*$|waves \(/i.test(t)){
+      head+=`<div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin:2px 0 5px">${t}</div>`;
+    } else {
+      notes+=`<li>${t}</li>`;
+    }
+  });
+  return (head||'')+(waves?`<div style="margin-bottom:6px">${waves}</div>`:'')+(notes?`<ul style="margin:2px 0 4px 15px;font-size:11px;color:var(--t2);line-height:1.5">${notes}</ul>`:'');
+}
+function stratBossHTML(rk, bossId){
+  const doc=RAID_STRATEGIES[rk]; if(!doc) return '';
+  const b=doc.bosses[bossId]; if(!b) return '';
   let h='<div style="margin-top:8px;border-top:1px dashed var(--border);padding-top:8px">';
   if(b.trash&&b.trash.length)
-    h+='<div class="pov-task"><i class="ti ti-skull" style="color:#b48ce0"></i><span style="line-height:1.6"><strong>Trash before:</strong><br>'+b.trash.map(t=>'• '+t).join('<br>')+'</span></div>';
+    h+='<div style="margin-bottom:6px"><div style="font-size:11px;color:#b48ce0;font-weight:600;margin-bottom:4px"><i class="ti ti-skull"></i> Trash before:</div>'+renderTrashList(b.trash)+'</div>';
   if(b.todo&&b.todo.length)
     h+='<div class="pov-task"><i class="ti ti-checklist" style="color:var(--gold)"></i><span style="line-height:1.6"><strong>What we do:</strong><br>'+b.todo.map(t=>'• '+t).join('<br>')+'</span></div>';
   if(b.position)
     h+='<div class="pov-task"><i class="ti ti-map-pin" style="color:var(--acc)"></i><span style="line-height:1.5"><strong>Positioning:</strong> '+b.position+'</span></div>';
   return h+'</div>';
 }
-function btStratFullHTML(){
-  const S=BT_STRATEGY;
-  const nameOf=id=>(BOSSES.bt.find(b=>b.id===id)||{}).name||id;
+function stratFullHTML(rk){
+  const S=RAID_STRATEGIES[rk]; if(!S) return '';
+  const order=(BOSSES[rk]||[]).map(b=>b.id); const ids=order.length?order:Object.keys(S.bosses);
+  const nameOf=id=>((BOSSES[rk]||[]).find(b=>b.id===id)||{}).name||id;
   let h='<div style="font-size:11px;color:var(--t3);margin-bottom:8px">'+S.overview+'</div>';
   h+='<div class="ct" style="margin:8px 0 6px;font-size:12px"><i class="ti ti-bulb" style="color:var(--gold)"></i>Raid-wide prep</div>';
   h+='<ul style="margin:0 0 10px 16px;font-size:11px;color:var(--t2);line-height:1.6">'+S.tips.map(t=>'<li>'+t+'</li>').join('')+'</ul>';
-  ['najentus','supremus','akama','teron','gurtogg','ros','shahraz','council','illidan'].forEach(id=>{
+  ids.forEach(id=>{
     const b=S.bosses[id]; if(!b) return;
     const tag=b.source==='draft'?' <span style="font-size:9px;color:var(--ora)">(draft)</span>':(b.source==='mixed'?' <span style="font-size:9px;color:var(--ora)">(fight = draft)</span>':'');
     h+='<div style="background:var(--bg3);border-radius:var(--r);padding:8px 10px;margin-bottom:6px">';
     h+='<div style="font-size:12px;font-weight:600;color:var(--t1);margin-bottom:4px">'+nameOf(id)+tag+'</div>';
-    if(b.trash&&b.trash.length) h+='<div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin:4px 0 2px">Trash</div><ul style="margin:0 0 4px 16px;font-size:11px;color:var(--t2);line-height:1.5">'+b.trash.map(t=>'<li>'+t+'</li>').join('')+'</ul>';
+    if(b.trash&&b.trash.length) h+='<div style="font-size:10px;color:#b48ce0;text-transform:uppercase;letter-spacing:.05em;margin:4px 0 3px"><i class="ti ti-skull"></i> Trash</div>'+renderTrashList(b.trash);
     if(b.todo&&b.todo.length) h+='<div style="font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em;margin:4px 0 2px">What we do</div><ul style="margin:0 0 4px 16px;font-size:11px;color:var(--t2);line-height:1.5">'+b.todo.map(t=>'<li>'+t+'</li>').join('')+'</ul>';
     if(b.position) h+='<div style="font-size:11px;color:var(--acc)"><i class="ti ti-map-pin"></i> '+b.position+'</div>';
     h+='</div>';
@@ -5417,115 +5552,100 @@ function roomSVG(bossId, role, phase, viewMode, resType){
 
     // ── RAGE WINTERCHILL ─────────────────────────────────────────────────
     winterchill(){
-      let s=bg('rect')+compass()+phaseLabel('RAGE WINTERCHILL','');
+      let s=bg('rect')+compass()+phaseLabel('RAGE WINTERCHILL','SPREAD FOR D&D');
       const cx=W/2, cy=H/2;
-      // Death and Decay pools to avoid
-      s+=zoneCircle(150,cy-40,26,'D&D','rgba(80,40,120,.22)',true);
-      s+=zoneCircle(210,cy+55,24,'D&D','rgba(80,40,120,.22)',true);
-      // Boss parked left, faced away from raid (raid to the right)
-      s+=bossNode(70,cy,'W',17);
-      s+=node(102,cy,'MT',RC.Tank,13);
-      s+=goldLabel(70,cy-30,'FACED AWAY');
-      // Melee on boss
-      [[110,cy-26],[112,cy+26],[132,cy-6]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
-      // Healers mid
-      [[180,cy-70],[185,cy+5],[175,cy+80]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
-      // Ranged wide spread right, clear of D&D
-      [[300,cy-90],[360,cy-70],[420,cy-40],[450,cy+5],[420,cy+45],[360,cy+75],[300,cy+90],[330,cy-20],[390,cy+15]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
-      s+=goldLabel(cx+60,H-22,'Step out of Death & Decay · heal Icebolt through · spread');
+      // Boss centre (misdirect-pulled to the ballista), tank to its RIGHT
+      s+=bossNode(cx,cy,'W',17);
+      s+=node(cx+30,cy,'MT',RC.Tank,13);
+      s+=goldLabel(cx,cy-26,'pulled to the ballista');
+      // Melee on the boss
+      [[cx-22,cy-14],[cx-18,cy+18],[cx-42,cy]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Ranged + healers spread LOOSELY around (reduce Death & Decay hits)
+      [[cx-92,cy-66],[cx+72,cy-88],[cx+122,cy+18],[cx+42,cy+90],[cx-102,cy+40],[cx-70,cy-8]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      [[cx-40,cy-92],[cx+130,cy-42],[cx-122,cy-16],[cx-28,cy+72],[cx+90,cy+72]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      s+=goldLabel(cx,H-22,'Spread out for Death & Decay · healers cover nearby players (Icebolt) · dispel Frost Nova · Lust in position');
       s+=legend();
       return s;
     },
 
     // ── ANETHERON ────────────────────────────────────────────────────────
     anetheron(){
-      let s=bg('rect')+compass()+phaseLabel('ANETHERON','');
+      let s=bg('rect')+compass()+phaseLabel('ANETHERON','SPREAD · INFERNALS OUT');
       const cx=W/2, cy=H/2;
-      // Infernal landing zones (right side, kited out)
-      s+=zoneCircle(410,90,30,'INFERNAL','rgba(200,80,40,.2)',true);
-      s+=zoneCircle(440,cy+60,28,'INFERNAL','rgba(200,80,40,.2)',true);
-      // Boss faced away at left edge
-      s+=bossNode(75,cy,'A',17);
-      s+=node(108,cy,'MT',RC.Tank,13);
-      s+=goldLabel(75,cy-30,'FACED AWAY');
-      // Infernal OT / kiter staged toward landings
-      s+=node(330,110,'OT',RC.Tank,13);
-      s+=goldLabel(330,90,'INFERNAL KITE');
-      // Carrion Swarm frontal cone (away from raid)
-      s+=`<path d="M75,${cy} L18,${cy-55} L18,${cy+55} Z" fill="rgba(120,40,120,.12)" stroke="rgba(160,80,160,.3)" stroke-dasharray="4 3"/>`;
-      // Melee behind boss
-      [[116,cy-26],[118,cy+26],[138,cy-4]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
-      // Healers
-      [[185,cy-65],[190,cy+5],[180,cy+72]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
-      // Ranged spread, away from infernals
-      [[260,cy-95],[320,cy-80],[260,cy+95],[320,cy+80],[230,cy-30],[240,cy+30],[300,cy-10]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
-      s+=goldLabel(cx+40,H-22,'Dispel Sleep · move out of Infernal AoE · kite Infernals out');
+      s+=bossNode(cx,cy,'A',17);
+      s+=node(cx+30,cy,'MT',RC.Tank,13);
+      // Infernal offtank staged AWAY from the raid (top-right) + landing zone
+      s+=zoneCircle(cx+150,cy-98,26,'INFERNALS','rgba(200,80,40,.2)',true);
+      s+=node(cx+120,cy-88,'OT',RC.Tank,12); s+=goldLabel(cx+120,cy-106,'infernal OT — away');
+      // Melee on boss
+      [[cx-22,cy-14],[cx-18,cy+18],[cx-42,cy]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Ranged + healers spread EVENLY (Carrion Swarm)
+      [[cx-92,cy-66],[cx+40,cy+90],[cx-102,cy+40],[cx+122,cy+30],[cx-70,cy-8],[cx+70,cy-70]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      [[cx-40,cy-92],[cx-122,cy-16],[cx-28,cy+72],[cx+90,cy+72],[cx+130,cy-30]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      s+=goldLabel(cx,H-22,'Spread evenly (Carrion Swarm) · 1 tank on boss + 1 on adds · keep Infernals AWAY (not tauntable) · dispel Sleep');
       s+=legend();
       return s;
     },
 
     // ── KAZ'ROGAL ────────────────────────────────────────────────────────
     kazrogal(){
-      let s=bg('oval')+compass()+phaseLabel("KAZ'ROGAL",'');
+      let s=bg('rect')+compass()+phaseLabel("KAZ'ROGAL",'RANGED >12yds · MANA RACE');
       const cx=W/2, cy=H/2;
-      // Boss center-left faced away
-      s+=bossNode(cx-70,cy,'K',17);
-      s+=node(cx-40,cy,'MT',RC.Tank,13);
-      s+=goldLabel(cx-70,cy-30,'FACED AWAY');
+      // War Stomp radius (12yd) around the boss
+      s+=`<circle cx="${cx}" cy="${cy+34}" r="62" fill="rgba(200,120,60,.06)" stroke="rgba(210,130,70,.5)" stroke-dasharray="4 3"/>`;
+      s+=goldLabel(cx,cy+108,'12yd War Stomp — ranged stay OUT');
+      // Boss + 3 stacked tanks (soak the Cleave)
+      s+=bossNode(cx,cy+34,'K',16);
+      [[cx+26,cy+24],[cx+30,cy+42],[cx+26,cy+58]].forEach(([x,y])=>s+=node(x,y,'MT',RC.Tank,11));
+      s+=goldLabel(cx+44,cy+16,'3 TANKS');
       // Melee on boss
-      [[cx-46,cy-26],[cx-44,cy+26],[cx-24,cy-4]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
-      // Healers
-      [[cx+10,cy-60],[cx+15,cy+5],[cx+5,cy+65]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
-      // Ranged spread (Mark explosion is AoE — don't stack)
-      [[cx+90,cy-80],[cx+150,cy-50],[cx+170,cy],[cx+150,cy+50],[cx+90,cy+80],[cx+60,cy-30],[cx+70,cy+35]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
-      s+=goldLabel(cx+30,H-22,'Spread — Mark explosions are AoE · manage mana · burn race');
+      [[cx-22,cy+24],[cx-24,cy+48]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Ranged far LEFT (out of War Stomp), healers RIGHT
+      [[cx-142,cy-30],[cx-152,cy+12],[cx-128,cy+52],[cx-112,cy-62]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      [[cx+120,cy-40],[cx+150,cy],[cx+120,cy+42],[cx+90,cy-70]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      s+=goldLabel(cx,H-22,'3 tanks soak Cleave (like Magtheridon) · ranged >12yds for War Stomp · manage mana / dispel the Mark');
       s+=legend();
       return s;
     },
 
     // ── AZGALOR ──────────────────────────────────────────────────────────
     azgalor(){
-      let s=bg('rect')+compass()+phaseLabel('AZGALOR','');
+      let s=bg('rect')+compass()+phaseLabel('AZGALOR','RANGED OUT OF RAIN OF FIRE');
       const cx=W/2, cy=H/2;
-      // Rain of Fire pools
-      s+=zoneCircle(200,cy-60,24,'RoF','rgba(200,80,40,.2)',true);
-      s+=zoneCircle(250,cy+55,22,'RoF','rgba(200,80,40,.2)',true);
-      // Designated Doomguard kill spot (right)
-      s+=zoneRect(400,cy-40,90,80,'DOOMGUARD KILL SPOT','rgba(100,60,160,.18)',true);
-      // Boss faced away left
-      s+=bossNode(75,cy,'A',17);
-      s+=node(108,cy,'MT',RC.Tank,13);
-      s+=goldLabel(75,cy-30,'FACED AWAY');
-      // Doomguard OT at add spot
-      s+=node(420,cy,'OT',RC.Tank,13);
-      // Melee on boss
-      [[116,cy-26],[118,cy+26],[138,cy-4]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
-      // Healers
-      [[185,cy-72],[190,cy+8],[175,cy+78]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
-      // Ranged spread (silence — reposition)
-      [[300,cy-90],[340,cy-65],[300,cy+90],[340,cy+65],[270,cy-25],[280,cy+30]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
-      s+=goldLabel(cx,H-22,'Doomed players run to kill spot · OT grabs Doomguard · dodge RoF');
+      // 30-yard Rain of Fire circle centred on the boss
+      s+=`<circle cx="${cx}" cy="${cy+8}" r="92" fill="rgba(200,80,40,.08)" stroke="rgba(220,120,60,.5)" stroke-width="1.4"/>`;
+      s+=goldLabel(cx,cy-72,'30-yard Rain of Fire range');
+      // Boss + tank + melee inside
+      s+=bossNode(cx,cy+8,'A',16);
+      s+=node(cx+28,cy+20,'MT',RC.Tank,12);
+      [[cx-22,cy],[cx-24,cy+28]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // Doom kill-spot inside
+      s+=addNode(cx-54,cy-12,'DM',12); s+=goldLabel(cx-54,cy-30,'Doom spot');
+      // Ranged + healers on the EDGE / just outside the RoF circle
+      [[cx-72,cy-58],[cx-4,cy-76],[cx+64,cy-56],[cx+98,cy]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      [[cx-36,cy-74],[cx+98,cy-42],[cx-98,cy-18]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
+      // Doomguard OT away (outside, top-right)
+      s+=node(cx+132,cy-82,'OT',RC.Tank,12); s+=goldLabel(cx+132,cy-100,'Doomguard OT — away');
+      s+=goldLabel(cx,H-22,'Ranged/healers on the EDGE, out of Rain of Fire (Shadow Priests in range) · Soulstone Doom targets · tanks stacked');
       s+=legend();
       return s;
     },
 
     // ── ARCHIMONDE ───────────────────────────────────────────────────────
     archimonde(){
-      let s=bg('oval')+compass()+phaseLabel('ARCHIMONDE','TEARS ON AIR BURST');
+      let s=bg('oval')+compass()+phaseLabel('ARCHIMONDE','4-5 GROUPS · TEARS ON AIR BURST');
       const cx=W/2, cy=H/2;
-      // Boss dead center
-      s+=bossNode(cx,cy,'A',18);
-      s+=node(cx+28,cy,'MT',RC.Tank,13);
-      // Doomfire trail (kited around outside)
-      s+=`<path d="M${cx+90},${cy-70} Q${cx+150},${cy} ${cx+90},${cy+70}" fill="none" stroke="rgba(220,120,40,.4)" stroke-width="3" stroke-dasharray="3 4"/>`;
-      s+=goldLabel(cx+140,cy,'DOOMFIRE');
-      // Melee ring
-      [[cx-24,cy-20],[cx-20,cy+22],[cx+8,cy-26],[cx+6,cy+26]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
-      // Healers ring
-      [[cx-58,cy-30],[cx-60,cy+26],[cx+50,cy-30],[cx+52,cy+28],[cx,cy-60],[cx,cy+62]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,12));
-      // Ranged even spread around center (not far edges — Finger of Death)
-      [[cx-110,cy-55],[cx-120,cy],[cx-110,cy+55],[cx-60,cy-85],[cx+60,cy-85],[cx-60,cy+85],[cx+60,cy+85],[cx+115,cy-50],[cx+118,cy+52]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
-      s+=goldLabel(cx,H-22,'EVERYONE carries Tears · run Doomfire outward · dispel Grip · stay near raid');
+      // Boss in the middle with MT + melee
+      s+=bossNode(cx,cy,'A',16);
+      s+=node(cx-30,cy,'MT',RC.Tank,13); s+=goldLabel(cx,cy-24,'boss in the middle');
+      [[cx+22,cy-14],[cx+26,cy+12]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
+      // 4-5 spread groups (each = healer + ranged; decurser + shaman per group)
+      [[cx-102,cy-68],[cx+92,cy-80],[cx-122,cy+42],[cx+122,cy+30],[cx-18,cy+96]].forEach(([x,y],i)=>{
+        s+=`<circle cx="${x}" cy="${y}" r="27" fill="rgba(100,120,180,.08)" stroke="rgba(150,160,200,.35)" stroke-dasharray="3 3"/>`;
+        s+=node(x-11,y,'H',RC.Healer,11); s+=node(x+12,y-2,'R',RC.Ranged,10);
+        s+=goldLabel(x,y+24,'grp '+(i+1));
+      });
+      s+=goldLabel(cx,H-22,'Spread in 4-5 groups (a decurser + shaman each) · Tears before landing from Air Burst · DECURSE #1 · focus heals on MT');
       s+=legend();
       return s;
     },
@@ -6324,7 +6444,7 @@ const svg=svgHtml;
         ${posNote?`<div class="pov-task"><i class="ti ti-map-pin" style="color:var(--acc)"></i><span style="line-height:1.5"><strong>Your position:</strong> ${posNote}</span></div>`:''}
         ${svg||''}
         ${trashHtml}
-        ${rk==='bt'?btStratBossHTML(boss.id):''}
+        ${RAID_STRATEGIES[rk]?stratBossHTML(rk,boss.id):''}
         ${rk==='bt'&&boss.id==='gurtogg'?bloodboilPovHTML(playerName):''}
       </div>`;
     }).join('');
@@ -7603,10 +7723,10 @@ function fullRaidCard(r,highlight){
       ${canManageRaids()&&!past?`<button class="btn btn-sm" onclick="toggleCleanup('${r.id}')" style="${r.cleanup?'background:rgba(41,128,185,.15);border-color:rgba(41,128,185,.35);color:#6ab4e8':''}"><i class="ti ti-broom"></i>${r.cleanup?'Remove Cleanup':'Mark Cleanup'}</button>`:''}
       ${canManageRaids()&&past?`<button class="btn btn-sm btn-s" onclick="createCleanupRaid('${r.id}')" style="background:rgba(41,128,185,.12);border-color:rgba(41,128,185,.35);color:#6ab4e8"><i class="ti ti-broom"></i>Create cleanup raid</button>`:''}
       ${r.wclUrl?`<a href="${r.wclUrl}" target="_blank" rel="noopener" class="btn btn-g btn-sm" style="text-decoration:none"><i class="ti ti-external-link"></i>Warcraft Logs</a>`:(canManageRaids()&&past?`<button class="btn btn-sm" onclick="if(document.getElementById('raid-edit-${r.id}').style.display==='none')toggleRaidEdit('${r.id}');setTimeout(()=>{const el=document.getElementById('re-wcl-${r.id}');if(el){el.focus();el.select();}},50)"><i class="ti ti-link"></i>+ Logs link</button>`:'')}
-      ${isBTRaid(r)?`<button class="btn btn-sm" onclick="toggleBTStrat('${r.id}')" style="background:rgba(122,95,176,.14);border-color:rgba(122,95,176,.4);color:#b48ce0"><i class="ti ti-map-2"></i>Raid Strategy</button>`:''}
+      ${raidStratKey(r)?`<button class="btn btn-sm" onclick="toggleBTStrat('${r.id}')" style="background:rgba(122,95,176,.14);border-color:rgba(122,95,176,.4);color:#b48ce0"><i class="ti ti-map-2"></i>Raid Strategy</button>`:''}
       ${isBTRaid(r)?`<button class="btn btn-sm" onclick="toggleBloodboil('${r.id}')" style="background:rgba(224,154,101,.14);border-color:rgba(224,154,101,.4);color:#e09a65"><i class="ti ti-arrows-shuffle"></i>Bloodboil Groups</button>`:''}
     </div>
-    ${isBTRaid(r)?`<div id="bt-strat-${r.id}" style="display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:10px">${btStratFullHTML()}</div>`:''}
+    ${raidStratKey(r)?`<div id="bt-strat-${r.id}" style="display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:10px">${stratFullHTML(raidStratKey(r))}</div>`:''}
     ${isBTRaid(r)?`<div id="bb-groups-${r.id}" style="display:none;margin-top:10px;border-top:1px solid var(--border);padding-top:10px"><div class="ct" style="font-size:12px;margin-bottom:8px"><i class="ti ti-arrows-shuffle" style="color:#e09a65"></i>Gurtogg Bloodboil Groups</div>${bloodboilGroupsHTML(r)}</div>`:''}
   </div>`;
 }
