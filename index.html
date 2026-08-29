@@ -574,6 +574,10 @@ tr:hover td{background:rgba(255,255,255,.013)}
   <div id="miss-banner"></div>
   <div class="card" style="margin-bottom:10px"><div class="ct"><i class="ti ti-shield-check" style="color:var(--ora)"></i>Role Coverage</div><div id="att-cov"></div></div>
   <div class="srow" id="att-stats"></div>
+  <div class="card" style="margin-bottom:10px">
+    <div class="ct" style="display:flex;align-items:center;gap:6px"><i class="ti ti-users-group" style="color:var(--acc)"></i>Active Raider Group <span id="att-active-count" style="font-size:11px;font-weight:400;color:var(--t3)"></span></div>
+    <div id="att-active"></div>
+  </div>
   <div class="g2" style="margin-bottom:10px">
     <div class="card"><div class="ct"><i class="ti ti-check" style="color:#5DCAA5"></i>Present <span id="att-pc" style="font-size:11px;font-weight:400;color:var(--t3)"></span></div><div id="att-present"></div></div>
     <div class="card"><div class="ct"><i class="ti ti-x" style="color:#e07b72"></i>Absent <span id="att-ac" style="font-size:11px;font-weight:400;color:var(--t3)"></span></div><div id="att-absent"></div></div>
@@ -3589,6 +3593,43 @@ function renderAttendance(){
   document.getElementById('att-cov').innerHTML=cvItems.map(i=>`<div class="${i.ok?'cov-ok':'cov-warn'}"><i class="ti ti-${i.ok?'check':'alert-triangle'}"></i><span style="min-width:180px;font-size:12px">${i.lbl}</span><strong>${i.val}</strong></div>`).join('');
   // quick toggle
   document.getElementById('att-quick').innerHTML=ROSTER.map(p=>{const canT=!isNamed()||p.name===CURRENT_USER.name;return`<span class="att-pill ${p.present?'present':'absent'}" ${canT?`onclick="togglePresent('${p.name}')"`:`style="cursor:default;opacity:.4"`} title="${p.type} · ${p.spec}">${p.name}</span>`;}).join('');
+  // active raider group
+  renderActiveRaiderGroup();
+}
+
+// ── Active Raider Group (core roster the RL curates, grouped by main role) ──
+function isActiveRaider(p){ return p && p.activeRaider!==false; } // default: active
+function mainRoleOf(p){ const roles=['Tank','Healer','Melee','Ranged']; return p.type==='Mage Tank'?'Tank':(roles.includes(p.type)?p.type:'Ranged'); }
+function toggleActiveRaider(name){
+  if(!canManageRaids()){ toast('Only the Raid Leader can edit the active raider group','warn'); return; }
+  const p=gp(name); if(!p) return;
+  p.activeRaider = (p.activeRaider===false); // reserve → active, else active → reserve
+  saveRoster();
+  renderAttendance();
+}
+function renderActiveRaiderGroup(){
+  const el=document.getElementById('att-active'); if(!el) return;
+  const rl=canManageRaids();
+  const roles=['Tank','Healer','Melee','Ranged'];
+  const roleColors={Tank:'#5b9bd5',Healer:'#4db87a',Melee:'#e05c3a',Ranged:'#d4a93a'};
+  const active=ROSTER.filter(isActiveRaider);
+  const reserve=ROSTER.filter(p=>!isActiveRaider(p));
+  const cnt=document.getElementById('att-active-count'); if(cnt) cnt.textContent=`(${active.length} raiders${reserve.length?` · ${reserve.length} reserve`:''})`;
+  const cols=roles.map(role=>{
+    const list=active.filter(p=>mainRoleOf(p)===role).sort((a,b)=>a.name.localeCompare(b.name));
+    return `<div style="flex:1;min-width:132px">
+      <div style="font-size:11px;font-weight:700;color:${roleColors[role]};margin-bottom:6px;text-transform:uppercase;letter-spacing:.05em">${role} <span style="color:var(--t3);font-weight:400">(${list.length})</span></div>
+      ${list.length?list.map(p=>`<div class="rrow" ${rl?`style="cursor:pointer" onclick="toggleActiveRaider('${p.name}')" title="Move to reserve"`:''}>${pill(p.name,!p.present)}<span style="margin-left:auto;font-size:10px;color:var(--t3)">${p.spec||p.cls}</span></div>`).join(''):'<div style="font-size:10px;color:var(--t3)">—</div>'}
+    </div>`;
+  }).join('');
+  let html=`<div style="display:flex;flex-wrap:wrap;gap:12px">${cols}</div>`;
+  if(reserve.length || rl){
+    html+=`<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px">
+      <div style="font-size:11px;font-weight:600;color:var(--t3);margin-bottom:6px"><i class="ti ti-user-pause"></i> Reserve / non-active${rl?' <span style="font-weight:400">— click to add to the active group</span>':''}</div>
+      ${reserve.length?`<div style="display:flex;flex-wrap:wrap;gap:4px">${reserve.map(p=>`<span class="att-pill" ${rl?`style="cursor:pointer;opacity:.75" onclick="toggleActiveRaider('${p.name}')"`:'style="opacity:.6;cursor:default"'} title="${p.type} · ${p.spec||p.cls}">${p.name} · ${mainRoleOf(p)}</span>`).join('')}</div>`:'<div style="font-size:10px;color:var(--t3)">Everyone is in the active group.</div>'}
+    </div>`;
+  }
+  el.innerHTML=html;
 }
 
 function box(n,l,c){return`<div class="sbox"><div class="snum" style="color:${c}">${n}</div><div class="slbl">${l}</div></div>`;}
