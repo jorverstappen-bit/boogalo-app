@@ -1833,8 +1833,8 @@ const BT_STRATEGY = {
     gurtogg: { source:'notes',
       trash:["Same trash as before Reliquary of Souls (Behemoth soak / Blade Fury / Blood Prophet / Shield Disciple / Mutant War Hound)."],
       todo:[
-        "All 3 tanks stay top-threat; the boss is untauntable. Aggro-swap after 7 stacks of Acidic Wound.",
-        "Bloodboil: 3 groups of 5 ranged/healers — use the 'Bloodboil Groups' button on the raid card (each player sees their group in Player POV). G1 starts OUT of the water, G2+G3 IN. When G1 is hit → G1 in, G2 out, G3 stays. When G2 is hit → G2 in, G3 out, G1 stays. Repeat.",
+        "Three tanks rotate Acidic Wound stacks. Two swap back and forth as the stacks climb; the third is a BACKUP for when Gurtogg forces a swap by casting Bewildering Strike on the current tank. The boss is untauntable, so swaps are done on threat.",
+        "Bloodboil groups — use the 'Bloodboil Groups' button on the raid card (each player sees their group in Player POV). ALL healers form ONE static group that stays on the water-basin line and never moves. The ranged DPS split into 2 groups that do the moving: R1 starts OUT, R2 starts IN — when the OUT group is hit by Bloodboil they run IN and the other ranged group runs OUT.",
         "P2: spread around. If you get Fel Rage you become the new Bloodboil target AND the main tank — go to the tank position, pop max defensives, get spam-healed. Mages DO NOT Ice Block; Hunters DO NOT Feign Death.",
       ],
       position:"See the soak-positioning image — tanks/soak spot set; ranged & healers run the 3 rotating Bloodboil groups." },
@@ -1852,8 +1852,12 @@ const BT_STRATEGY = {
         "3 phases; Bloodlust in P3.",
         "P1 (Suffering): no healing, no armor. Threat is set by the player CLOSEST to the boss — tank-swap here; backup = a Rogue goes in with Evasion. Soul Drain must be dispelled IMMEDIATELY.",
         "Adds spawn before P2 — nothing special.",
-        "P2 (Desire): Warlock Curse of Tongues. Warrior tank spell-reflects Deaden. Spirit Shock HAS TO BE KICKED (or the MT loses all threat). Mages spellsteal the Rune Shield.",
+        "P2 (Desire): Warlock Curse of Tongues. Warrior tank spell-reflects Deaden.",
+        "P2 Rune Shield — cast periodically on the boss; must be removed IMMEDIATELY (Mage Spellsteal, or any dispel that can strip a magic buff). Anyone capable of removing it should be watching for it and ready to react.",
+        "P2 Spirit Shock — cast every ~5s; MUST be interrupted every single time (or the MT loses all threat). Rogues + Warriors run an interrupt rotation so no cast gets through.",
         "P3 (Anger): Bloodlust. Hunters remove Seethe with Tranquilizing Shot.",
+        "P3 SINGLE TANK ONLY — taunting the boss triggers Seethe: +200% threat to the entire raid EXCEPT the taunter, and +100% attack speed on the boss. Do not tank-swap.",
+        "P3 Soul Scream — frontal cone that burns mana and rage. Tanks should keep their resource (rage/mana) as LOW as possible right before it hits, to minimize the damage taken from it.",
       ],
       position:"Each Essence tanked center; reposition per phase." },
     shahraz: { source:'notes',
@@ -2078,43 +2082,46 @@ function btRaidForPlayer(name){
   return up.find(r=>r.confirmed?.includes(name)) || up.find(r=>r.signedUp?.includes(name)) || upcomingBTRaid();
 }
 function computeBloodboilGroups(raid){
-  const groups=[[],[],[]];
-  if(!raid) return groups;
+  // Healers form ONE static group (stay on the water-basin line, never move).
+  // Ranged DPS are split into 2 groups that alternate moving in/out.
+  const out={healers:[],ranged:[[],[]]};
+  if(!raid) return out;
   // Prefer the confirmed roster; fall back to sign-ups so groups show before confirming.
   const src=(raid.confirmed&&raid.confirmed.length)?raid.confirmed:(raid.signedUp||[]);
   const conf=src.map(n=>gp(n)).filter(Boolean);
-  const healers=conf.filter(p=>p.type==='Healer');
-  const ranged=conf.filter(p=>p.type==='Ranged');
-  // Spread healers across the three groups first, then ranged — keeps heals even.
-  let gi=0;
-  [...healers,...ranged].forEach(p=>{ groups[gi%3].push(p.name); gi++; });
-  return groups;
+  out.healers=conf.filter(p=>p.type==='Healer').map(p=>p.name);
+  conf.filter(p=>p.type==='Ranged').forEach((p,i)=>{ out.ranged[i%2].push(p.name); });
+  return out;
 }
 function playerBloodboilGroup(raid,name){
   const g=computeBloodboilGroups(raid);
-  for(let i=0;i<3;i++) if(g[i].includes(name)) return i+1;
+  if(g.healers.includes(name)) return 'H';
+  for(let i=0;i<2;i++) if(g.ranged[i].includes(name)) return i+1;
   return null;
 }
 function bloodboilGroupsHTML(raid){
   const g=computeBloodboilGroups(raid);
-  const total=g.flat().length;
+  const total=g.healers.length+g.ranged.flat().length;
   if(!total) return '<div style="font-size:11px;color:var(--t3)">No ranged or healers signed up yet — groups appear once ranged/healers join.</div>';
   const usingSignups=!(raid.confirmed&&raid.confirmed.length);
-  const colors=['#6ab4e8','#e09a65','#5DCAA5'];
-  const labels=['G1 — starts OUT','G2 — starts IN','G3 — starts IN'];
-  const cols=g.map((grp,i)=>`<div style="background:var(--bg3);border-radius:var(--r);padding:8px;border-top:2px solid ${colors[i]}">
-    <div style="font-size:11px;font-weight:700;color:${colors[i]};margin-bottom:5px">${labels[i]}</div>
-    <div style="display:flex;flex-wrap:wrap;gap:4px">${grp.length?grp.map(n=>pill(n,!gp(n)?.present)).join(''):'<span style="font-size:10px;color:var(--t3)">—</span>'}</div>
-  </div>`).join('');
+  const box=(title,color,sub,members)=>`<div style="background:var(--bg3);border-radius:var(--r);padding:8px;border-top:2px solid ${color}">
+    <div style="font-size:11px;font-weight:700;color:${color}">${title}</div>
+    <div style="font-size:9px;color:var(--t3);margin:1px 0 5px">${sub}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px">${members.length?members.map(n=>pill(n,!gp(n)?.present)).join(''):'<span style="font-size:10px;color:var(--t3)">—</span>'}</div>
+  </div>`;
+  const cols=box('Healers — STATIC','#5DCAA5','Stay on the water-basin line — do NOT move',g.healers)
+    +box('Ranged R1 — starts OUT','#6ab4e8','Moves in/out on the rotation',g.ranged[0])
+    +box('Ranged R2 — starts IN','#e09a65','Moves in/out on the rotation',g.ranged[1]);
   return `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">${cols}</div>
-    <div style="font-size:10px;color:var(--t3);margin-top:6px">Rotation: G1 out / G2+G3 in. When the OUT group is hit by Bloodboil they run IN and the next group runs OUT (G1→G2→G3 cycle). Auto-built from ${usingSignups?'<span style="color:var(--ora)">sign-ups (updates once the roster is confirmed)</span>':'confirmed'} ranged &amp; healers.</div>`;
+    <div style="font-size:10px;color:var(--t3);margin-top:6px">Healers stay put on the water-basin line. The two ranged groups do the moving — R1 out / R2 in: when the OUT group is hit by Bloodboil they run IN and the other ranged group runs OUT. Auto-built from ${usingSignups?'<span style="color:var(--ora)">sign-ups (updates once the roster is confirmed)</span>':'confirmed'} ranged &amp; healers.</div>`;
 }
 function bloodboilPovHTML(name){
   const raid=btRaidForPlayer(name);
   if(!raid||!(raid.confirmed?.length||raid.signedUp?.length)) return '';
   const grp=playerBloodboilGroup(raid,name);
   if(!grp) return '<div class="pov-task"><i class="ti ti-arrows-shuffle" style="color:#e09a65"></i><span>Bloodboil groups: melee/tank — you don\'t rotate. Stay on the boss and mind Fel Rage.</span></div>';
-  return `<div class="pov-task"><i class="ti ti-arrows-shuffle" style="color:#e09a65"></i><span><strong>Your Bloodboil group: G${grp}</strong> — starts ${grp===1?'OUT of the water':'IN the water'}. Swap in/out on the rotation when your group is hit.</span></div>`;
+  if(grp==='H') return '<div class="pov-task"><i class="ti ti-arrows-shuffle" style="color:#5DCAA5"></i><span><strong>Bloodboil: HEALER group</strong> — stay on the water-basin line and do NOT move. Keep the raid topped through the rotation.</span></div>';
+  return `<div class="pov-task"><i class="ti ti-arrows-shuffle" style="color:#e09a65"></i><span><strong>Your Bloodboil group: Ranged R${grp}</strong> — starts ${grp===1?'OUT of the water':'IN the water'}. Swap in/out on the rotation when your group is hit; healers stay put.</span></div>`;
 }
 
 // Interruptible abilities per boss encounter
@@ -6000,7 +6007,7 @@ function roomSVG(bossId, role, phase, viewMode, resType){
       const water=(x,w)=>`<rect x="${x}" y="34" width="${w}" height="${H-70}" rx="4" fill="rgba(55,175,205,.15)" stroke="rgba(90,200,230,.5)" stroke-width="1.2"/>`+
         [0,1,2,3].map(i=>`<line x1="${x+8}" y1="${70+i*54}" x2="${x+w-8}" y2="${70+i*54}" stroke="rgba(130,225,245,.28)" stroke-width="1" stroke-dasharray="6 4"/>`).join('');
       s+=water(24,92);
-      s+=goldLabel(70,48,'WATER (IN) — G2/G3');
+      s+=goldLabel(58,48,'WATER (IN)');
       // candles along the back wall (decor)
       [150,220,300,380].forEach(x=>{ s+=`<circle cx="${x}" cy="30" r="6" fill="rgba(176,107,214,.25)"/><circle cx="${x}" cy="30" r="3" fill="#b06bd6"/>`; });
       // Boss on the RIGHT; 3 tanks to the RIGHT of the boss
@@ -6011,16 +6018,20 @@ function roomSVG(bossId, role, phase, viewMode, resType){
       // Melee to the LEFT of the boss
       [[bx-28,cy-14],[bx-30,cy+16],[bx-54,cy]].forEach(([x,y])=>s+=node(x,y,'M',RC.Melee,12));
       s+=goldLabel(bx-40,cy-30,'MELEE');
-      // SOAK / G1 OUT — dry ledge on the left
-      s+=zoneRect(132,cy-30,66,60,'G1 SOAK (OUT)','rgba(90,150,210,.12)',true);
-      // ALL ranged + healers on the LEFT (dry ledge = G1 out, water = G2/G3 in)
-      [[152,cy-6],[180,cy+8],[154,cy+24]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
-      [[52,cy-42],[82,cy-8],[52,cy+42]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,11));
-      [[82,cy+34],[52,cy]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
-      s+=goldLabel(165,cy-40,'SOAK');
+      // HEALERS — one STATIC group on the water-basin line (they never move)
+      const basinX=124;
+      s+=`<line x1="${basinX}" y1="52" x2="${basinX}" y2="${H-42}" stroke="rgba(93,202,165,.55)" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+      [[basinX,cy-48],[basinX,cy-24],[basinX,cy],[basinX,cy+24],[basinX,cy+48]].forEach(([x,y])=>s+=node(x,y,'H',RC.Healer,11));
+      s+=goldLabel(basinX+6,236,'HEALERS (static)');
+      // R2 — ranged group that starts IN the water (moves out on rotation)
+      [[52,cy-40],[84,cy-14],[52,cy+8],[84,cy+34],[52,cy+44]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
+      s+=goldLabel(66,cy-56,'R2 (IN)');
+      // R1 — ranged group that starts OUT on the dry ledge (moves in on rotation)
+      s+=zoneRect(150,cy-34,60,68,'R1 (OUT)','rgba(90,150,210,.12)',true);
+      [[168,cy-14],[192,cy],[168,cy+14]].forEach(([x,y])=>s+=node(x,y,'R',RC.Ranged,11));
       // Fel Rage → tank spot
       s+=addNode(bx-2,cy+58,'FR',12); s+=goldLabel(bx-2,cy+76,'FEL RAGE → tank');
-      s+=goldLabel(cx,H-22,'Ranged/healers LEFT (water rotation) · melee left of boss · tanks right · Fel Rage = new tank');
+      s+=goldLabel(cx,H-22,'Healers STATIC on basin line · 2 ranged groups (R1 out / R2 in) rotate · melee left of boss · tanks right · Fel Rage = new tank');
       s+=legend();
       return s;
     },
