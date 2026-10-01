@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Boogalo — TBC Raid Manager</title>
+<title>We Have An App — Raid Manager</title>
+<link rel="icon" type="image/webp" href="img/whaapp-icon.webp">
+<link rel="apple-touch-icon" href="img/whaapp-icon.webp">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.10.0/tabler-icons.min.css">
 <!-- Firebase JS SDK (Realtime Database) -->
@@ -286,8 +288,8 @@ tr:hover td{background:rgba(255,255,255,.013)}
 
 <div class="auth" id="auth">
   <div class="auth-box" style="width:400px;max-width:95vw">
-    <div class="auth-title">Boogalo</div>
-    <p style="font-size:10px;color:var(--t3);margin:4px 0 20px;text-transform:uppercase;letter-spacing:.1em">TBC Raid Manager — Boogaloo Guild</p>
+    <div class="auth-title">We Have An App</div>
+    <p style="font-size:10px;color:var(--t3);margin:4px 0 20px;text-transform:uppercase;letter-spacing:.1em">Raid Manager — We Have An App</p>
 
     <!-- Step 1: Choose sign-in method -->
     <div id="auth-step1">
@@ -337,14 +339,14 @@ tr:hover td{background:rgba(255,255,255,.013)}
         <div style="flex:1;height:1px;background:var(--border)"></div>
       </div>
       <button class="btn btn-s" style="width:100%;justify-content:center;padding:9px;font-size:12px" onclick="showGuildSignup()">
-        <i class="ti ti-user-plus"></i> Sign up to Boogalo
+        <i class="ti ti-user-plus"></i> Sign up to We Have An App
       </button>
     </div>
 
     <!-- Guild signup form -->
     <div id="auth-signup" style="display:none">
       <button onclick="document.getElementById('auth-signup').style.display='none';document.getElementById('auth-step1').style.display='block'" style="background:none;border:none;cursor:pointer;color:var(--t3);font-size:11px;margin-bottom:10px;display:flex;align-items:center;gap:4px"><i class="ti ti-arrow-left"></i> Back</button>
-      <div style="font-size:14px;font-weight:700;font-family:Cinzel,serif;color:var(--t1);margin-bottom:3px">Join Boogalo</div>
+      <div style="font-size:14px;font-weight:700;font-family:Cinzel,serif;color:var(--t1);margin-bottom:3px">Join We Have An App</div>
       <p style="font-size:10px;color:var(--t3);margin-bottom:14px">Fill in your character details — the Raid Leader will review your application.</p>
       <div id="auth-signup-warn" style="display:none;background:rgba(200,80,60,.1);border:1px solid rgba(200,80,60,.3);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;font-size:12px;color:#e07b72">
         <i class="ti ti-alert-triangle"></i> <span id="auth-signup-warn-msg">You are already on the roster!</span>
@@ -396,17 +398,18 @@ tr:hover td{background:rgba(255,255,255,.013)}
   <button class="mob-ham" id="mob-ham" onclick="toggleSidebar()" aria-label="Menu">
     <i class="ti ti-menu-2"></i>
   </button>
-  <span class="mob-title" id="mob-title">Boogalo</span>
+  <span class="mob-title" id="mob-title">We Have An App</span>
   <span class="sync-dot" id="sync-dot" title="Sync status"></span>
 </div>
 
 <div class="shell">
 <div class="sb-overlay" id="sb-overlay" onclick="collapseSidebar()"></div>
 <nav class="sb" id="sidebar">
-  <div class="sb-logo" style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+  <div class="sb-logo" style="display:flex;align-items:center;gap:9px">
+    <img src="img/whaapp-icon.webp" alt="We Have An App" style="width:42px;height:42px;border-radius:8px;flex-shrink:0;object-fit:cover">
     <div class="sb-logo-text">
-      <div class="logo-n">Boogalo</div>
-      <div class="logo-s">TBC Raid Manager</div>
+      <div class="logo-n">We Have An App</div>
+      <div class="logo-s">Raid Manager</div>
       <div class="vpill" id="vp"></div>
       <div id="sb-user-actions" style="display:none;margin-top:5px">
         <button id="sb-logout-btn" onclick="logout()" style="background:none;border:none;padding:0;cursor:pointer;font-size:9px;color:var(--t3);display:flex;align-items:center;gap:3px;letter-spacing:.04em;text-transform:uppercase">
@@ -432,10 +435,9 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'leave')"><i class="ti ti-plane"></i><span>Leave of Absence</span></div>
     </div>
     <div class="sbs"><div class="sbl">Tools</div>
-      <div class="ni" onclick="nav(this,'loot')"><i class="ti ti-trophy"></i><span>Loot Priority</span></div>
       <div class="ni" onclick="nav(this,'guild-effort')"><i class="ti ti-shopping-cart"></i><span>Guild Effort</span></div>
       <div class="ni" onclick="nav(this,'pov')"><i class="ti ti-user-circle"></i><span>Player POV</span></div>
-      <div class="ni" onclick="nav(this,'specreq')"><i class="ti ti-refresh"></i><span>Spec Requests<span class="nbadge" id="sr-badge">0</span></span></div>
+      <div class="ni" onclick="nav(this,'coc')"><i class="ti ti-scale"></i><span>Code of Conduct</span></div>
     </div>
     <div class="sbs"><div class="sbl">Sign-up</div>
       <div class="ni" onclick="nav(this,'signup')"><i class="ti ti-forms"></i><span>Apply for Raid</span></div>
@@ -461,10 +463,10 @@ tr:hover td{background:rgba(255,255,255,.013)}
   <div id="nav-guest" style="display:none">
     <div class="sbs"><div class="sbl">Raid Info</div>
       <div class="ni" onclick="nav(this,'roster')"><i class="ti ti-users"></i><span>Roster (view)</span></div>
-      <div class="ni" onclick="nav(this,'loot')"><i class="ti ti-trophy"></i><span>Loot Priority</span></div>
       <div class="ni" onclick="nav(this,'guild-effort')"><i class="ti ti-shopping-cart"></i><span>Guild Effort</span></div>
       <div class="ni" onclick="nav(this,'pov')"><i class="ti ti-user-circle"></i><span>Player POV</span></div>
       <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
+      <div class="ni" onclick="nav(this,'coc')"><i class="ti ti-scale"></i><span>Code of Conduct</span></div>
     </div>
     <div class="sbs"><div class="sbl">Schedule</div>
       <div class="ni" onclick="nav(this,'calendar')"><i class="ti ti-calendar"></i><span>Calendar</span></div>
@@ -480,8 +482,8 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <div class="sbs"><div class="sbl">Raid Info</div>
       <div class="ni" onclick="nav(this,'pov')"><i class="ti ti-user-circle"></i><span>Player POV</span></div>
       <div class="ni" onclick="nav(this,'roster')"><i class="ti ti-users"></i><span>Roster (view)</span></div>
-      <div class="ni" onclick="nav(this,'loot')"><i class="ti ti-trophy"></i><span>Loot Priority</span></div>
       <div class="ni" onclick="nav(this,'guild-effort')"><i class="ti ti-shopping-cart"></i><span>Guild Effort</span></div>
+      <div class="ni" onclick="nav(this,'coc')"><i class="ti ti-scale"></i><span>Code of Conduct</span></div>
     </div>
     <div class="sbs"><div class="sbl">Raids</div>
       <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
@@ -496,7 +498,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
     </div>
     <div class="sbs"><div class="sbl">My Account</div>
       <div class="ni" onclick="nav(this,'signup')"><i class="ti ti-forms"></i><span>Apply for Raid</span></div>
-      <div class="ni" onclick="nav(this,'specreq')"><i class="ti ti-refresh"></i><span>Request Spec Change</span></div>
+      <div class="ni" onclick="nav(this,'specreq')"><i class="ti ti-refresh"></i><span>Change My Spec</span></div>
     </div>
   </div>
   <div id="nav-officer" style="display:none">
@@ -522,6 +524,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
     </div>
     <div class="sbs"><div class="sbl">Analysis</div>
       <div class="ni" onclick="nav(this,'profiles')"><i class="ti ti-user-circle"></i><span>Profiles</span></div>
+      <div class="ni" onclick="nav(this,'coc')"><i class="ti ti-scale"></i><span>Code of Conduct</span></div>
     </div>
   </div>
   </div><!-- end sb-nav -->
@@ -545,7 +548,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div id="timer-date" style="font-size:9px;color:var(--t2);margin-top:1px"></div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between">
-      <span style="font-size:10px;color:var(--t3)">Boogaloo · Thunderstrike EU</span>
+      <span style="font-size:10px;color:var(--t3)">We Have An App</span>
       <button id="theme-btn" onclick="toggleTheme()" title="Toggle light/dark theme"
         style="background:none;border:1px solid var(--borderl);border-radius:6px;padding:3px 8px;cursor:pointer;font-size:13px;color:var(--t2);line-height:1">🌙</button>
     </div>
@@ -557,6 +560,10 @@ tr:hover td{background:rgba(255,255,255,.013)}
 </button>
 
 <div class="main"><div class="content" id="app">
+
+<div id="top-banner" style="width:100%;margin-bottom:16px;border-radius:12px;overflow:hidden;border:1px solid var(--border);box-shadow:0 2px 10px rgba(0,0,0,.25);line-height:0">
+  <img src="img/whaapp-banner.webp" alt="We Have An App" style="width:100%;display:block">
+</div>
 
 <!-- ===== PAGES ===== -->
 <div class="page" id="page-attendance">
@@ -684,22 +691,9 @@ tr:hover td{background:rgba(255,255,255,.013)}
   </div>
 </div>
 
-<div class="page" id="page-loot">
-  <div class="ph"><div class="pt">Loot Priority Advisor</div><div class="ps">Tier 5 token strategy &amp; key item assignments · Nether Vortex tally</div></div>
-  <div class="tabs" style="margin-bottom:14px">
-    <div class="tab active" id="loot-tab-prio" onclick="switchLootTab('prio')">Loot Priority</div>
-    <div class="tab" id="loot-tab-vortex" onclick="switchLootTab('vortex')">Nether Vortex</div>
-  </div>
-  <div id="loot-tab-prio-content">
-    <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-      <select id="lf-raid" onchange="renderLoot()" style="width:auto"><option value="">All raids</option><option value="Gruul">Gruul's Lair</option><option value="Mag">Magtheridon</option><option value="TK">Tempest Keep</option><option value="SSC">Serpent Shrine</option><option value="Kara">Karazhan</option></select>
-      <select id="lf-role" onchange="renderLoot()" style="width:auto"><option value="">All roles</option><option>Tank</option><option>Healer</option><option>Melee</option><option>Ranged</option></select>
-    </div>
-    <div id="loot-content"></div>
-  </div>
-  <div id="loot-tab-vortex-content" style="display:none">
-    <div id="vortex-content"></div>
-  </div>
+<div class="page" id="page-coc">
+  <div class="ph"><div class="pt">Guild Code of Conduct</div><div class="ps">The standards everyone follows while representing We Have An App</div></div>
+  <div id="coc-content"></div>
 </div>
 
 <div class="page" id="page-pov">
@@ -737,26 +731,17 @@ tr:hover td{background:rgba(255,255,255,.013)}
 </div>
 
 <div class="page" id="page-specreq">
-  <div class="ph"><div class="pt">Spec Change Requests</div><div class="ps" id="specreq-sub">Players can request to change their main or off-spec</div></div>
-  <div id="specreq-rl-section" style="display:none">
-    <div class="tabs"><div class="tab active" onclick="switchSRTab(this,'pending')">Pending</div><div class="tab" onclick="switchSRTab(this,'decided')">Decided</div></div>
-    <div id="specreq-list"></div>
-  </div>
-  <div id="specreq-par-section" style="display:none">
-    <div class="card ab">
-      <div class="ct"><i class="ti ti-refresh" style="color:var(--acc)"></i>Request Spec Change</div>
-      <div class="fg"><span class="fl">Your character name</span><input id="sr-name" placeholder="In-game name"></div>
-      <div class="g2">
-        <div class="fg" style="margin-bottom:0"><span class="fl">New main spec</span><input id="sr-main" placeholder="e.g. Restoration"></div>
-        <div class="fg" style="margin-bottom:0"><span class="fl">New off-spec (optional)</span><input id="sr-off" placeholder="e.g. Enhancement"></div>
-      </div>
-      <div class="fg" style="margin-top:10px"><span class="fl">Reason</span><textarea id="sr-reason" placeholder="Explain why you want to change spec…" style="min-height:60px;resize:vertical"></textarea></div>
-      <button class="btn btn-p" onclick="submitSpecReq()" style="margin-top:4px"><i class="ti ti-send"></i>Submit Request</button>
+  <div class="ph"><div class="pt">Change My Spec</div><div class="ps">Set your own main spec, off-spec and role — changes apply and sync instantly</div></div>
+  <div class="card ab" style="max-width:540px">
+    <div class="ct"><i class="ti ti-refresh" style="color:var(--acc)"></i>Your character</div>
+    <div class="fg"><span class="fl">Character name</span><input id="sr-name" placeholder="In-game name" oninput="specLoadChar()" autocomplete="off"></div>
+    <div id="sr-current" style="font-size:11px;color:var(--t3);margin:-4px 0 12px"></div>
+    <div class="g2">
+      <div class="fg" style="margin-bottom:0"><span class="fl">Main spec</span><select id="sr-main"></select></div>
+      <div class="fg" style="margin-bottom:0"><span class="fl">Off-spec (optional)</span><select id="sr-off"></select></div>
     </div>
-    <div style="margin-top:14px">
-      <div class="sht" style="margin-bottom:8px">YOUR REQUESTS</div>
-      <div id="my-specreqs"></div>
-    </div>
+    <div class="fg" style="margin-top:12px"><span class="fl">Main role</span><select id="sr-role"><option>Tank</option><option>Healer</option><option>Melee</option><option>Ranged</option><option>Mage Tank</option></select></div>
+    <button class="btn btn-p" onclick="applyMySpec()" style="margin-top:8px"><i class="ti ti-device-floppy"></i>Save my spec</button>
   </div>
 </div>
 
@@ -918,10 +903,10 @@ tr:hover td{background:rgba(255,255,255,.013)}
 </div>
 <script>
 // ============================================================
-// BOOGALO — CORE DATA & ENGINE
+// WE HAVE AN APP — CORE DATA & ENGINE
 // ============================================================
-const RL_KEY="boogalo-rl";
-const OFFICER_KEY="boogalo-officer";
+const RL_KEY="whaapp-rl";
+const OFFICER_KEY="whaapp-officer";
 let VIEW=null; // 'rl' | 'participant' | 'guest' | 'officer'
 let CURRENT_USER=null; // roster player when signed in by name
 let rosterSortCol='name';let rosterSortDir=1;
@@ -980,43 +965,7 @@ const CLASS_SPECS={Warrior:['Protection','Fury','Arms'],Paladin:['Protection','H
 const PROFESSIONS_PRIMARY=['Alchemy','Blacksmithing','Enchanting','Engineering','Herbalism','Jewelcrafting','Leatherworking','Mining','Skinning','Tailoring'];
 const PROFESSIONS_SECONDARY=['Cooking','First Aid','Fishing'];
 
-let ROSTER=[
-  {name:'Xullue',cls:'Warrior',spec:'Protection',flexSpec:'Arms',type:'Tank',dispel:['Purge'],interrupt:2,present:true,resFrost:true,resNature:false,resFire:false},
-  {name:'Holsteinbeef',cls:'Druid',spec:'Guardian',flexSpec:'Restoration',type:'Tank',dispel:[],interrupt:0,present:true,resFrost:false,resNature:true,resFire:false},
-  {name:'Cadbaladin',cls:'Paladin',spec:'Protection',flexSpec:'Holy',type:'Tank',dispel:['Magic','Disease','Poison'],interrupt:1,present:true,resFrost:false,resNature:false,resFire:true},
-  {name:'Frostor',cls:'Warrior',spec:'Protection',flexSpec:'Fury',type:'Tank',dispel:['Purge'],interrupt:2,present:true,resFrost:true,resNature:false,resFire:false},
-  {name:'Wolvke',cls:'Warrior',spec:'Fury',flexSpec:'Protection',type:'Melee',dispel:['Purge'],interrupt:2,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Vvambull',cls:'Shaman',spec:'Restoration',flexSpec:'Elemental',type:'Healer',dispel:['Poison','Disease','Purge'],interrupt:5,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Cakemon',cls:'Rogue',spec:'Assassination',flexSpec:'Combat',type:'Melee',dispel:[],interrupt:2,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Leundeadpres',cls:'Priest',spec:'Holy',flexSpec:'Discipline',type:'Healer',dispel:['Magic','Disease'],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Teeko',cls:'Shaman',spec:'Enhancement',flexSpec:'',type:'Melee',dispel:['Poison','Disease','Purge'],interrupt:1,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Dethclok',cls:'Warlock',spec:'Affliction',flexSpec:'Destruction',type:'Ranged',dispel:[],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Macknetron',cls:'Warlock',spec:'Destruction',flexSpec:'',type:'Ranged',dispel:[],interrupt:0,present:true,resFrost:false,resNature:false,resFire:true},
-  {name:'Brudersilik',cls:'Warlock',spec:'Destruction',flexSpec:'',type:'Ranged',dispel:[],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Enchanter',cls:'Priest',spec:'Holy',flexSpec:'Shadow',type:'Healer',dispel:['Magic','Disease'],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Palastuff',cls:'Paladin',spec:'Holy',flexSpec:'Protection',type:'Healer',dispel:['Magic','Disease','Poison'],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Mantine',cls:'Mage',spec:'Fire',flexSpec:'Frost',type:'Ranged',dispel:['Curse'],interrupt:3,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Csoti',cls:'Rogue',spec:'Assassination',flexSpec:'',type:'Melee',dispel:[],interrupt:2,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Sappheal',cls:'Priest',spec:'Holy',flexSpec:'Discipline',type:'Healer',dispel:['Magic','Disease'],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Swagmon',cls:'Shaman',spec:'Restoration',flexSpec:'Elemental',type:'Healer',dispel:['Poison','Disease','Purge'],interrupt:5,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Oilsmoke',cls:'Shaman',spec:'Enhancement',flexSpec:'',type:'Melee',dispel:['Poison','Disease','Purge'],interrupt:1,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Hatthor',cls:'Warrior',spec:'Fury',flexSpec:'Arms',type:'Melee',dispel:['Purge'],interrupt:2,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Communicator',cls:'Shaman',spec:'Enhancement',flexSpec:'Elemental',type:'Melee',dispel:['Poison','Disease','Purge'],interrupt:1,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Zyuu',cls:'Druid',spec:'Balance',flexSpec:'Feral',type:'Ranged',dispel:['Curse'],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Harryshotter',cls:'Hunter',spec:'Marksmanship',flexSpec:'',type:'Ranged',dispel:['Tranq'],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Holysparkz',cls:'Warlock',spec:'Destruction',flexSpec:'',type:'Ranged',dispel:[],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Kalaveijo',cls:'Shaman',spec:'Restoration',flexSpec:'Elemental',type:'Healer',dispel:['Poison','Disease','Purge'],interrupt:5,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Zandalai',cls:'Warrior',spec:'Arms',flexSpec:'Protection',type:'Melee',dispel:['Purge'],interrupt:2,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Tinybm',cls:'Druid',spec:'Restoration',flexSpec:'',type:'Healer',dispel:['Curse'],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Qhan',cls:'Shaman',spec:'Enhancement',flexSpec:'',type:'Melee',dispel:['Poison','Disease','Purge'],interrupt:1,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Moondoggo',cls:'Mage',spec:'Fire',flexSpec:'Arcane',type:'Ranged',dispel:['Curse'],interrupt:3,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Disloyal',cls:'Priest',spec:'Shadow',flexSpec:'',type:'Ranged',dispel:['Magic','Disease'],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Noonii',cls:'Mage',spec:'Arcane',flexSpec:'Frost',type:'Ranged',dispel:['Curse'],interrupt:3,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Unholysparkz',cls:'Paladin',spec:'Holy',flexSpec:'Protection',type:'Healer',dispel:['Magic','Disease','Poison'],interrupt:0,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Sygrdrifa',cls:'Shaman',spec:'Enhancement',flexSpec:'',type:'Melee',dispel:['Poison','Disease','Purge'],interrupt:1,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'Jodazugzug',cls:'Warrior',spec:'Arms',flexSpec:'',type:'Melee',dispel:['Purge'],interrupt:2,present:true,resFrost:false,resNature:false,resFire:false},
-  {name:'kdawg',cls:'Shaman',spec:'Restoration',flexSpec:'Enhancement',type:'Healer',dispel:['Poison','Disease','Purge'],interrupt:5,present:true,resFrost:false,resNature:false,resFire:false},
-];
+let ROSTER=[];
 
 // Nether Vortex tally
 let vortexCounts={};  // {playerName: count}
@@ -1025,45 +974,12 @@ ROSTER.forEach(p=>vortexCounts[p.name]=0);
 
 // ─────────────────────────────────────────────────────────────
 // Alt tracking — { mainName: [altName, altName, ...] }
-let playerAlts = {'Holysparkz':['Unholysparkz']};
+let playerAlts = {};
 
 // Player assignment weights — RL only
 // Structure: { playerName: { Tank: 1-5, Healer: 1-5, Melee: 1-5, Ranged: 1-5 } }
 // Unique per class role pool. Used for auto-assigning MT, main healers, runners etc.
-let playerWeights = {
-  "Brudersilik":{"Tank":1},
-  "Cadbaladin":{"Healer":2,"Melee":1,"Tank":5},
-  "Cakemon":{"Melee":4},
-  "Communicator":{"Healer":1,"Melee":1,"Ranged":1},
-  "Csoti":{"Melee":1},
-  "Dethclok":{"Ranged":2},
-  "Disloyal":{"Healer":1,"Ranged":5},
-  "Enchanter":{"Ranged":2},
-  "Frostor":{"Melee":2,"Tank":5},
-  "Harryshotter":{"Ranged":4},
-  "Hatthor":{"Melee":4,"Tank":1},
-  "Holsteinbeef":{"Melee":2,"Ranged":1,"Tank":5},
-  "Holysparkz":{"Ranged":4,"Tank":1},
-  "Kalaveijo":{"Healer":4,"Melee":1,"Ranged":3},
-  "Leundeadpres":{"Healer":4,"Ranged":1},
-  "Macknetron":{"Tank":4},
-  "Mantine":{"Ranged":5,"Tank":1},
-  "Moondoggo":{"Tank":3},
-  "Noonii":{"Ranged":5,"Tank":1},
-  "Oilsmoke":{"Healer":1,"Melee":5,"Ranged":1},
-  "Palastuff":{"Healer":4,"Melee":1,"Tank":4},
-  "Qhan":{"Healer":1,"Melee":4,"Ranged":1},
-  "Sappheal":{"Healer":5,"Ranged":1},
-  "Swagmon":{"Healer":5,"Melee":1,"Ranged":2},
-  "Teeko":{"Healer":1,"Ranged":1},
-  "Tinybm":{"Healer":2,"Melee":1,"Ranged":1,"Tank":1},
-  "Unholysparkz":{"Healer":5,"Melee":1,"Tank":3},
-  "Vvambull":{"Healer":5,"Melee":1,"Ranged":1},
-  "Wolvke":{"Melee":5,"Tank":2},
-  "Xullue":{"Tank":4},
-  "Zandalai":{"Tank":1},
-  "Zyuu":{"Healer":1,"Melee":2,"Ranged":4,"Tank":2}
-};
+let playerWeights = {};
 function getWeight(name, role){
   return (playerWeights[name]?.[role]) ?? 3; // default 3 (neutral)
 }
@@ -1073,14 +989,14 @@ function setWeight(name, role, val){
   saveWeights();
 }
 function saveRoster(){
-  try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}
+  try{localStorage.setItem('whaapp-roster',JSON.stringify(ROSTER));}catch(e){}
   fbSet('roster', ROSTER);
 }
 function saveWeights(){
-  try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}
+  try{localStorage.setItem('whaapp-weights',JSON.stringify(playerWeights));}catch(e){}
   fbSet('weights', playerWeights);
 }
-function saveRaids(){try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}fbSet('raids',raidSchedule);}
+function saveRaids(){try{localStorage.setItem('whaapp-raids',JSON.stringify(raidSchedule));}catch(e){}fbSet('raids',raidSchedule);}
 // Correct any roster player whose role doesn't match their main spec.
 // Runs on load to fix stale data (e.g. from swapSpecs before the role-sync fix).
 function normalizeRosterRoles(){
@@ -1093,29 +1009,29 @@ function normalizeRaidStatuses(){
   const today=todayKey();
   raidSchedule.forEach(r=>{if(r.status!=='completed'&&isPast(r.date)&&r.date!==today)r.status='completed';});
 }
-function saveVortex(){try{localStorage.setItem('boogalo-vortex',JSON.stringify(vortexCounts));}catch(e){}fbSet('vortex',vortexCounts);}
+function saveVortex(){try{localStorage.setItem('whaapp-vortex',JSON.stringify(vortexCounts));}catch(e){}fbSet('vortex',vortexCounts);}
 function saveAlts(){
-  try{localStorage.setItem('boogalo-alts',JSON.stringify(playerAlts));}catch(e){}
+  try{localStorage.setItem('whaapp-alts',JSON.stringify(playerAlts));}catch(e){}
   fbSet('alts', playerAlts);
 }
 function saveRoleOverrides(){
-  try{localStorage.setItem('boogalo-roleOverrides',JSON.stringify(roleOverrides));}catch(e){}
+  try{localStorage.setItem('whaapp-roleOverrides',JSON.stringify(roleOverrides));}catch(e){}
   fbSet('roleOverrides', roleOverrides);
 }
 function saveApplications(){
-  try{localStorage.setItem('boogalo-applications',JSON.stringify(applications));}catch(e){}
+  try{localStorage.setItem('whaapp-applications',JSON.stringify(applications));}catch(e){}
   fbSet('applications', applications.length?applications:null);
 }
 function saveSpecRequests(){
-  try{localStorage.setItem('boogalo-specRequests',JSON.stringify(specRequests));}catch(e){}
+  try{localStorage.setItem('whaapp-specRequests',JSON.stringify(specRequests));}catch(e){}
   fbSet('specRequests', specRequests.length?specRequests:null);
 }
 function saveReviews(){
-  try{localStorage.setItem('boogalo-reviews',JSON.stringify({list:reviews,stars:reviewStars}));}catch(e){}
+  try{localStorage.setItem('whaapp-reviews',JSON.stringify({list:reviews,stars:reviewStars}));}catch(e){}
   fbSet('reviews',{list:reviews.length?reviews:null,stars:reviewStars});
 }
 function saveLeaves(){
-  try{localStorage.setItem('boogalo-leaves',JSON.stringify(leaves));}catch(e){}
+  try{localStorage.setItem('whaapp-leaves',JSON.stringify(leaves));}catch(e){}
   fbSet('leaves', leaves.length?leaves:null);
 }
 // Is a character on leave on a given raid date?
@@ -1219,27 +1135,27 @@ function removeLeave(id){
   toast('Leave removed for '+lv.name,'ok');
 }
 function saveVortexRequests(){
-  try{localStorage.setItem('boogalo-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}
+  try{localStorage.setItem('whaapp-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}
   fbSet('vortexRequests', vortexRequests.length?vortexRequests:null);
 }
 function saveHealerTanks(){
-  try{localStorage.setItem('boogalo-healerTanks',JSON.stringify(healerTanks));}catch(e){}
+  try{localStorage.setItem('whaapp-healerTanks',JSON.stringify(healerTanks));}catch(e){}
   fbSet('healerTanks', healerTanks);
 }
 function saveGroups(){
-  try{localStorage.setItem('boogalo-groups',JSON.stringify(groups));}catch(e){}
+  try{localStorage.setItem('whaapp-groups',JSON.stringify(groups));}catch(e){}
   fbSet('groups', groups);
 }
 function saveBossAssignments(){
-  try{localStorage.setItem('boogalo-bossAssignments',JSON.stringify(bossAssignments));}catch(e){}
+  try{localStorage.setItem('whaapp-bossAssignments',JSON.stringify(bossAssignments));}catch(e){}
   fbSet('bossAssignments', bossAssignments);
 }
 function saveKillLog(){
-  try{localStorage.setItem('boogalo-killLog',JSON.stringify(killLog));}catch(e){}
+  try{localStorage.setItem('whaapp-killLog',JSON.stringify(killLog));}catch(e){}
   fbSet('killLog',killLog);
 }
 function saveChecklist(){
-  try{localStorage.setItem('boogalo-checklist',JSON.stringify(checklistState));}catch(e){}
+  try{localStorage.setItem('whaapp-checklist',JSON.stringify(checklistState));}catch(e){}
 }
 // Return the effective attendance list for a raid.
 // r.attended is authoritative when set; otherwise fall back to r.confirmed,
@@ -2459,7 +2375,7 @@ function tryNameLogin(){
   document.getElementById('auth-name-err').style.display='none';
   document.getElementById('auth-name-dropdown').style.display='none';
   setView('participant', player);
-  try{sessionStorage.setItem('boogalo-lastuser', player.name);}catch(e){}
+  try{sessionStorage.setItem('whaapp-lastuser', player.name);}catch(e){}
   toast('Welcome back, '+player.name+'!','ok');
 }
 // ============================================================
@@ -2472,11 +2388,11 @@ function toggleTheme(){
   else document.documentElement.removeAttribute('data-theme');
   const btn=document.getElementById('theme-btn');
   if(btn) btn.textContent=next==='light'?'🌙':'☀️';
-  try{localStorage.setItem('boogalo-theme',next);}catch(e){}
+  try{localStorage.setItem('whaapp-theme',next);}catch(e){}
 }
 function initTheme(){
   let t='dark';
-  try{t=localStorage.getItem('boogalo-theme')||'dark';}catch(e){}
+  try{t=localStorage.getItem('whaapp-theme')||'dark';}catch(e){}
   if(t==='light'){
     document.documentElement.setAttribute('data-theme','light');
     const btn=document.getElementById('theme-btn');
@@ -2811,7 +2727,7 @@ function getGEData(name){
 }
 function saveGE(){
   const payload={data:guildEffortData,bank:guildBankStock,extra:guildExtraItems,profs:playerProfessions};
-  try{localStorage.setItem('boogalo-guildEffort',JSON.stringify(payload));}catch(e){}
+  try{localStorage.setItem('whaapp-guildEffort',JSON.stringify(payload));}catch(e){}
   try{fbSet('guildEffort',payload);}catch(e){}
 }
 // RL, or any enrolled Guild Effort member, may edit guild bank quantities.
@@ -3480,7 +3396,7 @@ function renamePlayer(oldName){
     CURRENT_USER=p;
     const mpName=document.getElementById('my-profile-name');
     if(mpName)mpName.textContent=n;
-    try{sessionStorage.setItem('boogalo-lastuser',n);}catch(e){}
+    try{sessionStorage.setItem('whaapp-lastuser',n);}catch(e){}
   }
   saveRoster();saveRaids();saveAlts();saveRoleOverrides();saveGroups();saveReviews();saveBossAssignments();
   openProfile(n);
@@ -3488,7 +3404,7 @@ function renamePlayer(oldName){
 }
 
 function logout(){
-  try{sessionStorage.removeItem('boogalo-lastuser');}catch(e){}
+  try{sessionStorage.removeItem('whaapp-lastuser');}catch(e){}
   VIEW=null;
   CURRENT_USER=null;
   // Reset auth form to step 1
@@ -3533,7 +3449,7 @@ function nav(el,page){
   if(window.innerWidth<=768) collapseSidebar();
   updateMobTitle(page);
   updateMobNav(page);
-  ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),za:()=>renderBossPage('za'),stats:renderStats,profiles:renderProfiles,progression:renderProgression,'guild-effort':renderGuildEffort})[page]?.();
+  ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,coc:renderCoC,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),za:()=>renderBossPage('za'),stats:renderStats,profiles:renderProfiles,progression:renderProgression,'guild-effort':renderGuildEffort})[page]?.();
 }
 
 // ============================================================
@@ -3884,7 +3800,7 @@ function submitGuildApp(){
   document.getElementById('gs-name').style.borderColor='';
   const alreadyInGs=ROSTER.find(p=>p.name.toLowerCase()===name.toLowerCase());
   if(alreadyInGs){
-    document.getElementById('auth-signup-warn-msg').textContent=`${alreadyInGs.name} is already a Boogalo member. No application needed — use the login screen to sign in, or contact the Raid Leader.`;
+    document.getElementById('auth-signup-warn-msg').textContent=`${alreadyInGs.name} is already a We Have An App member. No application needed — use the login screen to sign in, or contact the Raid Leader.`;
     document.getElementById('auth-signup-warn').style.display='block';
     document.getElementById('auth-signup-success').style.display='none';
     return;
@@ -4419,6 +4335,7 @@ function renderLoot(){
 }
 
 function renderVortex(){
+  if(!document.getElementById('vortex-content')) return; // Loot/Vortex page removed in relaunch
   const sorted=Object.entries(vortexCounts).sort((a,b)=>b[1]-a[1]);
   const maxV=Math.max(1,...Object.values(vortexCounts));
   const pendingReqs=vortexRequests.filter(r=>r.status==='pending');
@@ -6265,7 +6182,7 @@ function roomSVG(bossId, role, phase, viewMode, resType){
 // ── Diagram node positions (RL-editable, persisted & synced) ──────────────
 let diagramPositions = {}; // { 'bossId-phase': { nodeIdx: {x,y} } }
 function saveDiagramPositions(){
-  try{localStorage.setItem('boogalo-diagramPositions',JSON.stringify(diagramPositions));}catch(e){}
+  try{localStorage.setItem('whaapp-diagramPositions',JSON.stringify(diagramPositions));}catch(e){}
   try{fbSet('diagramPositions',diagramPositions);}catch(e){}
 }
 function setDiagramNodePos(diagKey, idx, x, y){
@@ -6810,43 +6727,149 @@ function copyMRT(btn,text){navigator.clipboard.writeText(text).then(()=>{toast('
 // ============================================================
 // SPEC REQUESTS
 // ============================================================
+// ── Self-service spec change ──────────────────────────────────────────
+// Players set their own main spec / off-spec / role; applies to the roster instantly.
 function renderSpecReq(){
-  if(isRL()){
-    document.getElementById('specreq-sub').textContent='Review and approve spec change requests from players';
-    document.getElementById('specreq-rl-section').style.display='block';
-    document.getElementById('specreq-par-section').style.display='none';
-    renderSRList();
-  }else{
-    document.getElementById('specreq-sub').textContent='Request a change to your main spec or off-spec — the RL will review and confirm';
-    document.getElementById('specreq-rl-section').style.display='none';
-    document.getElementById('specreq-par-section').style.display='block';
-    document.getElementById('my-specreqs').innerHTML=specRequests.length?specRequests.map(sr=>srCard(sr)).join(''):'<div class="empty"><i class="ti ti-refresh"></i><p>No spec requests submitted yet.</p></div>';
+  const nameEl=document.getElementById('sr-name'); if(!nameEl) return;
+  // Prefill with the signed-in character when we know who it is.
+  if(!nameEl.value && CURRENT_USER && CURRENT_USER.name) nameEl.value=CURRENT_USER.name;
+  specLoadChar();
+}
+function specLoadChar(){
+  const name=(document.getElementById('sr-name').value||'').trim();
+  const cur=document.getElementById('sr-current');
+  const mainSel=document.getElementById('sr-main'), offSel=document.getElementById('sr-off'), roleSel=document.getElementById('sr-role');
+  const p=gp(name);
+  if(!p){
+    cur.textContent = name ? 'No character by that name in the roster yet.' : 'Type your character name to load your current spec.';
+    const specs=[].concat(...Object.values(CLASS_SPECS)).filter((v,i,a)=>a.indexOf(v)===i).sort();
+    mainSel.innerHTML=specs.map(s=>`<option>${s}</option>`).join('');
+    offSel.innerHTML='<option value="">None</option>'+specs.map(s=>`<option>${s}</option>`).join('');
+    return;
   }
-  updateSRBadge();
+  const specs=CLASS_SPECS[p.cls]||[];
+  cur.innerHTML=`${ctag?ctag(p.cls):p.cls} · current: <strong>${p.spec}</strong>${p.flexSpec?' / '+p.flexSpec:''} · ${p.type}`;
+  mainSel.innerHTML=specs.map(s=>`<option ${s===p.spec?'selected':''}>${s}</option>`).join('');
+  offSel.innerHTML='<option value="">None</option>'+specs.map(s=>`<option ${s===p.flexSpec?'selected':''}>${s}</option>`).join('');
+  roleSel.value=p.type||'Ranged';
 }
-function srCard(sr){const colors={pending:'var(--ora)',approved:'var(--gre)',declined:'var(--red)'};return`<div class="src ${sr.status}"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;flex-wrap:wrap;gap:5px"><div>${pill(sr.player)} <span class="badge" style="background:rgba(100,100,100,.1);color:var(--t2)">${sr.status.toUpperCase()}</span></div></div><div style="font-size:12px;color:var(--t2);margin-bottom:5px">Requesting: <strong>${sr.mainSpec}</strong>${sr.offSpec?' / Off: '+sr.offSpec:''}</div>${sr.reason?`<div style="font-size:11px;color:var(--t3);margin-bottom:8px">${sr.reason}</div>`:''} ${isRL()&&sr.status==='pending'?`<div style="display:flex;gap:6px"><button class="btn btn-s btn-sm" onclick="decideSR('${sr.id}','approved')"><i class="ti ti-check"></i>Approve</button><button class="btn btn-d btn-sm" onclick="decideSR('${sr.id}','declined')"><i class="ti ti-x"></i>Decline</button></div>`:''}</div>`;}
-function switchSRTab(el,tab){srTab=tab;document.querySelectorAll('#specreq-rl-section .tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderSRList();}
-function renderSRList(){document.getElementById('specreq-list').innerHTML=specRequests.filter(r=>srTab==='pending'?r.status==='pending':r.status!=='pending').map(sr=>srCard(sr)).join('')||`<div class="empty"><i class="ti ti-check"></i><p>No ${srTab} requests.</p></div>`;}
-function submitSpecReq(){
-  const player=document.getElementById('sr-name').value.trim();
-  const mainSpec=document.getElementById('sr-main').value.trim();
-  const offSpec=document.getElementById('sr-off').value.trim();
-  const reason=document.getElementById('sr-reason').value.trim();
-  if(!player||!mainSpec){toast('Fill in your name and new main spec','err');return;}
-  if(!gp(player)){toast('Player not found in roster','err');return;}
-  specRequests.push({id:genId(),player,mainSpec,offSpec,reason,status:'pending'});
-  saveSpecRequests();
-  document.getElementById('sr-name').value='';document.getElementById('sr-main').value='';document.getElementById('sr-off').value='';document.getElementById('sr-reason').value='';
-  updateSRBadge();toast('Spec request submitted — awaiting RL approval','ok');renderSpecReq();
+function applyMySpec(){
+  const name=(document.getElementById('sr-name').value||'').trim();
+  const p=gp(name);
+  if(!p){toast('Character not found in the roster','err');return;}
+  const main=document.getElementById('sr-main').value;
+  const off=document.getElementById('sr-off').value;
+  const role=document.getElementById('sr-role').value;
+  if(!main){toast('Pick a main spec','err');return;}
+  if(off && off===main){toast('Off-spec must differ from main spec','err');return;}
+  p.spec=main; p.flexSpec=off||''; if(role) p.type=role;
+  saveRoster();
+  try{normalizeRosterRoles&&normalizeRosterRoles();}catch(e){}
+  renderRoster?.();renderAttendance?.();renderRoles?.();
+  specLoadChar();
+  toast('Your spec has been updated','ok');
 }
-function decideSR(id,decision){
-  const sr=specRequests.find(r=>r.id===id);if(!sr)return;
-  sr.status=decision;
-  if(decision==='approved'){const p=gp(sr.player);if(p&&sr.mainSpec){p.spec=sr.mainSpec;if(sr.offSpec)p.flexSpec=sr.offSpec;saveRoster();}}
-  saveSpecRequests();
-  updateSRBadge();renderSRList();toast(`Request ${decision}!`,decision==='approved'?'ok':'err');
+// Legacy no-op stubs kept so old Firebase/badge hooks never throw after the
+// spec-request feature was replaced with self-service editing.
+function renderSRList(){}
+function updateSRBadge(){const b=document.getElementById('sr-badge');if(b)b.style.display='none';}
+
+// ── Guild Code of Conduct ─────────────────────────────────────────────
+const COC_DATA={
+  intro:[
+    "Our guild is built around having a good time together, progressing as a group, and creating a community people actually want to be part of.",
+    "Everyone is expected to follow these standards while representing the guild in-game, on Discord, and in any other guild-related environment."
+  ],
+  sections:[
+    {n:1,t:"Respect Other Players",p:[
+      "Treat guild members and other players with respect.",
+      "Friendly banter, jokes, and trash talk are part of gaming, but there is a clear difference between joking around and deliberately making someone uncomfortable. This includes ragebaiting.",
+      "Harassment, bullying, discrimination, personal attacks, threats, or repeatedly targeting another player will not be tolerated. And officers are allowed to Server-mute / Disconnect / Kick you. This will be based on what has been said and done.",
+      "If someone asks you to stop, stop."]},
+    {n:2,t:"Keep the Drama to 0",p:[
+      "Disagreements will happen. Handle them like adults.",
+      "If you have an issue with another member, try to resolve it privately first. If that does not work, contact an Officer. They WILL help.",
+      "Do not turn personal disagreements into guild-wide arguments, Discord fights, public callouts, or attempts to get other members involved. If it goes too far, you will be muted — both parties in the argument — and it will be discussed later."]},
+    {n:3,t:"Banter Is Welcome — Toxicity Is Not",p:[
+      "We want the guild to feel relaxed and social.",
+      "Dark humour, memes, ragebaiting, and competitive banter may happen depending on the group, but context matters.",
+      'Do not use "it was just a joke" as an excuse to repeatedly insult or provoke someone.',
+      "Know your audience and respect people's boundaries."]},
+    {n:4,t:"Raiding and Group Content",p:[
+      "When joining organised guild content, you are expected to respect the time of the other players involved. This means:",
+      "Be ready 30 minutes before the agreed starting time. If you're late for ANY reason, inform an officer, and try to park your character at the content that will be done so you cause the least amount of harm. If we don't know anything 15 minutes before pull time, we will start looking for a replacement. Respect everyone's time.",
+      "Come prepared with the appropriate gear, consumables, enchants, and knowledge expected for the content. If you don't know something, ask. We're happy to explain.",
+      "Listen to the Raid Leader or group leader during encounters.",
+      "Keep unnecessary chatter down when tactics are being explained.",
+      "Accept constructive feedback without turning it into an argument. Do this in DMs first to not obstruct the raid — with 40 people it can become a lot.",
+      "Let the raid leadership know as early as possible if you cannot attend. Or put this in our App!",
+      "Do not intentionally leave a raid or group in a difficult position without explanation. Send anyone a quick DM so we know it's not a power outage or anything. Real life ALWAYS comes first.",
+      "Mistakes happen. Repeatedly refusing to learn from them is a different matter, and may affect your spot in the raid / guild."]},
+    {n:5,t:"Performance and Feedback",p:[
+      "Nobody is expected to play perfectly.",
+      "Players should, however, make a reasonable effort to improve when participating in progression content.",
+      "Feedback should focus on gameplay rather than the person.",
+      "We're trying to be an above average guild. Not the Creme de la creme.",
+      "Explain what can be improved instead of simply telling someone that they are bad.",
+      "Likewise, players receiving feedback should be willing to listen and ask questions when necessary."]},
+    {n:6,t:"Loot",p:[
+      "Follow the guild's agreed loot rules. 2SR (for your main spec) > MS > OS.",
+      "Do not attempt to manipulate loot distribution, hide relevant information, pressure other members into passing items, or create arguments after a loot decision has been made.",
+      'The ONLY reason we\'d do any "loot councilling" will be if we can not progress the content due to gear restrictions. (Tanks getting 1-hit or something of the sort.)',
+      "If you disagree with a decision, discuss it privately with the relevant Officer or Raid Leader after the raid.",
+      "Loot is temporary. Your reputation within the guild lasts considerably longer."]},
+    {n:7,t:"Discord and Voice Chat",p:[
+      "The same standards apply on Discord as they do in-game.",
+      "You are not required to speak on voice comms. But you are required to listen.",
+      "Do not: spam channels unnecessarily; constantly interrupt people in voice chat; post deliberately offensive or inappropriate material; share private conversations without permission; post another member's personal information; or repeatedly provoke members simply to get a reaction (\"ragebaiting\").",
+      "Use the appropriate channels where possible and respect requests from Officers."]},
+    {n:8,t:"Representing the Guild",p:[
+      "Your behaviour affects the reputation of the entire guild.",
+      "When interacting with other players, avoid behaviour such as deliberately griefing groups, ninja-looting, scamming, abusing players, or creating unnecessary conflicts while representing the guild. You will be kicked if we find out.",
+      "Competitive play is fine.",
+      "Being known as an asshole guild is not the objective."]},
+    {n:9,t:"Cheating, Exploits and Real-Money Trading",p:[
+      "Do not use cheats, bots, hacks, or other prohibited software while representing the guild.",
+      "Members are expected to follow Blizzard's rules and Terms of Service.",
+      "Using exploits that could place the guild, raid team, or other members at risk may result in immediate removal."]},
+    {n:10,t:"Guild Information",p:[
+      "Some discussions, strategies, logs, leadership conversations, or other information may be intended for guild members only. This goes for content in the Discord but also in the App.",
+      "Do not deliberately share private guild information externally when you have been asked not to do so.",
+      "Likewise, Officers are expected to handle reports and personal disputes discreetly."]},
+    {n:11,t:"Officers and Leadership",p:[
+      "Officers exist to help keep the guild organised, not to police every conversation.",
+      "Members are expected to follow reasonable instructions from Raid Leaders and Officers during organised guild activities.",
+      "Officers are held to the same Code of Conduct as everyone else, if not higher, and are expected to lead by example.",
+      "If you have a problem with an Officer, raise it privately with another member of the leadership team."]},
+    {n:12,t:"Problems and Complaints",p:[
+      "If something is bothering you, speak up before it becomes a larger problem. Nobody is perfect.",
+      "Contact an Officer privately and explain what happened.",
+      "Whenever possible, provide context such as screenshots, messages, logs, or the names of players who were involved. Keep in mind, we all come from different cultures and backgrounds in Europe. Most people don't speak English fluently!",
+      "Reports will be handled as fairly and privately as reasonably possible."]},
+    {n:13,t:"Consequences",p:[
+      "Not every problem requires the same response. Depending on the situation, action may include:",
+      "Informal warning → Official warning → Removal from raids or guild activities → Guild removal.",
+      "Serious behaviour may result in immediate removal without previous warnings. Examples include severe harassment, threats, deliberate scamming, cheating, or behaviour that could seriously damage the guild or its members."]},
+    {n:14,t:"Common Sense",p:[
+      "No Code of Conduct can cover every possible situation. Use common sense.",
+      'If your defence for doing something is technically "there wasn\'t a rule saying I couldn\'t," you are probably already heading in the wrong direction. Use common sense.',
+      "The goal is simple: Play the game. Kill bosses. Help your guildmates. Have fun. Don't be a cunt.",
+      "USE COMMON SENSE."]}
+  ]
+};
+function renderCoC(){
+  const el=document.getElementById('coc-content'); if(!el) return;
+  const intro=`<div class="card" style="margin-bottom:12px;border-left:3px solid var(--acc)">${COC_DATA.intro.map(t=>`<p style="font-size:13px;color:var(--t2);margin:0 0 8px;line-height:1.55">${t}</p>`).join('')}</div>`;
+  const secs=COC_DATA.sections.map(s=>`
+    <div class="card" style="margin-bottom:10px">
+      <div class="ct" style="display:flex;align-items:center;gap:8px">
+        <span style="display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:6px;background:var(--accg);color:var(--acc);font-size:12px;font-weight:700;font-family:Cinzel,serif">${s.n}</span>
+        <span>${s.t}</span>
+      </div>
+      ${s.p.map(t=>`<p style="font-size:12.5px;color:var(--t2);margin:0 0 7px;line-height:1.55">${t}</p>`).join('')}
+    </div>`).join('');
+  el.innerHTML=intro+secs;
 }
-function updateSRBadge(){const n=specRequests.filter(r=>r.status==='pending').length;const b=document.getElementById('sr-badge');if(b){b.textContent=n;b.style.display=n>0?'inline':'none';}}
 
 // ============================================================
 // SIGNUP & APPLICATIONS
@@ -6868,7 +6891,7 @@ function submitApp(){
   const alreadyIn=ROSTER.find(p=>p.name.toLowerCase()===name.toLowerCase());
   if(alreadyIn){
     document.getElementById('signup-warn').style.display='block';
-    document.getElementById('signup-warn-msg').textContent=`${alreadyIn.name} is already a member of Boogalo. No application needed — use the login above to sign in, or contact the Raid Leader if you're having trouble.`;
+    document.getElementById('signup-warn-msg').textContent=`${alreadyIn.name} is already a member of We Have An App. No application needed — use the login above to sign in, or contact the Raid Leader if you're having trouble.`;
     document.getElementById('signup-success').style.display='none';
     return;
   }
@@ -8126,7 +8149,7 @@ function addToICal(raidId){
   const[eh,em]=r.end.split(':').map(Number);
   const dtS=new Date(y,m-1,d,sh,sm);const dtE=new Date(y,m-1,d,eh+Math.floor((em+r.extra)/60),(em+r.extra)%60);
   const fmt=dt=>dt.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
-  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Boogalo//TBC Raid Manager//EN','BEGIN:VEVENT',`DTSTART:${fmt(dtS)}`,`DTEND:${fmt(dtE)}`,`SUMMARY:${r.name} Raid`,`DESCRIPTION:Boogaloo guild raid\\nRL: ${r.rl}\\nSignups: ${r.signedUp.length}/${r.max}`,`LOCATION:World of Warcraft TBC`,'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//We Have An App//Raid Manager//EN','BEGIN:VEVENT',`DTSTART:${fmt(dtS)}`,`DTEND:${fmt(dtE)}`,`SUMMARY:${r.name} Raid`,`DESCRIPTION:We Have An App guild raid\\nRL: ${r.rl}\\nSignups: ${r.signedUp.length}/${r.max}`,`LOCATION:World of Warcraft TBC`,'END:VEVENT','END:VCALENDAR'].join('\r\n');
   const blob=new Blob([ics],{type:'text/calendar'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`${r.name.replace(/\s+/g,'_')}_${r.date}.ics`;a.click();URL.revokeObjectURL(url);toast('Calendar event downloaded!','ok');
 }
 
@@ -8480,7 +8503,7 @@ function refreshDiscordText(){
   const melee=pr.filter(p=>effectiveRole(p)==='Melee');
   const ranged=pr.filter(p=>effectiveRole(p)==='Ranged');
   const lines=[
-    '📅 **Boogaloo Raid — '+fmtKey(todayKey())+'**',
+    '📅 **We Have An App Raid — '+fmtKey(todayKey())+'**',
     '═══════════════════════════════',
     '🛡 **Tanks ('+tanks.length+'):** '+(tanks.map(p=>p.name).join(', ')||'—'),
     '💚 **Healers ('+healers.length+'):** '+(healers.map(p=>p.name).join(', ')||'—'),
@@ -8528,7 +8551,7 @@ function toggleSidebar(){
     const ham=document.getElementById('mob-ham');
     if(ham) ham.querySelector('i').className=collapsed?'ti ti-menu-2':'ti ti-x';
   }
-  try{sessionStorage.setItem('boogalo_sb_collapsed', collapsed?'1':'0');}catch(e){}
+  try{sessionStorage.setItem('whaapp_sb_collapsed', collapsed?'1':'0');}catch(e){}
 }
 function collapseSidebar(){
   const sb=document.getElementById('sidebar');
@@ -8537,21 +8560,21 @@ function collapseSidebar(){
   if(overlay){overlay.classList.remove('show');}
   const ham=document.getElementById('mob-ham');
   if(ham) ham.querySelector('i').className='ti ti-menu-2';
-  try{sessionStorage.setItem('boogalo_sb_collapsed','1');}catch(e){}
+  try{sessionStorage.setItem('whaapp_sb_collapsed','1');}catch(e){}
 }
 function restoreSidebarState(){
   try{
-    const saved=sessionStorage.getItem('boogalo_sb_collapsed');
+    const saved=sessionStorage.getItem('whaapp_sb_collapsed');
     if(saved==='1'){
       const sb=document.getElementById('sidebar');
       if(sb) sb.classList.add('collapsed');
     }
   }catch(e){}
 }
-const MOB_PAGE_NAMES={attendance:'Attendance',roster:'Roster',roles:'Roles & Groups',dispels:'Dispels & CCs',res:'Resistances',loot:'Loot Priority',pov:'Player POV',specreq:'Spec Requests',signup:'Apply for Raid','rl-review':'RL Review',calendar:'Calendar',raids:'Upcoming Raids','create-raid':'Create Raid',leave:'Leave of Absence',gruul:"Gruul's Lair",mag:'Magtheridon',tk:'Tempest Keep',ssc:'Serpent Shrine',kara:'Karazhan',hyjal:'Mount Hyjal',bt:'Black Temple',za:"Zul'Aman",stats:'Statistics',profiles:'Profiles',progression:'Progression','guild-effort':'Guild Effort'};
+const MOB_PAGE_NAMES={attendance:'Attendance',roster:'Roster',roles:'Roles & Groups',dispels:'Dispels & CCs',res:'Resistances',coc:'Code of Conduct',pov:'Player POV',specreq:'Change My Spec',signup:'Apply for Raid','rl-review':'RL Review',calendar:'Calendar',raids:'Upcoming Raids','create-raid':'Create Raid',leave:'Leave of Absence',gruul:"Gruul's Lair",mag:'Magtheridon',tk:'Tempest Keep',ssc:'Serpent Shrine',kara:'Karazhan',hyjal:'Mount Hyjal',bt:'Black Temple',za:"Zul'Aman",stats:'Statistics',profiles:'Profiles',progression:'Progression','guild-effort':'Guild Effort'};
 function updateMobTitle(page){
   const el=document.getElementById('mob-title');
-  if(el) el.textContent=MOB_PAGE_NAMES[page]||'Boogalo';
+  if(el) el.textContent=MOB_PAGE_NAMES[page]||'We Have An App';
 }
 function updateMobNav(page){
   document.querySelectorAll('.mob-nav-btn').forEach(b=>b.classList.remove('active'));
@@ -8568,7 +8591,7 @@ function mobNav(page){
     if(pg)pg.classList.add('active');
     const mainEl=document.querySelector('.main');if(mainEl)mainEl.scrollTop=0;
     collapseSidebar();updateMobTitle(page);updateMobNav(page);
-    ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,loot:renderLoot,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),za:()=>renderBossPage('za'),stats:renderStats,profiles:renderProfiles,progression:renderProgression,'guild-effort':renderGuildEffort})[page]?.();
+    ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,coc:renderCoC,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),za:()=>renderBossPage('za'),stats:renderStats,profiles:renderProfiles,progression:renderProgression,'guild-effort':renderGuildEffort})[page]?.();
   }
 }
 function initSwipeGesture(){
@@ -8600,6 +8623,9 @@ function initSwipeGesture(){
 //  6. Paste it below as FIREBASE_DB and push
 // ═══════════════════════════════════════════════════════════════════
 const FIREBASE_DB = 'https://boogalo-app-default-rtdb.europe-west1.firebasedatabase.app';
+// Data namespace. Bumped for the "We have an App" relaunch so all shared data starts
+// fresh; the old TBC/Boogalo data stays untouched under the un-prefixed paths.
+const FB_NS = 'whaapp/';
 
 let _fbDB = null;   // Firebase SDK database reference
 let _fbIgnore = false; // prevents listener → save → listener loops
@@ -8613,7 +8639,7 @@ try{
 
 function fbSet(path, data){
   if(!_fbDB || _fbIgnore) return;
-  _fbDB.ref(path).set(data).catch(e=>console.warn('[FB] write failed:',path,e.message));
+  _fbDB.ref(FB_NS+path).set(data).catch(e=>console.warn('[FB] write failed:',path,e.message));
 }
 
 function _fbArr(data){if(!Array.isArray(data)&&data!==null)data=Object.values(data||{});return Array.isArray(data)?data.filter(Boolean):[];}
@@ -8624,23 +8650,23 @@ function _fbSync(arr,data){arr.length=0;data.forEach(x=>arr.push(x));}
 function applyFirebaseKey(key,data){
   _fbIgnore=true;
   try{
-    if(key==='raids'){if(data&&typeof data==='object'){const d=_fbArr(data).map(r=>r?({...r,signedUp:r.signedUp?_fbArr(r.signedUp):[],confirmed:r.confirmed?_fbArr(r.confirmed):[],attended:r.attended?_fbArr(r.attended):[],signupStatus:r.signupStatus&&typeof r.signupStatus==='object'?{...r.signupStatus}:{},assignments:(()=>{const a=r.assignments||{};const tl=a.tankList?_fbArr(a.tankList):[a.MT,a.OT1,a.OT2].filter(Boolean);return{...a,tankList:tl,healerTargets:a.healerTargets||{}};})(),raidGroups:(()=>{const ng=r.max<=10?2:5;return Array.from({length:ng},(_,i)=>{const g=(r.raidGroups||{})[i];return g?_fbArr(g):[];});})()} ):null).filter(Boolean);raidSchedule=d;normalizeRaidStatuses();try{localStorage.setItem('boogalo-raids',JSON.stringify(raidSchedule));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();if(document.getElementById('pov-search')?.value)renderPOV?.();}
-    else if(key==='roster'){if(data&&typeof data==='object'){const d=_fbArr(data).map(p=>p?({...p,dispel:p.dispel?_fbArr(p.dispel):[]}):null).filter(Boolean);_fbSync(ROSTER,d);normalizeRosterRoles();try{localStorage.setItem('boogalo-roster',JSON.stringify(ROSTER));}catch(e){}}renderRoster?.();renderAttendance?.();renderRoles?.();renderRes?.();renderProfiles?.();}
-    else if(key==='vortex'){if(data&&typeof data==='object'){Object.assign(vortexCounts,data);try{localStorage.setItem('boogalo-vortex',JSON.stringify(vortexCounts));}catch(e){}}renderVortex?.();}
-    else if(key==='weights'){if(data&&typeof data==='object'){Object.keys(playerWeights).forEach(k=>delete playerWeights[k]);Object.assign(playerWeights,data);try{localStorage.setItem('boogalo-weights',JSON.stringify(playerWeights));}catch(e){}}}
-    else if(key==='alts'){if(data&&typeof data==='object'){Object.keys(playerAlts).forEach(k=>delete playerAlts[k]);Object.assign(playerAlts,data);try{localStorage.setItem('boogalo-alts',JSON.stringify(playerAlts));}catch(e){}}}
-    else if(key==='roleOverrides'){Object.keys(roleOverrides).forEach(k=>delete roleOverrides[k]);if(data&&typeof data==='object')Object.assign(roleOverrides,data);try{localStorage.setItem('boogalo-roleOverrides',JSON.stringify(roleOverrides));}catch(e){}renderRoles?.();renderAttendance?.();}
-    else if(key==='applications'){const d=_fbArr(data);_fbSync(applications,d);try{localStorage.setItem('boogalo-applications',JSON.stringify(applications));}catch(e){}renderRLReview?.();updatePendingBadge?.();renderSignup?.();}
-    else if(key==='specRequests'){const d=_fbArr(data);_fbSync(specRequests,d);try{localStorage.setItem('boogalo-specRequests',JSON.stringify(specRequests));}catch(e){}renderSRList?.();renderSpecReq?.();updateSRBadge?.();}
-    else if(key==='reviews'){if(data&&typeof data==='object'){const list=_fbArr(data.list);_fbSync(reviews,list);if(data.stars&&typeof data.stars==='object'){Object.keys(reviewStars).forEach(k=>delete reviewStars[k]);Object.assign(reviewStars,data.stars);}try{localStorage.setItem('boogalo-reviews',JSON.stringify({list:reviews,stars:reviewStars}));}catch(e){}}renderReviews?.();updateRevBadge?.();}
-    else if(key==='leaves'){const d=_fbArr(data);_fbSync(leaves,d);try{localStorage.setItem('boogalo-leaves',JSON.stringify(leaves));}catch(e){}renderLeave?.();setTimeout(()=>{try{applyAllLeaves();}catch(e){}},0);}
-    else if(key==='vortexRequests'){const d=_fbArr(data);_fbSync(vortexRequests,d);try{localStorage.setItem('boogalo-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}renderVortex?.();}
-    else if(key==='healerTanks'){const d=_fbArr(data);if(d.length){_fbSync(healerTanks,d);try{localStorage.setItem('boogalo-healerTanks',JSON.stringify(healerTanks));}catch(e){}}renderRoles?.();}
-    else if(key==='groups'){if(data){const outer=_fbArr(data);if(outer.length){groups.length=0;outer.forEach(g=>groups.push(_fbArr(g)));try{localStorage.setItem('boogalo-groups',JSON.stringify(groups));}catch(e){}}}renderRoles?.();}
-    else if(key==='bossAssignments'){if(data&&typeof data==='object'){Object.keys(bossAssignments).forEach(k=>delete bossAssignments[k]);Object.assign(bossAssignments,data);try{localStorage.setItem('boogalo-bossAssignments',JSON.stringify(bossAssignments));}catch(e){}}Object.keys(BOSSES).forEach(rk=>{const el=document.getElementById(rk+'-content');if(el&&el.children.length)renderBossPage(rk);});}
-    else if(key==='killLog'){if(data&&typeof data==='object'){Object.keys(killLog).forEach(k=>delete killLog[k]);Object.assign(killLog,data);try{localStorage.setItem('boogalo-killLog',JSON.stringify(killLog));}catch(e){}}const pe=document.getElementById('progression-content');if(pe&&pe.children.length)renderProgression?.();}
-    else if(key==='guildEffort'){if(data&&typeof data==='object'){guildEffortData=(data.data&&typeof data.data==='object')?data.data:{};guildBankStock=(data.bank&&typeof data.bank==='object')?data.bank:{};guildExtraItems=Array.isArray(data.extra)?data.extra:_fbArr(data.extra);playerProfessions=(data.profs&&typeof data.profs==='object')?data.profs:{};normalizeGE();try{localStorage.setItem('boogalo-guildEffort',JSON.stringify({data:guildEffortData,bank:guildBankStock,extra:guildExtraItems,profs:playerProfessions}));}catch(e){}}const ge=document.getElementById('guild-effort-content');if(ge&&ge.children.length)renderGuildEffort?.();}
-    else if(key==='diagramPositions'){if(data&&typeof data==='object'){diagramPositions=data;try{localStorage.setItem('boogalo-diagramPositions',JSON.stringify(diagramPositions));}catch(e){}}try{document.querySelectorAll('svg[data-diagkey]').forEach(rerenderDiagram);}catch(e){}}
+    if(key==='raids'){if(data&&typeof data==='object'){const d=_fbArr(data).map(r=>r?({...r,signedUp:r.signedUp?_fbArr(r.signedUp):[],confirmed:r.confirmed?_fbArr(r.confirmed):[],attended:r.attended?_fbArr(r.attended):[],signupStatus:r.signupStatus&&typeof r.signupStatus==='object'?{...r.signupStatus}:{},assignments:(()=>{const a=r.assignments||{};const tl=a.tankList?_fbArr(a.tankList):[a.MT,a.OT1,a.OT2].filter(Boolean);return{...a,tankList:tl,healerTargets:a.healerTargets||{}};})(),raidGroups:(()=>{const ng=r.max<=10?2:5;return Array.from({length:ng},(_,i)=>{const g=(r.raidGroups||{})[i];return g?_fbArr(g):[];});})()} ):null).filter(Boolean);raidSchedule=d;normalizeRaidStatuses();try{localStorage.setItem('whaapp-raids',JSON.stringify(raidSchedule));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();if(document.getElementById('pov-search')?.value)renderPOV?.();}
+    else if(key==='roster'){if(data&&typeof data==='object'){const d=_fbArr(data).map(p=>p?({...p,dispel:p.dispel?_fbArr(p.dispel):[]}):null).filter(Boolean);_fbSync(ROSTER,d);normalizeRosterRoles();try{localStorage.setItem('whaapp-roster',JSON.stringify(ROSTER));}catch(e){}}renderRoster?.();renderAttendance?.();renderRoles?.();renderRes?.();renderProfiles?.();}
+    else if(key==='vortex'){if(data&&typeof data==='object'){Object.assign(vortexCounts,data);try{localStorage.setItem('whaapp-vortex',JSON.stringify(vortexCounts));}catch(e){}}renderVortex?.();}
+    else if(key==='weights'){if(data&&typeof data==='object'){Object.keys(playerWeights).forEach(k=>delete playerWeights[k]);Object.assign(playerWeights,data);try{localStorage.setItem('whaapp-weights',JSON.stringify(playerWeights));}catch(e){}}}
+    else if(key==='alts'){if(data&&typeof data==='object'){Object.keys(playerAlts).forEach(k=>delete playerAlts[k]);Object.assign(playerAlts,data);try{localStorage.setItem('whaapp-alts',JSON.stringify(playerAlts));}catch(e){}}}
+    else if(key==='roleOverrides'){Object.keys(roleOverrides).forEach(k=>delete roleOverrides[k]);if(data&&typeof data==='object')Object.assign(roleOverrides,data);try{localStorage.setItem('whaapp-roleOverrides',JSON.stringify(roleOverrides));}catch(e){}renderRoles?.();renderAttendance?.();}
+    else if(key==='applications'){const d=_fbArr(data);_fbSync(applications,d);try{localStorage.setItem('whaapp-applications',JSON.stringify(applications));}catch(e){}renderRLReview?.();updatePendingBadge?.();renderSignup?.();}
+    else if(key==='specRequests'){const d=_fbArr(data);_fbSync(specRequests,d);try{localStorage.setItem('whaapp-specRequests',JSON.stringify(specRequests));}catch(e){}renderSRList?.();renderSpecReq?.();updateSRBadge?.();}
+    else if(key==='reviews'){if(data&&typeof data==='object'){const list=_fbArr(data.list);_fbSync(reviews,list);if(data.stars&&typeof data.stars==='object'){Object.keys(reviewStars).forEach(k=>delete reviewStars[k]);Object.assign(reviewStars,data.stars);}try{localStorage.setItem('whaapp-reviews',JSON.stringify({list:reviews,stars:reviewStars}));}catch(e){}}renderReviews?.();updateRevBadge?.();}
+    else if(key==='leaves'){const d=_fbArr(data);_fbSync(leaves,d);try{localStorage.setItem('whaapp-leaves',JSON.stringify(leaves));}catch(e){}renderLeave?.();setTimeout(()=>{try{applyAllLeaves();}catch(e){}},0);}
+    else if(key==='vortexRequests'){const d=_fbArr(data);_fbSync(vortexRequests,d);try{localStorage.setItem('whaapp-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}renderVortex?.();}
+    else if(key==='healerTanks'){const d=_fbArr(data);if(d.length){_fbSync(healerTanks,d);try{localStorage.setItem('whaapp-healerTanks',JSON.stringify(healerTanks));}catch(e){}}renderRoles?.();}
+    else if(key==='groups'){if(data){const outer=_fbArr(data);if(outer.length){groups.length=0;outer.forEach(g=>groups.push(_fbArr(g)));try{localStorage.setItem('whaapp-groups',JSON.stringify(groups));}catch(e){}}}renderRoles?.();}
+    else if(key==='bossAssignments'){if(data&&typeof data==='object'){Object.keys(bossAssignments).forEach(k=>delete bossAssignments[k]);Object.assign(bossAssignments,data);try{localStorage.setItem('whaapp-bossAssignments',JSON.stringify(bossAssignments));}catch(e){}}Object.keys(BOSSES).forEach(rk=>{const el=document.getElementById(rk+'-content');if(el&&el.children.length)renderBossPage(rk);});}
+    else if(key==='killLog'){if(data&&typeof data==='object'){Object.keys(killLog).forEach(k=>delete killLog[k]);Object.assign(killLog,data);try{localStorage.setItem('whaapp-killLog',JSON.stringify(killLog));}catch(e){}}const pe=document.getElementById('progression-content');if(pe&&pe.children.length)renderProgression?.();}
+    else if(key==='guildEffort'){if(data&&typeof data==='object'){guildEffortData=(data.data&&typeof data.data==='object')?data.data:{};guildBankStock=(data.bank&&typeof data.bank==='object')?data.bank:{};guildExtraItems=Array.isArray(data.extra)?data.extra:_fbArr(data.extra);playerProfessions=(data.profs&&typeof data.profs==='object')?data.profs:{};normalizeGE();try{localStorage.setItem('whaapp-guildEffort',JSON.stringify({data:guildEffortData,bank:guildBankStock,extra:guildExtraItems,profs:playerProfessions}));}catch(e){}}const ge=document.getElementById('guild-effort-content');if(ge&&ge.children.length)renderGuildEffort?.();}
+    else if(key==='diagramPositions'){if(data&&typeof data==='object'){diagramPositions=data;try{localStorage.setItem('whaapp-diagramPositions',JSON.stringify(diagramPositions));}catch(e){}}try{document.querySelectorAll('svg[data-diagkey]').forEach(rerenderDiagram);}catch(e){}}
   }finally{_fbIgnore=false;}
 }
 
@@ -8654,7 +8680,7 @@ function setSyncDot(state){
 // Prevents a logging-in client from clobbering newer data created by other clients.
 function seedIfEmpty(key, saveFn){
   if(!_fbDB){ try{saveFn();}catch(e){} return; } // offline: persist locally only
-  _fbDB.ref(key).once('value').then(snap=>{
+  _fbDB.ref(FB_NS+key).once('value').then(snap=>{
     const v=snap.val();
     if(v===null||v===undefined||(typeof v==='object'&&Object.keys(v).length===0)) saveFn();
   }).catch(()=>{});
@@ -8666,7 +8692,7 @@ function initFirebaseSync(){
   const keys=['raids','roster','vortex','weights','alts','roleOverrides','applications',
    'specRequests','reviews','vortexRequests','healerTanks','groups','bossAssignments','killLog','leaves','guildEffort','diagramPositions'];
   keys.forEach(key=>{
-    _fbDB.ref(key).on('value', snap=>{
+    _fbDB.ref(FB_NS+key).on('value', snap=>{
       const data=snap.val();
       if(data!==null&&data!==undefined) applyFirebaseKey(key,data);
       if(!synced){synced=true;setSyncDot('synced');}
@@ -8676,35 +8702,35 @@ function initFirebaseSync(){
 
 window.onload=function(){
   // Load any cached data from localStorage (instant fallback for returning tabs)
-  try{const sr=localStorage.getItem('boogalo-roster');if(sr){const r=JSON.parse(sr);if(Array.isArray(r)&&r.length)ROSTER=r;}}catch(e){}
+  try{const sr=localStorage.getItem('whaapp-roster');if(sr){const r=JSON.parse(sr);if(Array.isArray(r)&&r.length)ROSTER=r;}}catch(e){}
   normalizeRosterRoles();
-  try{const sw=localStorage.getItem('boogalo-weights');if(sw){const w=JSON.parse(sw);if(w&&typeof w==='object')playerWeights=w;}}catch(e){}
-  try{const srd=localStorage.getItem('boogalo-raids');if(srd){const r=JSON.parse(srd);if(Array.isArray(r)&&r.length)raidSchedule=r;}}catch(e){}
+  try{const sw=localStorage.getItem('whaapp-weights');if(sw){const w=JSON.parse(sw);if(w&&typeof w==='object')playerWeights=w;}}catch(e){}
+  try{const srd=localStorage.getItem('whaapp-raids');if(srd){const r=JSON.parse(srd);if(Array.isArray(r)&&r.length)raidSchedule=r;}}catch(e){}
   normalizeRaidStatuses();
-  try{const sv=localStorage.getItem('boogalo-vortex');if(sv){const v=JSON.parse(sv);if(v&&typeof v==='object')Object.assign(vortexCounts,v);}}catch(e){}
-  try{const sa=localStorage.getItem('boogalo-alts');if(sa){const a=JSON.parse(sa);if(a&&typeof a==='object')Object.assign(playerAlts,a);}}catch(e){}
-  try{const sro=localStorage.getItem('boogalo-roleOverrides');if(sro){const o=JSON.parse(sro);if(o&&typeof o==='object')Object.assign(roleOverrides,o);}}catch(e){}
-  try{const sap=localStorage.getItem('boogalo-applications');if(sap){const a=JSON.parse(sap);if(Array.isArray(a))a.forEach(x=>applications.push(x));}}catch(e){}
-  try{const ssp=localStorage.getItem('boogalo-specRequests');if(ssp){const s=JSON.parse(ssp);if(Array.isArray(s))s.forEach(x=>specRequests.push(x));}}catch(e){}
-  try{const srv=localStorage.getItem('boogalo-reviews');if(srv){const d=JSON.parse(srv);if(d&&Array.isArray(d.list))d.list.forEach(x=>reviews.push(x));if(d&&d.stars&&typeof d.stars==='object')Object.assign(reviewStars,d.stars);}}catch(e){}
-  try{const slv=localStorage.getItem('boogalo-leaves');if(slv){const l=JSON.parse(slv);if(Array.isArray(l))l.forEach(x=>leaves.push(x));}}catch(e){}
-  try{const svr=localStorage.getItem('boogalo-vortexRequests');if(svr){const v=JSON.parse(svr);if(Array.isArray(v))v.forEach(x=>vortexRequests.push(x));}}catch(e){}
-  try{const sht=localStorage.getItem('boogalo-healerTanks');if(sht){const h=JSON.parse(sht);if(Array.isArray(h)&&h.length){healerTanks.length=0;h.forEach(x=>healerTanks.push(x));}}}catch(e){}
-  try{const sg=localStorage.getItem('boogalo-groups');if(sg){const g=JSON.parse(sg);if(Array.isArray(g)&&g.length){groups.length=0;g.forEach(x=>groups.push(Array.isArray(x)?x:[])); }}}catch(e){}
-  try{const sba=localStorage.getItem('boogalo-bossAssignments');if(sba){const b=JSON.parse(sba);if(b&&typeof b==='object')Object.assign(bossAssignments,b);}}catch(e){}
-  try{const skl=localStorage.getItem('boogalo-killLog');if(skl){const k=JSON.parse(skl);if(k&&typeof k==='object')Object.assign(killLog,k);}}catch(e){}
-  try{const scl=localStorage.getItem('boogalo-checklist');if(scl){const c=JSON.parse(scl);if(c&&typeof c==='object')Object.assign(checklistState,c);}}catch(e){}
-  try{const sge=localStorage.getItem('boogalo-guildEffort');if(sge){const g=JSON.parse(sge);if(g&&typeof g==='object'){if(g.data&&typeof g.data==='object')guildEffortData=g.data;if(g.bank&&typeof g.bank==='object')guildBankStock=g.bank;if(Array.isArray(g.extra))guildExtraItems=g.extra;if(g.profs&&typeof g.profs==='object')playerProfessions=g.profs;normalizeGE();}}}catch(e){}
-  try{const sdp=localStorage.getItem('boogalo-diagramPositions');if(sdp){const d=JSON.parse(sdp);if(d&&typeof d==='object')diagramPositions=d;}}catch(e){}
+  try{const sv=localStorage.getItem('whaapp-vortex');if(sv){const v=JSON.parse(sv);if(v&&typeof v==='object')Object.assign(vortexCounts,v);}}catch(e){}
+  try{const sa=localStorage.getItem('whaapp-alts');if(sa){const a=JSON.parse(sa);if(a&&typeof a==='object')Object.assign(playerAlts,a);}}catch(e){}
+  try{const sro=localStorage.getItem('whaapp-roleOverrides');if(sro){const o=JSON.parse(sro);if(o&&typeof o==='object')Object.assign(roleOverrides,o);}}catch(e){}
+  try{const sap=localStorage.getItem('whaapp-applications');if(sap){const a=JSON.parse(sap);if(Array.isArray(a))a.forEach(x=>applications.push(x));}}catch(e){}
+  try{const ssp=localStorage.getItem('whaapp-specRequests');if(ssp){const s=JSON.parse(ssp);if(Array.isArray(s))s.forEach(x=>specRequests.push(x));}}catch(e){}
+  try{const srv=localStorage.getItem('whaapp-reviews');if(srv){const d=JSON.parse(srv);if(d&&Array.isArray(d.list))d.list.forEach(x=>reviews.push(x));if(d&&d.stars&&typeof d.stars==='object')Object.assign(reviewStars,d.stars);}}catch(e){}
+  try{const slv=localStorage.getItem('whaapp-leaves');if(slv){const l=JSON.parse(slv);if(Array.isArray(l))l.forEach(x=>leaves.push(x));}}catch(e){}
+  try{const svr=localStorage.getItem('whaapp-vortexRequests');if(svr){const v=JSON.parse(svr);if(Array.isArray(v))v.forEach(x=>vortexRequests.push(x));}}catch(e){}
+  try{const sht=localStorage.getItem('whaapp-healerTanks');if(sht){const h=JSON.parse(sht);if(Array.isArray(h)&&h.length){healerTanks.length=0;h.forEach(x=>healerTanks.push(x));}}}catch(e){}
+  try{const sg=localStorage.getItem('whaapp-groups');if(sg){const g=JSON.parse(sg);if(Array.isArray(g)&&g.length){groups.length=0;g.forEach(x=>groups.push(Array.isArray(x)?x:[])); }}}catch(e){}
+  try{const sba=localStorage.getItem('whaapp-bossAssignments');if(sba){const b=JSON.parse(sba);if(b&&typeof b==='object')Object.assign(bossAssignments,b);}}catch(e){}
+  try{const skl=localStorage.getItem('whaapp-killLog');if(skl){const k=JSON.parse(skl);if(k&&typeof k==='object')Object.assign(killLog,k);}}catch(e){}
+  try{const scl=localStorage.getItem('whaapp-checklist');if(scl){const c=JSON.parse(scl);if(c&&typeof c==='object')Object.assign(checklistState,c);}}catch(e){}
+  try{const sge=localStorage.getItem('whaapp-guildEffort');if(sge){const g=JSON.parse(sge);if(g&&typeof g==='object'){if(g.data&&typeof g.data==='object')guildEffortData=g.data;if(g.bank&&typeof g.bank==='object')guildBankStock=g.bank;if(Array.isArray(g.extra))guildExtraItems=g.extra;if(g.profs&&typeof g.profs==='object')playerProfessions=g.profs;normalizeGE();}}}catch(e){}
+  try{const sdp=localStorage.getItem('whaapp-diagramPositions');if(sdp){const d=JSON.parse(sdp);if(d&&typeof d==='object')diagramPositions=d;}}catch(e){}
   // Initialise app — Firebase SDK listeners fire within ~100ms and update all views
   if(window.innerWidth<=768) collapseSidebar();
   initSwipeGesture();
-  seedRaids();
+  // seedRaids(); // disabled for the We Have An App relaunch — raids start empty; RL creates new ones
   initFirebaseSync(); // connects via WebSocket; each key fires on('value') with live data
   initTheme();
   startRaidTimer();
   try{
-    const saved=sessionStorage.getItem('boogalo-lastuser');
+    const saved=sessionStorage.getItem('whaapp-lastuser');
     if(saved){const p=ROSTER.find(x=>x.name===saved);if(p)setView('participant',p);}
   }catch(e){}
   updateSigSpecs();
