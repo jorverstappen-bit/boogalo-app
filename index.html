@@ -445,14 +445,6 @@ tr:hover td{background:rgba(255,255,255,.013)}
     </div>
     <div class="sbs"><div class="sbl">Raids</div>
       <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
-      <div class="ni" onclick="nav(this,'gruul')"><i class="ti ti-sword"></i><span>Gruul's Lair</span></div>
-      <div class="ni" onclick="nav(this,'mag')"><i class="ti ti-flame"></i><span>Magtheridon</span></div>
-      <div class="ni" onclick="nav(this,'tk')"><i class="ti ti-bolt"></i><span>Tempest Keep</span></div>
-      <div class="ni" onclick="nav(this,'ssc')"><i class="ti ti-droplet"></i><span>Serpent Shrine</span></div>
-      <div class="ni" onclick="nav(this,'kara')"><i class="ti ti-building-castle"></i><span>Karazhan</span></div>
-      <div class="ni" onclick="nav(this,'hyjal')"><i class="ti ti-mountain"></i><span>Mount Hyjal</span></div>
-      <div class="ni" onclick="nav(this,'bt')"><i class="ti ti-building-castle"></i><span>Black Temple</span></div>
-      <div class="ni" onclick="nav(this,'za')"><i class="ti ti-feather"></i><span>Zul'Aman</span></div>
     </div>
     <div class="sbs"><div class="sbl">Analysis</div>
       <div class="ni" onclick="nav(this,'profiles')"><i class="ti ti-user-circle"></i><span>Profiles</span></div>
@@ -487,14 +479,6 @@ tr:hover td{background:rgba(255,255,255,.013)}
     </div>
     <div class="sbs"><div class="sbl">Raids</div>
       <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
-      <div class="ni" onclick="nav(this,'gruul')"><i class="ti ti-sword"></i><span>Gruul's Lair</span></div>
-      <div class="ni" onclick="nav(this,'mag')"><i class="ti ti-flame"></i><span>Magtheridon</span></div>
-      <div class="ni" onclick="nav(this,'tk')"><i class="ti ti-bolt"></i><span>Tempest Keep</span></div>
-      <div class="ni" onclick="nav(this,'ssc')"><i class="ti ti-droplet"></i><span>Serpent Shrine</span></div>
-      <div class="ni" onclick="nav(this,'kara')"><i class="ti ti-building-castle"></i><span>Karazhan</span></div>
-      <div class="ni" onclick="nav(this,'hyjal')"><i class="ti ti-mountain"></i><span>Mount Hyjal</span></div>
-      <div class="ni" onclick="nav(this,'bt')"><i class="ti ti-building-castle"></i><span>Black Temple</span></div>
-      <div class="ni" onclick="nav(this,'za')"><i class="ti ti-feather"></i><span>Zul'Aman</span></div>
     </div>
     <div class="sbs"><div class="sbl">My Account</div>
       <div class="ni" onclick="nav(this,'signup')"><i class="ti ti-forms"></i><span>Apply for Raid</span></div>
@@ -513,14 +497,6 @@ tr:hover td{background:rgba(255,255,255,.013)}
     </div>
     <div class="sbs"><div class="sbl">Raids</div>
       <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
-      <div class="ni" onclick="nav(this,'gruul')"><i class="ti ti-sword"></i><span>Gruul's Lair</span></div>
-      <div class="ni" onclick="nav(this,'mag')"><i class="ti ti-flame"></i><span>Magtheridon</span></div>
-      <div class="ni" onclick="nav(this,'tk')"><i class="ti ti-bolt"></i><span>Tempest Keep</span></div>
-      <div class="ni" onclick="nav(this,'ssc')"><i class="ti ti-droplet"></i><span>Serpent Shrine</span></div>
-      <div class="ni" onclick="nav(this,'kara')"><i class="ti ti-building-castle"></i><span>Karazhan</span></div>
-      <div class="ni" onclick="nav(this,'hyjal')"><i class="ti ti-mountain"></i><span>Mount Hyjal</span></div>
-      <div class="ni" onclick="nav(this,'bt')"><i class="ti ti-building-castle"></i><span>Black Temple</span></div>
-      <div class="ni" onclick="nav(this,'za')"><i class="ti ti-feather"></i><span>Zul'Aman</span></div>
     </div>
     <div class="sbs"><div class="sbl">Analysis</div>
       <div class="ni" onclick="nav(this,'profiles')"><i class="ti ti-user-circle"></i><span>Profiles</span></div>
@@ -561,8 +537,8 @@ tr:hover td{background:rgba(255,255,255,.013)}
 
 <div class="main"><div class="content" id="app">
 
-<div id="top-banner" style="width:100%;margin-bottom:16px;border-radius:12px;overflow:hidden;border:1px solid var(--border);box-shadow:0 2px 10px rgba(0,0,0,.25);line-height:0">
-  <img src="img/whaapp-banner.webp" alt="We Have An App" style="width:100%;display:block">
+<div id="top-banner" style="display:none;width:100%;margin-bottom:16px;border-radius:12px;overflow:hidden;border:1px solid var(--border);box-shadow:0 2px 10px rgba(0,0,0,.25);line-height:0">
+  <img src="img/whaapp-banner.webp" alt="We Have An App" style="width:100%;height:clamp(70px,11vw,120px);object-fit:cover;object-position:center 42%;display:block">
 </div>
 
 <!-- ===== PAGES ===== -->
@@ -670,25 +646,8 @@ tr:hover td{background:rgba(255,255,255,.013)}
 </div>
 
 <div class="page" id="page-res">
-  <div class="ph"><div class="pt">Resistance Gear Tracker</div><div class="ps">Standard requirement: 1 Frost Res tank · 1 Nature Res tank · 1 Fire Res tank</div></div>
-  <div class="card">
-    <div class="ct"><i class="ti ti-droplet" style="color:#69CCF0"></i>Hydross the Unstable — Frost + Nature resistance</div>
-    <div id="res-hydross"></div>
-  </div>
-  <div class="card">
-    <div class="ct"><i class="ti ti-flame" style="color:#ff8060"></i>Fire Resistance — Al'ar &amp; other fire encounters</div>
-    <div id="res-fire"></div>
-  </div>
-  <div class="card">
-    <div class="ct"><i class="ti ti-shield" style="color:var(--t2)"></i>Weekly Assignment</div>
-    <div style="font-size:12px;color:var(--t2);margin-bottom:8px">Set which tank has each resistance set for this week's raids:</div>
-    <div id="res-weekly"></div>
-  </div>
-  <div class="card">
-    <div class="ct"><i class="ti ti-gauge" style="color:var(--gold)"></i>Resistance Readiness</div>
-    <div style="font-size:12px;color:var(--t2);margin-bottom:8px">Per-fight check against each player's actual resistance from gear (before raid buffs). Enter values below.</div>
-    <div id="res-readiness"></div>
-  </div>
+  <div class="ph"><div class="pt">Resistance Gear Tracker</div><div class="ps">Resistance requirements for fights that need them</div></div>
+  <div id="res-content"></div>
 </div>
 
 <div class="page" id="page-coc">
@@ -2218,6 +2177,7 @@ function setView(v, user){
   VIEW=v;
   CURRENT_USER=user||null;
   document.getElementById('auth').style.display='none';
+  {const tb=document.getElementById('top-banner');if(tb)tb.style.display='';}
   document.getElementById('auth-step1').style.display='block';
   document.getElementById('rl-form').style.display='none';
   const offForm=document.getElementById('officer-form');if(offForm)offForm.style.display='none';
@@ -3417,6 +3377,7 @@ function logout(){
   const ni=document.getElementById('auth-name');
   if(ni) ni.value='';
   document.getElementById('auth').style.display='flex';
+  {const tb=document.getElementById('top-banner');if(tb)tb.style.display='none';}
   document.getElementById('nav-rl').style.display='none';
   document.getElementById('nav-par').style.display='none';
   document.getElementById('nav-officer').style.display='none';
@@ -4080,103 +4041,8 @@ function renderDispels(){
 // RESISTANCES
 // ============================================================
 function renderRes(){
-  const fPlayers  = ROSTER.filter(p=>p.resFrost);
-  const nPlayers  = ROSTER.filter(p=>p.resNature);
-  const fiPlayers = ROSTER.filter(p=>p.resFire);
-
-  // Helper: a player row with remove button (RL only)
-  function resRow(p, key, badgeCls, icon){
-    return `<div class="rrow" style="gap:6px">
-      ${pill(p.name,!p.present)} ${ctag(p.cls)}
-      <span class="badge ${badgeCls}" style="margin-left:2px">${icon}</span>
-      ${isRL()?`<button class="btn btn-sm" style="margin-left:auto;font-size:10px;padding:2px 7px;background:var(--redd);border-color:rgba(192,57,43,.3);color:#e07b72"
-        onclick="removeRes('${p.name}','${key}')"><i class="ti ti-x"></i></button>`:''}
-    </div>`;
-  }
-
-  // Helper: add-from-roster dropdown (RL only)
-  function addDropdown(key, excludeAlready, id, label){
-    if(!isRL()) return '';
-    const eligible = ROSTER.filter(p=>!p[key]).filter(excludeAlready);
-    if(!eligible.length) return `<div style="font-size:10px;color:var(--t3);padding:4px 0 2px">All eligible players assigned.</div>`;
-    return `<div style="display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap">
-      <select id="${id}" style="flex:1;min-width:130px;font-size:11px">
-        <option value="">+ Add from roster…</option>
-        ${eligible.map(p=>`<option value="${p.name}">${p.name} (${p.cls} — ${p.type})</option>`).join('')}
-      </select>
-      <button class="btn btn-s btn-sm" onclick="addResFromDropdown('${key}','${id}','${label}')">
-        <i class="ti ti-plus"></i> Assign
-      </button>
-    </div>`;
-  }
-
-  document.getElementById('res-hydross').innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:10px">
-      <div>
-        <div class="sht" style="margin-bottom:6px">
-          <i class="ti ti-snowflake" style="color:#69CCF0"></i> Frost Resistance
-        </div>
-        ${fPlayers.length
-          ? fPlayers.map(p=>resRow(p,'resFrost','res-f','❄ Frost Res')).join('')
-          : `<div style="font-size:11px;color:var(--red);padding:4px 0">⚠ Nobody assigned yet</div>`}
-        ${addDropdown('resFrost',()=>true,'add-frost-sel','Frost Res')}
-      </div>
-      <div>
-        <div class="sht" style="margin-bottom:6px">
-          <i class="ti ti-leaf" style="color:#ABD473"></i> Nature Resistance
-        </div>
-        ${nPlayers.length
-          ? nPlayers.map(p=>resRow(p,'resNature','res-n','🌿 Nature Res')).join('')
-          : `<div style="font-size:11px;color:var(--red);padding:4px 0">⚠ Nobody assigned yet</div>`}
-        ${addDropdown('resNature',()=>true,'add-nature-sel','Nature Res')}
-      </div>
-    </div>
-    <div class="bnote">
-      <i class="ti ti-info-circle"></i>
-      Hydross requires at least 1 frost res tank and 1 nature res tank.
-      Any roster member can be assigned — pick the correct tank or designated player.
-    </div>`;
-
-  document.getElementById('res-fire').innerHTML=`
-    <div class="sht" style="margin-bottom:8px">
-      <i class="ti ti-flame" style="color:#ff8060"></i> Fire Resistance
-    </div>
-    ${fiPlayers.length
-      ? fiPlayers.map(p=>resRow(p,'resFire','res-fi','🔥 Fire Res')).join('')
-      : `<div style="font-size:11px;color:var(--red);padding:4px 0">⚠ Nobody assigned yet</div>`}
-    ${addDropdown('resFire',()=>true,'add-fire-sel','Fire Res')}
-    <div class="bnote" style="margin-top:10px">
-      <i class="ti ti-info-circle"></i>
-      Paladin tanks wear fire resistance plate. Warlocks can Felguard-tank with fire res gear.
-      Any player who has a fire resistance set can be added here.
-    </div>`;
-
-  // Weekly quick-assignment panel (unchanged concept, now uses the broader lists)
-  document.getElementById('res-weekly').innerHTML=`
-    <div style="font-size:11px;color:var(--t2);margin-bottom:10px">
-      Quick-assign one primary player per resistance type for this week's raids:
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-      ${[
-        {key:'resFrost', label:'❄ Frost', color:'#69CCF0'},
-        {key:'resNature',label:'🌿 Nature',color:'#ABD473'},
-        {key:'resFire',  label:'🔥 Fire',  color:'#ff8060'},
-      ].map(({key,label,color})=>{
-        const assigned=ROSTER.filter(p=>p[key]);
-        return `<div style="background:var(--bg3);border-radius:var(--r);padding:10px">
-          <div style="font-size:11px;font-weight:600;margin-bottom:6px;color:${color}">${label} Resistance</div>
-          <select style="width:100%;margin-bottom:6px" onchange="quickAssignRes(this.value,'${key}')" ${!isRL()?'disabled':''}>
-            <option value="">— Quick assign —</option>
-            ${ROSTER.map(p=>`<option value="${p.name}" ${p[key]?'selected':''}>${p.name} (${p.cls})</option>`).join('')}
-          </select>
-          <div style="font-size:10px;color:var(--t3)">
-            Assigned: ${assigned.map(p=>p.name).join(', ')||'<span style="color:var(--red)">None</span>'}
-          </div>
-        </div>`;
-      }).join('')}
-    </div>`;
-
-  renderResReadiness();
+  const el=document.getElementById("res-content"); if(!el) return;
+  el.innerHTML=`<div class="empty"><i class="ti ti-shield-off"></i><p>No resistance requirements for the current content.</p><p style="font-size:11px;color:var(--t3);margin-top:4px">Resistance fights will appear here once they are added for the new raids.</p></div>`;
 }
 
 // ── Resistance readiness (per-fight check vs. each player's gear resist) ──
