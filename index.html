@@ -161,6 +161,10 @@ tr:hover td{background:rgba(255,255,255,.013)}
 .tog.on{background:var(--gre);border-color:var(--gre)}
 .tog::after{content:'';position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:#fff;transition:transform .13s;box-shadow:0 1px 3px rgba(0,0,0,.4)}
 .tog.on::after{transform:translateX(17px)}
+.tog.sm{width:32px;height:18px}
+.tog.sm::after{width:13px;height:13px}
+.tog.sm.on::after{transform:translateX(14px)}
+.rtogl{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--t2);cursor:pointer;user-select:none;white-space:nowrap}
 /* EMPTY */
 .empty{text-align:center;padding:36px 16px;color:var(--t3)}
 .empty i{font-size:28px;display:block;margin-bottom:8px;opacity:.3}
@@ -582,11 +586,13 @@ tr:hover td{background:rgba(255,255,255,.013)}
     </div>
   </div>
   <div class="srow" id="roster-stats"></div>
-  <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+  <div style="display:flex;gap:10px 16px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
     <select id="rf-type" onchange="renderRoster()" style="width:auto"><option value="">All roles</option><option>Tank</option><option>Healer</option><option>Melee</option><option>Ranged</option></select>
     <select id="rf-cls" onchange="renderRoster()" style="width:auto"><option value="">All classes</option></select>
-    <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--t2);cursor:pointer"><input type="checkbox" id="rf-pres" onchange="renderRoster()"> Present only</label>
-    <select id="rf-alt" onchange="renderRoster()" style="width:auto"><option value="">Mains &amp; Alts</option><option value="main">Mains only</option><option value="alt">Alts only</option></select>
+    <label class="rtogl"><span class="tog sm" id="sw-pres" onclick="toggleRosterFilter('pres')"></span> Present only</label>
+    <label class="rtogl"><span class="tog sm" id="sw-alts" onclick="toggleRosterFilter('alts')"></span> Show alts</label>
+    <label class="rtogl"><span class="tog sm" id="sw-active" onclick="toggleRosterFilter('active')"></span> Active raiders</label>
+    <label class="rtogl"><span class="tog sm" id="sw-group" onclick="toggleRosterFilter('group')"></span> Group alts under main</label>
     <div style="flex:1"></div>
     <button class="btn btn-s btn-sm" id="add-player-toggle" onclick="toggleAddPlayer()" style="display:none"><i class="ti ti-plus"></i>Add player</button>
   </div>
@@ -603,8 +609,6 @@ tr:hover td{background:rgba(255,255,255,.013)}
     </tr></thead>
     <tbody id="roster-tbody"></tbody>
   </table>
-  <!-- RL-only weight panel, rendered by renderRoster() -->
-  <div id="weight-panel" style="display:none"></div>
 </div>
 
 <div class="page" id="page-roles">
@@ -699,7 +703,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="fg" style="margin-bottom:0"><span class="fl">Main spec</span><select id="sr-main"></select></div>
       <div class="fg" style="margin-bottom:0"><span class="fl">Off-spec (optional)</span><select id="sr-off"></select></div>
     </div>
-    <div class="fg" style="margin-top:12px"><span class="fl">Main role</span><select id="sr-role"><option>Tank</option><option>Healer</option><option>Melee</option><option>Ranged</option><option>Mage Tank</option></select></div>
+    <div class="fg" style="margin-top:12px"><span class="fl">Main role</span><select id="sr-role"><option>Tank</option><option>Healer</option><option>Melee</option><option>Ranged</option></select></div>
     <button class="btn btn-p" onclick="applyMySpec()" style="margin-top:8px"><i class="ti ti-device-floppy"></i>Save my spec</button>
   </div>
 </div>
@@ -781,7 +785,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="fg"><span class="fl">End</span><input type="time" id="cr-end" value="23:00" style="width:100px"></div>
     </div>
     <div class="frow">
-      <div class="fg"><span class="fl">Max Players</span><input type="number" id="cr-max" value="25" min="1" max="40" style="width:80px"></div>
+      <div class="fg"><span class="fl">Raid Size</span><select id="cr-max" style="width:auto"><option value="40">40-man</option><option value="20">20-man</option><option value="10">10-man</option></select></div>
       <div class="fg"><span class="fl">Extra Time</span><select id="cr-extra" style="width:auto"><option value="0">None</option><option value="30" selected>+30 min</option><option value="60">+60 min</option></select></div>
       <div class="fg" style="flex:1"><span class="fl">Raid Leader</span><input id="cr-rl" placeholder="Name"></div>
     </div>
@@ -869,6 +873,15 @@ const OFFICER_KEY="whaapp-officer";
 let VIEW=null; // 'rl' | 'participant' | 'guest' | 'officer'
 let CURRENT_USER=null; // roster player when signed in by name
 let rosterSortCol='name';let rosterSortDir=1;
+// Roster view switches
+let rosterPresOnly=false, rosterShowAlts=true, rosterShowActive=true, rosterGroupAlts=false;
+function toggleRosterFilter(which){
+  if(which==='pres') rosterPresOnly=!rosterPresOnly;
+  else if(which==='alts') rosterShowAlts=!rosterShowAlts;
+  else if(which==='active') rosterShowActive=!rosterShowActive;
+  else if(which==='group') rosterGroupAlts=!rosterGroupAlts;
+  renderRoster();
+}
 let appTab='pending';let srTab='pending';let stTab='overview';
 let applications=[];let specRequests=[];let raidSchedule=[];let reviews=[];
 let leaves=[]; // Leave of absence: [{id,name,from,to,note,by}] — from/to inclusive YYYY-MM-DD
@@ -905,8 +918,8 @@ const CLASS_ROLES={
   Rogue:['Melee'],
   Priest:['Healer','Ranged'],  // Shadow = Ranged
   Shaman:['Healer','Melee','Ranged'],
-  Mage:['Ranged','Tank'],      // Mage tank (Spellsteal — Krosh style)
-  Warlock:['Ranged','Tank'],   // Warlock tank (Felguard — fire res)
+  Mage:['Ranged'],
+  Warlock:['Ranged'],
   Druid:['Tank','Healer','Melee','Ranged'],
 };
 // Spec → canonical role
@@ -920,16 +933,13 @@ const SPEC_ROLE={
   Marksmanship:'Ranged','Beast Mastery':'Ranged',Survival:'Ranged',
   Elemental:'Ranged',Balance:'Ranged',
 };
-const CLASS_SPECS={Warrior:['Protection','Fury','Arms'],Paladin:['Protection','Holy','Retribution'],Hunter:['Marksmanship','Beast Mastery','Survival'],Rogue:['Assassination','Combat','Subtlety'],Priest:['Holy','Discipline','Shadow'],Shaman:['Restoration','Enhancement','Elemental'],Mage:['Fire','Arcane','Frost'],Warlock:['Affliction','Destruction','Demonology'],Druid:['Guardian','Restoration','Balance','Feral']};
-const PROFESSIONS_PRIMARY=['Alchemy','Blacksmithing','Enchanting','Engineering','Herbalism','Jewelcrafting','Leatherworking','Mining','Skinning','Tailoring'];
+const CLASS_SPECS={Warrior:['Arms','Fury','Protection'],Paladin:['Holy','Protection','Retribution'],Hunter:['Beast Mastery','Marksmanship','Survival'],Rogue:['Assassination','Combat','Subtlety'],Priest:['Discipline','Holy','Shadow'],Shaman:['Elemental','Enhancement','Restoration'],Mage:['Arcane','Fire','Frost'],Warlock:['Affliction','Demonology','Destruction'],Druid:['Balance','Feral','Restoration']};
+const PROFESSIONS_PRIMARY=['Alchemy','Blacksmithing','Enchanting','Engineering','Herbalism','Leatherworking','Mining','Skinning','Tailoring'];
 const PROFESSIONS_SECONDARY=['Cooking','First Aid','Fishing'];
 
 let ROSTER=[];
 
 // Nether Vortex tally
-let vortexCounts={};  // {playerName: count}
-let vortexRequests=[]; // [{id, player, item, reason, status}]
-ROSTER.forEach(p=>vortexCounts[p.name]=0);
 
 // ─────────────────────────────────────────────────────────────
 // Alt tracking — { mainName: [altName, altName, ...] }
@@ -968,7 +978,6 @@ function normalizeRaidStatuses(){
   const today=todayKey();
   raidSchedule.forEach(r=>{if(r.status!=='completed'&&isPast(r.date)&&r.date!==today)r.status='completed';});
 }
-function saveVortex(){try{localStorage.setItem('whaapp-vortex',JSON.stringify(vortexCounts));}catch(e){}fbSet('vortex',vortexCounts);}
 function saveAlts(){
   try{localStorage.setItem('whaapp-alts',JSON.stringify(playerAlts));}catch(e){}
   fbSet('alts', playerAlts);
@@ -1093,10 +1102,6 @@ function removeLeave(id){
   renderLeave(); renderRaids?.(); renderCalendar?.();
   toast('Leave removed for '+lv.name,'ok');
 }
-function saveVortexRequests(){
-  try{localStorage.setItem('whaapp-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}
-  fbSet('vortexRequests', vortexRequests.length?vortexRequests:null);
-}
 function saveHealerTanks(){
   try{localStorage.setItem('whaapp-healerTanks',JSON.stringify(healerTanks));}catch(e){}
   fbSet('healerTanks', healerTanks);
@@ -1140,7 +1145,7 @@ function removeFromGroup(gi,name){
 function addToRaidGroup(raidId,gi,name){
   if(!name||!canManageRaids()) return;
   const r=raidSchedule.find(x=>x.id===raidId); if(!r) return;
-  const numGroups=r.max<=10?2:5;
+  const numGroups=Math.max(1,Math.ceil(r.max/5));
   const maxPerGrp=Math.ceil(r.max/numGroups);
   if(!r.raidGroups) r.raidGroups=Array.from({length:numGroups},()=>[]);
   if(r.raidGroups[gi]?.length>=maxPerGrp){toast('Group '+(gi+1)+' is full (max '+maxPerGrp+')','err');return;}
@@ -1159,7 +1164,7 @@ function autoAssignRaidGroups(raidId){
   const r=raidSchedule.find(x=>x.id===raidId);
   if(!r||!r.confirmed.length){toast('No confirmed roster to assign','err');return;}
   const conf=r.confirmed.map(n=>gp(n)).filter(Boolean);
-  const numGroups=r.max<=10?2:5;
+  const numGroups=Math.max(1,Math.ceil(r.max/5));
   const maxPerGrp=Math.ceil(r.max/numGroups);
   const g=Array.from({length:numGroups},()=>[]);
   const placed=new Set();
@@ -2229,14 +2234,13 @@ function setView(v, user){
   if(v==='rl'){
     document.querySelector('#nav-rl .ni')?.click();
     // Seed ONLY keys that are empty in Firebase — never overwrite existing data
-    seedIfEmpty('roster',saveRoster); seedIfEmpty('raids',saveRaids); seedIfEmpty('vortex',saveVortex);
+    seedIfEmpty('roster',saveRoster); seedIfEmpty('raids',saveRaids);
     seedIfEmpty('weights',saveWeights); seedIfEmpty('alts',saveAlts); seedIfEmpty('roleOverrides',saveRoleOverrides);
     seedIfEmpty('healerTanks',saveHealerTanks); seedIfEmpty('groups',saveGroups);
     if(applications.length) seedIfEmpty('applications',saveApplications);
     if(specRequests.length) seedIfEmpty('specRequests',saveSpecRequests);
     if(reviews.length) seedIfEmpty('reviews',saveReviews);
     if(leaves.length) seedIfEmpty('leaves',saveLeaves);
-    if(vortexRequests.length) seedIfEmpty('vortexRequests',saveVortexRequests);
     if(Object.keys(guildEffortData).length||Object.keys(guildBankStock).length||guildExtraItems.length||Object.keys(playerProfessions).length) seedIfEmpty('guildEffort',saveGE);
     if(Object.keys(diagramPositions).length) seedIfEmpty('diagramPositions',saveDiagramPositions);
   }
@@ -2250,7 +2254,6 @@ function setView(v, user){
     if(specRequests.length) seedIfEmpty('specRequests',saveSpecRequests);
     if(reviews.length) seedIfEmpty('reviews',saveReviews);
     if(leaves.length) seedIfEmpty('leaves',saveLeaves);
-    if(vortexRequests.length) seedIfEmpty('vortexRequests',saveVortexRequests);
     if(Object.keys(guildEffortData).length||Object.keys(guildBankStock).length||guildExtraItems.length||Object.keys(playerProfessions).length) seedIfEmpty('guildEffort',saveGE);
     if(Object.keys(diagramPositions).length) seedIfEmpty('diagramPositions',saveDiagramPositions);
   }
@@ -2473,172 +2476,209 @@ function startRaidTimer(){
 // GUILD EFFORT — consumable shopping list & contributions
 // ============================================================
 const CONSUMABLES = {
+  // ── FLASKS (persist through death — the premium raid consumable) ───────
+  flask: [
+    {id:'flask_titans', name:'Flask of the Titans', stat:'+1200 max HP (persists through death)',
+     url:'https://www.wowhead.com/classic/item=13510', roles:['Tank','Melee'],
+     recipe:{skill:'Alchemy (300)', reagents:['Gromsblood x7','Stonescale Oil x3','Black Lotus x1','Crystal Vial x1']}},
+    {id:'flask_supreme', name:'Flask of Supreme Power', stat:'+150 spell damage (persists through death)',
+     url:'https://www.wowhead.com/classic/item=13512', roles:['Ranged'],
+     recipe:{skill:'Alchemy (300)', reagents:['Dreamfoil x7','Mountain Silversage x3','Black Lotus x1','Crystal Vial x1']}},
+    {id:'flask_wisdom', name:'Flask of Distilled Wisdom', stat:'+2000 max mana (persists through death)',
+     url:'https://www.wowhead.com/classic/item=13511', roles:['Healer','Ranged'],
+     recipe:{skill:'Alchemy (300)', reagents:['Dreamfoil x7','Icecap x3','Black Lotus x1','Crystal Vial x1']}},
+    {id:'flask_chromatic', name:'Flask of Chromatic Resistance', stat:'+25 resistance to all magic schools',
+     url:'https://www.wowhead.com/classic/item=13513', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Alchemy (300)', reagents:['Icecap x7','Mountain Silversage x3','Black Lotus x1','Crystal Vial x1']}},
+  ],
+  // ── BATTLE ELIXIRS ────────────────────────────────────────────────────
   battle: [
-    {id:'elx_shadow',  name:'Elixir of Major Shadow Power', stat:'+55 Shadow Spell Dmg',
-     url:'https://www.wowhead.com/tbc/item=22835', roles:['Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Ancient Lichen x1','Nightmare Vine x1','Crystal Vial x1']}},
-    {id:'elx_agility', name:'Elixir of Major Agility',      stat:'+35 Agi, +20 Crit',
-     url:'https://www.wowhead.com/tbc/item=22831', roles:['Melee','Ranged','Tank'],
-     recipe:{skill:'Alchemy', reagents:['Terocone x1','Felweed x2','Crystal Vial x1']}},
-    {id:'elx_firepower',name:'Elixir of Major Firepower',   stat:'+55 Fire Spell Dmg',
-     url:'https://www.wowhead.com/tbc/item=22833', roles:['Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Mote of Fire x2','Ancient Lichen x1','Crystal Vial x1']}},
-    {id:'elx_frost',   name:'Elixir of Major Frost Power',  stat:'+55 Frost Spell Dmg',
-     url:'https://www.wowhead.com/tbc/item=22827', roles:['Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Mote of Water x2','Ancient Lichen x1','Crystal Vial x1']}},
-    {id:'elx_healing', name:'Elixir of Healing Power',      stat:'+50 Healing',
-     url:'https://www.wowhead.com/tbc/item=22825', roles:['Healer'],
-     recipe:{skill:'Alchemy', reagents:['Golden Sansam x1','Dreaming Glory x1','Crystal Vial x1']}},
-    {id:'elx_strength',name:'Elixir of Major Strength',     stat:'+35 Strength',
-     url:'https://www.wowhead.com/tbc/item=22824', roles:['Melee','Tank'],
-     recipe:{skill:'Alchemy', reagents:['Mountain Silversage x1','Felweed x1','Crystal Vial x1']}},
-    {id:'elx_onslaught',name:'Onslaught Elixir',            stat:'+60 Attack Power',
-     url:'https://www.wowhead.com/tbc/item=28102', roles:['Melee','Ranged'],
-     recipe:{skill:'Alchemy', reagents:['See Wowhead link for exact mats']}},
-    {id:'elx_adept',   name:"Adept's Elixir",               stat:'+24 Spell Dmg/Heal, +24 Spell Crit',
-     url:'https://www.wowhead.com/tbc/item=28103', roles:['Ranged','Healer'],
-     recipe:{skill:'Alchemy', reagents:['Dreamfoil x1','Felweed x1','Crystal Vial x1']}},
-    {id:'elx_mastery', name:'Elixir of Mastery',            stat:'+15 All Stats',
-     url:'https://www.wowhead.com/tbc/item=28104', roles:['Tank','Healer','Melee','Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Terocone x1','Felweed x1','Crystal Vial x1']}},
-    {id:'elx_mongoose',name:'Elixir of the Mongoose',       stat:'+25 Agi, +28 Crit',
-     url:'https://www.wowhead.com/tbc/item=13452', roles:['Melee','Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Mountain Silversage x2','Sorrowmoss x2','Crystal Vial x1']}},
-    {id:'elx_demonslaying',name:'Elixir of Demonslaying',   stat:'+265 AP vs Demons (5 min)',
-     url:'https://www.wowhead.com/tbc/item=9224', roles:['Melee','Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Gromsblood x1','Ghost Mushroom x1','Crystal Vial x1']}},
-    {id:'elx_felstrength',name:'Fel Strength Elixir',       stat:'+90 AP, -10 Stamina',
-     url:'https://www.wowhead.com/tbc/item=31679', roles:['Melee'],
-     recipe:{skill:'Alchemy', reagents:['Terocone x1','Nightmare Vine x2','Crystal Vial x1']}},
-    {id:'elx_arcane',  name:'Greater Arcane Elixir',        stat:'+35 Spell Dmg/Heal',
-     url:'https://www.wowhead.com/tbc/item=13454', roles:['Ranged','Healer'],
-     recipe:{skill:'Alchemy', reagents:['Dreamfoil x3','Mountain Silversage x1','Crystal Vial x1']}},
+    {id:'elx_mongoose', name:'Elixir of the Mongoose', stat:'+25 Agility, +2% Crit',
+     url:'https://www.wowhead.com/classic/item=13452', roles:['Melee','Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'elx_giants', name:'Elixir of Giants', stat:'+25 Strength',
+     url:'https://www.wowhead.com/classic/item=9206', roles:['Tank','Melee'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'elx_gtragility', name:'Elixir of Greater Agility', stat:'+25 Agility',
+     url:'https://www.wowhead.com/classic/item=9187', roles:['Melee','Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'elx_arcane', name:'Greater Arcane Elixir', stat:'+35 spell damage',
+     url:'https://www.wowhead.com/classic/item=13454', roles:['Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'elx_shadowpower', name:'Elixir of Shadow Power', stat:'+40 Shadow damage',
+     url:'https://www.wowhead.com/classic/item=9264', roles:['Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'elx_gtrfirepower', name:'Elixir of Greater Firepower', stat:'+40 Fire damage',
+     url:'https://www.wowhead.com/classic/item=21546', roles:['Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'elx_frostpower', name:'Elixir of Frost Power', stat:'+15 Frost damage',
+     url:'https://www.wowhead.com/classic/item=17708', roles:['Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'elx_bruteforce', name:'Elixir of Brute Force', stat:'+18 Strength, +18 Stamina',
+     url:'https://www.wowhead.com/classic/item=13453', roles:['Tank','Melee'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'elx_firewater', name:'Winterfall Firewater', stat:'+35 Attack Power',
+     url:'https://www.wowhead.com/classic/item=12820', roles:['Melee'],
+     recipe:{skill:'World drop — Winterfall furbolgs (Winterspring)', reagents:['Not crafted — farmed']}},
   ],
+  // ── GUARDIAN ELIXIRS ──────────────────────────────────────────────────
   guardian: [
-    {id:'gelx_mageblood',name:'Elixir of Major Mageblood',  stat:'+16 MP5',
-     url:'https://www.wowhead.com/tbc/item=22840', roles:['Healer','Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Ancient Lichen x1','Netherbloom x1','Crystal Vial x1']}},
-    {id:'gelx_defense', name:'Elixir of Major Defense',     stat:'+550 Armor',
-     url:'https://www.wowhead.com/tbc/item=22834', roles:['Tank'],
-     recipe:{skill:'Alchemy', reagents:['Ancient Lichen x3','Terocone x1','Imbued Vial x1']}},
-    {id:'gelx_fortitude',name:'Elixir of Major Fortitude',  stat:'+250 HP, +10 HP5',
-     url:'https://www.wowhead.com/tbc/item=32062', roles:['Tank','Healer'],
-     recipe:{skill:'Alchemy', reagents:['Ragveil x2','Felweed x1','Crystal Vial x1']}},
-    {id:'gelx_wisdom',  name:'Elixir of Draenic Wisdom',    stat:'+30 Int, +30 Spirit',
-     url:'https://www.wowhead.com/tbc/item=32067', roles:['Healer','Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Felweed x1','Terocone x1','Crystal Vial x1']}},
-    {id:'gelx_empowerment',name:'Elixir of Empowerment',    stat:'-30 Target Magic Resist',
-     url:'https://www.wowhead.com/tbc/item=22848', roles:['Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Netherbloom x1','Mana Thistle x1','Crystal Vial x1']}},
-    {id:'gelx_ironskin', name:'Elixir of Ironskin',         stat:'+30 Resilience',
-     url:'https://www.wowhead.com/tbc/item=32068', roles:['Tank'],
-     recipe:{skill:'Alchemy', reagents:['Ancient Lichen x1','Ragveil x1','Crystal Vial x1']}},
-    {id:'gelx_earthen', name:'Earthen Elixir',              stat:'-20 Phys/Magic Dmg taken',
-     url:'https://www.wowhead.com/tbc/item=32063', roles:['Tank'],
-     recipe:{skill:'Alchemy', reagents:['Dreaming Glory x1','Ragveil x2','Crystal Vial x1']}},
-    {id:'gelx_arthas',  name:'Gift of Arthas',               stat:'+10 Shadow Resist, disease debuff on attackers',
-     url:'https://www.wowhead.com/tbc/item=9088', roles:['Tank','Healer','Melee','Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Blindweed x3','Crystal Vial x1']}},
+    {id:'gelx_fortitude', name:'Elixir of Fortitude', stat:'+120 max HP',
+     url:'https://www.wowhead.com/classic/item=3825', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'gelx_mageblood', name:'Mageblood Potion', stat:'+12 mana per 5 sec',
+     url:'https://www.wowhead.com/classic/item=20007', roles:['Healer','Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'gelx_superdef', name:'Elixir of Superior Defense', stat:'+450 Armor',
+     url:'https://www.wowhead.com/classic/item=13445', roles:['Tank','Melee'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'gelx_mightytroll', name:"Mighty Troll's Blood Potion", stat:'+12 HP per 5 sec',
+     url:'https://www.wowhead.com/classic/item=3826', roles:['Tank'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'gelx_arthas', name:'Gift of Arthas', stat:'+10 Shadow Res; disease debuff on attackers',
+     url:'https://www.wowhead.com/classic/item=9088', roles:['Tank'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
   ],
+  // ── RESISTANCE / PROTECTION POTIONS ───────────────────────────────────
+  protection: [
+    {id:'prot_fire', name:'Greater Fire Protection Potion', stat:'Absorbs Fire damage (MC/BWL/Ragnaros)',
+     url:'https://www.wowhead.com/classic/item=13457', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'prot_frost', name:'Greater Frost Protection Potion', stat:'Absorbs Frost damage (Naxx/Sapphiron)',
+     url:'https://www.wowhead.com/classic/item=13456', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'prot_nature', name:'Greater Nature Protection Potion', stat:'Absorbs Nature damage (AQ/Huhuran)',
+     url:'https://www.wowhead.com/classic/item=13458', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'prot_shadow', name:'Greater Shadow Protection Potion', stat:'Absorbs Shadow damage (BWL/Naxx)',
+     url:'https://www.wowhead.com/classic/item=13459', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'prot_arcane', name:'Greater Arcane Protection Potion', stat:'Absorbs Arcane damage',
+     url:'https://www.wowhead.com/classic/item=13461', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+  ],
+  // ── COMBAT POTIONS ────────────────────────────────────────────────────
   potion: [
-    {id:'pot_supermana',  name:'Super Mana Potion',          stat:'+1800-3001 Mana',
-     url:'https://www.wowhead.com/tbc/item=22832', roles:['Healer','Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Dreaming Glory x2','Felweed x1','Crystal Vial x1']}},
-    {id:'pot_superhealth',name:'Super Healing Potion',       stat:'+1500-2501 HP',
-     url:'https://www.wowhead.com/tbc/item=22829', roles:['Tank','Melee','Healer'],
-     recipe:{skill:'Alchemy', reagents:['Netherbloom x2','Felweed x1','Crystal Vial x1']}},
-    {id:'pot_destruction',name:'Destruction Potion',         stat:'+2% Crit, +120 Spell Dmg (15s)',
-     url:'https://www.wowhead.com/tbc/item=22839', roles:['Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Nightmare Vine x2','Netherbloom x1','Crystal Vial x1']}},
-    {id:'pot_haste',      name:'Haste Potion',               stat:'+400 Haste (15s)',
-     url:'https://www.wowhead.com/tbc/item=22838', roles:['Melee','Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Terocone x2','Netherbloom x1','Crystal Vial x1']}},
-    {id:'pot_heroic',     name:'Heroic Potion',              stat:'+70 Str, +700 HP (15s)',
-     url:'https://www.wowhead.com/tbc/item=22837', roles:['Melee','Tank'],
-     recipe:{skill:'Alchemy', reagents:['Terocone x2','Ancient Lichen x1','Crystal Vial x1']}},
-    {id:'pot_insanestr',  name:'Insane Strength Potion',     stat:'+120 Str, -75 Defense (15s)',
-     url:'https://www.wowhead.com/tbc/item=22828', roles:['Melee'],
-     recipe:{skill:'Alchemy', reagents:['Terocone x3','Crystal Vial x1']}},
-    {id:'pot_shadow',     name:'Major Shadow Protection Potion', stat:'Absorbs 2800-4001 Shadow (makes 5)',
-     url:'https://www.wowhead.com/tbc/item=22846', roles:['Tank','Healer','Melee','Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Primal Shadow x1','Mana Thistle x3','Crystal Vial x5']}},
-    {id:'pot_fire',       name:'Major Fire Protection Potion',   stat:'Absorbs 2800-4001 Fire (makes 5)',
-     url:'https://www.wowhead.com/tbc/item=22841', roles:['Tank','Melee','Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Primal Fire x1','Mana Thistle x3','Crystal Vial x5']}},
-    {id:'pot_nature',     name:'Major Nature Protection Potion', stat:'Absorbs 2800-4001 Nature (makes 5)',
-     url:'https://www.wowhead.com/tbc/item=22844', roles:['Tank','Healer','Melee','Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Primal Life x1','Mana Thistle x3','Crystal Vial x5']}},
-    {id:'pot_frost',      name:'Major Frost Protection Potion',  stat:'Absorbs 2800-4001 Frost (makes 5)',
-     url:'https://www.wowhead.com/tbc/item=22842', roles:['Tank','Melee','Ranged'],
-     recipe:{skill:'Alchemy', reagents:['Primal Water x1','Mana Thistle x3','Crystal Vial x5']}},
-    {id:'pot_arcane',     name:'Major Arcane Protection Potion', stat:'Absorbs 2800-4001 Arcane (makes 5)',
-     url:'https://www.wowhead.com/tbc/item=22845', roles:['Ranged','Healer'],
-     recipe:{skill:'Alchemy', reagents:['Primal Mana x1','Mana Thistle x3','Crystal Vial x5']}},
-    {id:'pot_holy',       name:'Major Holy Protection Potion',   stat:'Absorbs 2800-4001 Holy (makes 5)',
-     url:'https://www.wowhead.com/tbc/item=22847', roles:['Tank','Healer'],
-     recipe:{skill:'Alchemy', reagents:['Primal Life x1','Mana Thistle x3','Crystal Vial x5']}},
-    {id:'pot_mightyrage', name:'Mighty Rage Potion',         stat:'+30-90 Rage, +25 Str (20s)',
-     url:'https://www.wowhead.com/tbc/item=13442', roles:['Tank','Melee'],
-     recipe:{skill:'Alchemy', reagents:['Gromsblood x3','Crystal Vial x1']}},
-    {id:'pot_rejuv',      name:'Super Rejuvenation Potion',  stat:'+1650-2751 Mana & HP',
-     url:'https://www.wowhead.com/tbc/item=22850', roles:['Healer'],
-     recipe:{skill:'Alchemy', reagents:['Mana Thistle x2','Dreaming Glory x1','Netherbloom x1','Crystal Vial x1']}},
+    {id:'pot_majorheal', name:'Major Healing Potion', stat:'Restores ~1050 HP',
+     url:'https://www.wowhead.com/classic/item=13446', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'pot_majormana', name:'Major Mana Potion', stat:'Restores ~1500 mana',
+     url:'https://www.wowhead.com/classic/item=13444', roles:['Healer','Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'pot_mightyrage', name:'Mighty Rage Potion', stat:'+45-75 Rage, +25 Strength',
+     url:'https://www.wowhead.com/classic/item=13442', roles:['Tank','Melee'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'pot_freeaction', name:'Free Action Potion', stat:'Immune to stun & snare for 30s',
+     url:'https://www.wowhead.com/classic/item=5634', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'pot_livingaction', name:'Living Action Potion', stat:'Removes & is immune to movement-impairing',
+     url:'https://www.wowhead.com/classic/item=20008', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+    {id:'pot_restorative', name:'Restorative Potion', stat:'Periodically removes magic/curse/poison/disease',
+     url:'https://www.wowhead.com/classic/item=9030', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
   ],
+  // ── WEAPON ENHANCEMENTS (oils & stones) ───────────────────────────────
   weapon: [
-    {id:'oil_mana',  name:'Brilliant Mana Oil',        stat:'+12 MP5, +25 Healing',
-     url:'https://www.wowhead.com/tbc/item=20748', roles:['Healer'],
-     recipe:{skill:'Enchanting', reagents:['Large Brilliant Shard x2','Purple Lotus x3','Crystal Vial x1']}},
-    {id:'oil_wizard',name:'Superior Wizard Oil',       stat:'+42 Spell Dmg',
-     url:'https://www.wowhead.com/tbc/item=22522', roles:['Ranged'],
-     recipe:{skill:'Enchanting', reagents:['Arcane Dust x3','Nightmare Vine x1','Crystal Vial x1']}},
-    {id:'stone_sharp',name:'Adamantite Sharpening Stone', stat:'+12 Weapon Dmg, +14 Crit',
-     url:'https://www.wowhead.com/tbc/item=23529', roles:['Melee'],
-     recipe:{skill:'Blacksmithing', reagents:['Adamantite Bar x1','Mote of Earth x2']}},
-    {id:'stone_weight',name:'Adamantite Weightstone',  stat:'+12 Weapon Dmg, +14 Crit',
-     url:'https://www.wowhead.com/tbc/item=28421', roles:['Melee'],
-     recipe:{skill:'Blacksmithing', reagents:['Adamantite Bar x1','Netherweave Cloth x2']}},
+    {id:'oil_wizard', name:'Brilliant Wizard Oil', stat:'+36 spell damage, +1% spell crit',
+     url:'https://www.wowhead.com/classic/item=20749', roles:['Ranged'],
+     recipe:{skill:'Enchanting', reagents:['See Wowhead link for mats']}},
+    {id:'oil_mana', name:'Brilliant Mana Oil', stat:'+12 MP5, +25 Healing',
+     url:'https://www.wowhead.com/classic/item=20748', roles:['Healer'],
+     recipe:{skill:'Enchanting', reagents:['See Wowhead link for mats']}},
+    {id:'stone_dense', name:'Dense Sharpening Stone', stat:'+8 weapon damage (edged)',
+     url:'https://www.wowhead.com/classic/item=12404', roles:['Tank','Melee'],
+     recipe:{skill:'Blacksmithing', reagents:['See Wowhead link for mats']}},
+    {id:'weight_dense', name:'Dense Weightstone', stat:'+8 weapon damage (blunt)',
+     url:'https://www.wowhead.com/classic/item=12643', roles:['Tank','Melee'],
+     recipe:{skill:'Blacksmithing', reagents:['See Wowhead link for mats']}},
+    {id:'stone_elemental', name:'Elemental Sharpening Stone', stat:'+2% crit (edged)',
+     url:'https://www.wowhead.com/classic/item=18262', roles:['Melee'],
+     recipe:{skill:'Drop — elemental mobs / AH', reagents:['Not crafted — farmed or AH']}},
+    {id:'stone_consecrated', name:'Consecrated Sharpening Stone', stat:'+100 damage vs Undead (Naxx)',
+     url:'https://www.wowhead.com/classic/item=23122', roles:['Tank','Melee'],
+     recipe:{skill:'Argent Dawn rep vendor', reagents:['Bought with AD tokens']}},
+    {id:'oil_blessedwizard', name:'Blessed Wizard Oil', stat:'+60 spell damage vs Undead (Naxx)',
+     url:'https://www.wowhead.com/classic/item=23123', roles:['Ranged','Healer'],
+     recipe:{skill:'Argent Dawn rep vendor', reagents:['Bought with AD tokens']}},
   ],
   // ── FOOD (well-fed buffs) ─────────────────────────────────────────────
   food: [
-    {id:'food_crawdad',   name:'Spicy Crawdad',      stat:'+30 Stamina, +20 Spirit — Tank food',
-     url:'https://www.wowhead.com/tbc/item=27859', roles:['Tank','Healer'],
-     recipe:{skill:'Cooking', reagents:['Furious Crawdad x1','Hot Spices x1']}},
-    {id:'food_fishsticks',name:'Golden Fish Sticks', stat:'+44 Healing, +20 Spirit — Healer food',
-     url:'https://www.wowhead.com/tbc/item=27661', roles:['Healer'],
-     recipe:{skill:'Cooking', reagents:['Golden Darter x1','Mild Spices x1']}},
-    {id:'food_warpburger', name:'Warp Burger',       stat:'+20 Agility, +20 Stamina — Melee food',
-     url:'https://www.wowhead.com/tbc/item=27658', roles:['Melee'],
-     recipe:{skill:'Cooking', reagents:['Warped Flesh x1','Mild Spices x1']}},
-    {id:'food_ravagerdog', name:'Ravager Dog',       stat:'+20 Attack Power, +20 Stamina — Melee food',
-     url:'https://www.wowhead.com/tbc/item=27655', roles:['Melee'],
-     recipe:{skill:'Cooking', reagents:['Ravager Flesh x1','Mild Spices x1']}},
-    {id:'food_ranged',    name:'Ranged DPS Food (Blackened Basilisk)', stat:'+23 Spell Dmg, +20 Spirit — Ranged/caster food',
-     url:'https://www.wowhead.com/tbc/item=27657', roles:['Ranged'],
-     recipe:{skill:'Cooking', reagents:["Chunk o' Basilisk x1",'Hot Spices x1']}},
+    {id:'food_squid', name:'Grilled Squid', stat:'+10 Agility (well fed)',
+     url:'https://www.wowhead.com/classic/item=13928', roles:['Melee','Ranged'],
+     recipe:{skill:'Cooking', reagents:['See Wowhead link for mats']}},
+    {id:'food_nightfin', name:'Nightfin Soup', stat:'+8 Spirit, +mana regen (well fed)',
+     url:'https://www.wowhead.com/classic/item=13931', roles:['Healer','Ranged'],
+     recipe:{skill:'Cooking', reagents:['See Wowhead link for mats']}},
+    {id:'food_wolfsteak', name:'Tender Wolf Steak', stat:'+12 Stamina, +12 Spirit (well fed)',
+     url:'https://www.wowhead.com/classic/item=18045', roles:['Tank','Healer'],
+     recipe:{skill:'Cooking', reagents:['See Wowhead link for mats']}},
+    {id:'food_dumplings', name:'Smoked Desert Dumplings', stat:'+20 Strength (well fed)',
+     url:'https://www.wowhead.com/classic/item=20452', roles:['Tank','Melee'],
+     recipe:{skill:'Cooking', reagents:['See Wowhead link for mats']}},
+    {id:'food_runntum', name:'Runn Tum Tuber Surprise', stat:'+10 Intellect (well fed)',
+     url:'https://www.wowhead.com/classic/item=18254', roles:['Healer','Ranged'],
+     recipe:{skill:'Cooking', reagents:['See Wowhead link for mats']}},
+    {id:'food_chimaerok', name:"Dirge's Kickin' Chimaerok Chops", stat:'+25 Stamina (well fed)',
+     url:'https://www.wowhead.com/classic/item=21023', roles:['Tank'],
+     recipe:{skill:'Cooking (rare)', reagents:['See Wowhead link for mats']}},
+    {id:'food_sagefish', name:'Smoked Sagefish', stat:'+mana regen (well fed)',
+     url:'https://www.wowhead.com/classic/item=21072', roles:['Healer','Ranged'],
+     recipe:{skill:'Cooking', reagents:['See Wowhead link for mats']}},
   ],
   // ── ENGINEERING GADGETS ───────────────────────────────────────────────
   engineering: [
-    {id:'eng_sapper',    name:'Super Sapper Charge',  stat:'~900-1300 Fire AoE (thrown)',
-     url:'https://www.wowhead.com/tbc/item=23827', roles:['Tank','Melee','Ranged'],
-     recipe:{skill:'Engineering', reagents:['Netherweave Cloth x4','Elemental Blasting Powder x4','Primal Mana x1']}},
-    {id:'eng_repairbot', name:'Field Repair Bot 110G (Repair Bot)', stat:'Repairs gear & acts as vendor — raid utility',
-     url:'https://www.wowhead.com/tbc/item=34113', roles:['Tank','Healer','Melee','Ranged'],
-     recipe:{skill:'Engineering', reagents:['Adamantite Bar x8','Handful of Fel Iron Bolts x8','Khorium Power Core x1']}},
-    {id:'eng_arcanebomb',name:'Arcane Bomb',          stat:'Drains mana + silences casters 5s (AoE)',
-     url:'https://www.wowhead.com/tbc/item=16040', roles:['Ranged'],
-     recipe:{skill:'Engineering', reagents:['Delicate Arcanite Converter x1','Thorium Bar x3','Runecloth x1']}},
+    {id:'eng_sapper', name:'Goblin Sapper Charge', stat:'~450-750 Fire AoE (also self-damage)',
+     url:'https://www.wowhead.com/classic/item=10646', roles:['Tank','Melee','Ranged'],
+     recipe:{skill:'Engineering', reagents:['See Wowhead link for mats']}},
+    {id:'eng_dynamite', name:'Dense Dynamite', stat:'~340-460 Fire AoE',
+     url:'https://www.wowhead.com/classic/item=18641', roles:['Melee','Ranged'],
+     recipe:{skill:'Engineering', reagents:['See Wowhead link for mats']}},
+    {id:'eng_grenade', name:'Thorium Grenade', stat:'~300-500 Fire AoE + 3s stun',
+     url:'https://www.wowhead.com/classic/item=15993', roles:['Tank','Melee','Ranged'],
+     recipe:{skill:'Engineering', reagents:['See Wowhead link for mats']}},
+    {id:'eng_repair', name:'Field Repair Bot 74A', stat:'Repairs gear — raid utility',
+     url:'https://www.wowhead.com/classic/item=17118', roles:['Tank','Healer','Melee','Ranged'],
+     recipe:{skill:'Engineering', reagents:['See Wowhead link for mats']}},
   ],
-  // ── RUNES & TANK WARDS ────────────────────────────────────────────────
-  runes: [
-    {id:'rune_dark',     name:'Dark Rune',            stat:'Restore 900-1500 mana (costs health) — Healers & RDPS',
-     url:'https://www.wowhead.com/tbc/item=20520', roles:['Healer','Ranged'],
-     recipe:{skill:'World drop / Auction House', reagents:['Not crafted — farmed or purchased']}},
-    {id:'ward_warding',  name:'Warding (tank-applied)', stat:'Tank mitigation — apply before pull',
-     url:'https://www.wowhead.com/tbc/search?q=warding', roles:['Tank'],
-     recipe:{skill:'Consumable', reagents:['Applied by tanks before the pull']}},
-    {id:'ward_shielding',name:'Shielding (tank-applied)', stat:'Tank damage absorb — apply before pull',
-     url:'https://www.wowhead.com/tbc/search?q=shielding', roles:['Tank'],
-     recipe:{skill:'Consumable', reagents:['Applied by tanks before the pull']}},
+  // ── RUNES, ZANZA, JUJU & SCROLLS ──────────────────────────────────────
+  misc: [
+    {id:'rune_demonic', name:'Demonic Rune', stat:'Restore ~900-1500 mana (costs HP)',
+     url:'https://www.wowhead.com/classic/item=12662', roles:['Healer','Ranged'],
+     recipe:{skill:'Drop — demons / Dire Maul', reagents:['Not crafted — farmed']}},
+    {id:'rune_dark', name:'Dark Rune', stat:'Restore ~900-1500 mana (costs HP)',
+     url:'https://www.wowhead.com/classic/item=20520', roles:['Healer','Ranged'],
+     recipe:{skill:'Drop — Blackrock / Scholomance', reagents:['Not crafted — farmed']}},
+    {id:'zanza_spirit', name:'Spirit of Zanza', stat:'+50 max HP & Mana (2h)',
+     url:'https://www.wowhead.com/classic/item=20079', roles:['Tank','Healer'],
+     recipe:{skill:"Zul'Gurub — Zandalar rep vendor", reagents:['Bought with ZG coins']}},
+    {id:'zanza_swift', name:'Swiftness of Zanza', stat:'+haste / attack speed (2h)',
+     url:'https://www.wowhead.com/classic/item=20081', roles:['Melee','Ranged'],
+     recipe:{skill:"Zul'Gurub — Zandalar rep vendor", reagents:['Bought with ZG coins']}},
+    {id:'zanza_sheen', name:'Sheen of Zanza', stat:'+spell damage & healing (2h)',
+     url:'https://www.wowhead.com/classic/item=20080', roles:['Ranged','Healer'],
+     recipe:{skill:"Zul'Gurub — Zandalar rep vendor", reagents:['Bought with ZG coins']}},
+    {id:'juju_power', name:'Juju Power', stat:'+30 Strength (30 min)',
+     url:'https://www.wowhead.com/classic/item=12451', roles:['Tank','Melee'],
+     recipe:{skill:"Un'Goro — Jinxed Hoodoo Pile", reagents:['Not crafted — farmed']}},
+    {id:'juju_might', name:'Juju Might', stat:'+40 Attack Power (10 min)',
+     url:'https://www.wowhead.com/classic/item=12460', roles:['Tank','Melee'],
+     recipe:{skill:"Un'Goro — Jinxed Hoodoo Pile", reagents:['Not crafted — farmed']}},
+    {id:'juju_guile', name:'Juju Guile', stat:'+30 Intellect (30 min)',
+     url:'https://www.wowhead.com/classic/item=12457', roles:['Ranged','Healer'],
+     recipe:{skill:"Un'Goro — Jinxed Hoodoo Pile", reagents:['Not crafted — farmed']}},
+    {id:'scroll_str', name:'Scroll of Strength IV', stat:'+17 Strength (30 min)',
+     url:'https://www.wowhead.com/classic/item=10310', roles:['Tank','Melee'],
+     recipe:{skill:'Vendor / world drop', reagents:['Bought / world drop']}},
+    {id:'scroll_agi', name:'Scroll of Agility IV', stat:'+17 Agility (30 min)',
+     url:'https://www.wowhead.com/classic/item=10309', roles:['Melee','Ranged'],
+     recipe:{skill:'Vendor / world drop', reagents:['Bought / world drop']}},
+    {id:'scroll_int', name:'Scroll of Intellect IV', stat:'+17 Intellect (30 min)',
+     url:'https://www.wowhead.com/classic/item=10308', roles:['Ranged','Healer'],
+     recipe:{skill:'Vendor / world drop', reagents:['Bought / world drop']}},
+    {id:'scroll_prot', name:'Scroll of Protection IV', stat:'+300 Armor (30 min)',
+     url:'https://www.wowhead.com/classic/item=10305', roles:['Tank'],
+     recipe:{skill:'Vendor / world drop', reagents:['Bought / world drop']}},
   ],
 };
 const CONSUMABLE_BY_ID = {};
@@ -2652,7 +2692,6 @@ const WOW_PROFESSIONS = {
   Enchanting:      [],
   Engineering:     ['Gnomish Engineering','Goblin Engineering'],
   Herbalism:       [],
-  Jewelcrafting:   [],
   Leatherworking:  ['Dragonscale Leatherworker','Elemental Leatherworker','Tribal Leatherworker'],
   Mining:          [],
   Skinning:        [],
@@ -2696,8 +2735,8 @@ function canEditGuildBank(){ return isRL() || (isNamed() && CURRENT_USER && !!gu
 function renderGEProfileSection(name){
   const ged=getGEData(name);
   if(!ged.isGEMember) return '<div style="font-size:11px;color:var(--t3)">Not a Guild Effort member. Check the box above to enroll.</div>';
-  const catLabels={battle:'Battle Elixir',guardian:'Guardian Elixir',potion:'Mana/Health Potion',weapon:'Weapon Enhancement',food:'Food',engineering:'Engineering',runes:'Runes & Wards'};
-  const catKeys=['battle','guardian','potion','weapon','food','engineering','runes'];
+  const catLabels={flask:'Flask',battle:'Battle Elixir',guardian:'Guardian Elixir',protection:'Protection Potion',potion:'Mana/Health Potion',weapon:'Weapon Enhancement',food:'Food',engineering:'Engineering',misc:'Runes · Zanza · Juju · Scrolls'};
+  const catKeys=['flask','battle','guardian','protection','potion','weapon','food','engineering','misc'];
   const canEdit=isRL()||(isNamed()&&CURRENT_USER&&CURRENT_USER.name===name);
   let html='<div style="font-size:11px;color:var(--t3);margin-bottom:10px">Select which consumables you need each raid night and how many.</div>';
   catKeys.forEach(cat=>{
@@ -2794,6 +2833,32 @@ function setGERequest(name, itemId, qty){
   else ged.requests.push({id:itemId,qty});
   saveGE();
 }
+function setGEGuideRole(r){ window._geGuideRole=r; renderGuildEffort(); }
+function renderGEGuide(){
+  const role=window._geGuideRole||'';
+  const catLabels={flask:'🧪 Flasks',battle:'⚔ Battle Elixirs',guardian:'🛡 Guardian Elixirs',protection:'❄ Protection Potions',potion:'⚗ Potions',weapon:'🗡 Weapon Enhancements',food:'🍖 Food',engineering:'🛠 Engineering',misc:'🔮 Runes · Zanza · Juju · Scrolls'};
+  const roleColors={Tank:'#5b9bd5',Healer:'#4db87a',Melee:'#e05c3a',Ranged:'#d4a93a'};
+  const roles=['Tank','Healer','Melee','Ranged'];
+  const chip=(r,label)=>`<button class="btn btn-sm" onclick="setGEGuideRole('${r}')" style="font-size:11px;${role===r?`background:${r?roleColors[r]+'33':'var(--accg)'};border-color:${r?roleColors[r]:'var(--acc)'};color:var(--t1)`:''}">${label}</button>`;
+  let h=`<div class="card" style="margin-bottom:12px">
+    <div class="ct"><i class="ti ti-list-search" style="color:var(--acc)"></i>What to Bring <span style="font-size:11px;font-weight:400;color:var(--t3)">— pick your role to see the consumables you want</span></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">${chip('','All roles')}${roles.map(r=>chip(r,r)).join('')}</div>
+  </div>`;
+  Object.entries(CONSUMABLES).forEach(([cat,items])=>{
+    const list=items.filter(c=>!role||(c.roles||[]).includes(role));
+    if(!list.length) return;
+    h+=`<div class="card" style="margin-bottom:10px">
+      <div style="font-size:11px;font-weight:700;color:var(--t2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">${catLabels[cat]||cat}</div>
+      ${list.map(c=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">
+        <a href="${c.url}" target="_blank" rel="noopener" style="font-size:12.5px;font-weight:600;color:var(--acc);text-decoration:none">${c.name} <i class="ti ti-external-link" style="font-size:10px"></i></a>
+        <span style="font-size:11px;color:var(--t2)">${c.stat}</span>
+        <span style="margin-left:auto;display:flex;gap:4px;flex-wrap:wrap">${(c.roles||[]).map(r=>`<span class="badge" style="background:${roleColors[r]}22;color:${roleColors[r]};border:0.5px solid ${roleColors[r]}66;font-size:9px">${r}</span>`).join('')}</span>
+        <span style="font-size:10px;color:var(--t3);width:100%">${(c.recipe&&c.recipe.skill)||''}</span>
+      </div>`).join('')}
+    </div>`;
+  });
+  return h;
+}
 function renderGuildEffort(){
   const el=document.getElementById('guild-effort-content');
   if(!el) return;
@@ -2806,14 +2871,20 @@ function renderGuildEffort(){
   });
   guildExtraItems.forEach(ex=>{ totals[ex.id]=(totals[ex.id]||0)+ex.qty; });
   const members=ROSTER.filter(p=>guildEffortData[p.name]?.isGEMember);
-  const catLabels={battle:'⚔ Battle Elixirs',guardian:'🛡 Guardian Elixirs',potion:'⚗ Potions',weapon:'🗡 Weapon Enhancements',food:'🍖 Food',engineering:'🛠 Engineering',runes:'🔮 Runes & Wards'};
-  const catBorders={battle:'rgba(200,80,60,.3)',guardian:'rgba(41,128,185,.3)',potion:'rgba(26,158,114,.3)',weapon:'rgba(200,121,65,.3)',food:'rgba(214,160,60,.3)',engineering:'rgba(150,150,160,.3)',runes:'rgba(150,90,200,.3)'};
+  const catLabels={flask:'🧪 Flasks',battle:'⚔ Battle Elixirs',guardian:'🛡 Guardian Elixirs',protection:'❄ Protection Potions',potion:'⚗ Potions',weapon:'🗡 Weapon Enhancements',food:'🍖 Food',engineering:'🛠 Engineering',misc:'🔮 Runes · Zanza · Juju'};
+  const catBorders={flask:'rgba(124,111,224,.4)',battle:'rgba(200,80,60,.3)',guardian:'rgba(41,128,185,.3)',protection:'rgba(105,204,240,.3)',potion:'rgba(26,158,114,.3)',weapon:'rgba(200,121,65,.3)',food:'rgba(214,160,60,.3)',engineering:'rgba(150,150,160,.3)',misc:'rgba(150,90,200,.3)'};
   const activeTab=window._geTab||'shopping';
   let html=`
     <div class="tabs" style="margin-bottom:14px">
+      <div class="tab ${activeTab==='guide'?'active':''}" onclick="window._geTab='guide';renderGuildEffort()">What to Bring</div>
       <div class="tab ${activeTab==='shopping'?'active':''}" onclick="window._geTab='shopping';renderGuildEffort()">Shopping List</div>
       <div class="tab ${activeTab==='members'?'active':''}" onclick="window._geTab='members';renderGuildEffort()">Members (${members.length})</div>
     </div>`;
+  if(activeTab==='guide'){
+    html+=renderGEGuide();
+    el.innerHTML=html;
+    return;
+  }
   if(activeTab==='shopping'){
     if(canEditGuildBank()){
       html+=`<div class="card" style="margin-bottom:12px">
@@ -2839,13 +2910,15 @@ function renderGuildEffort(){
         </div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
           <select id="ge-extra-cat" style="width:auto;font-size:11px" onchange="updateGEExtraItems()">
+            <option value="flask">Flask</option>
             <option value="battle">Battle Elixir</option>
             <option value="guardian">Guardian Elixir</option>
+            <option value="protection">Protection Potion</option>
             <option value="potion">Potion</option>
             <option value="weapon">Weapon Enh.</option>
             <option value="food">Food</option>
             <option value="engineering">Engineering</option>
-            <option value="runes">Runes & Wards</option>
+            <option value="misc">Runes · Zanza · Juju</option>
           </select>
           <select id="ge-extra-item" style="flex:1;font-size:11px"></select>
           <input id="ge-extra-qty" type="number" min="1" value="5" style="width:60px;font-size:11px" placeholder="Qty">
@@ -2860,7 +2933,7 @@ function renderGuildEffort(){
         </div>`:''}`:''}
       </div>`;
     }
-    const cats=['battle','guardian','potion','weapon','food','engineering','runes'];
+    const cats=['flask','battle','guardian','protection','potion','weapon','food','engineering','misc'];
     const hasAny=cats.some(cat=>CONSUMABLES[cat].some(c=>totals[c.id]>0));
     if(!hasAny){
       html+='<div class="empty"><i class="ti ti-shopping-cart-off"></i><p>No consumables requested yet.<br>Members set their needs in their player profile.</p></div>';
@@ -2972,7 +3045,7 @@ function renderProfiles(){
       </select>
       <select id="prof-role" onchange="renderProfileList()" style="width:auto">
         <option value="">All roles</option>
-        <option>Tank</option><option>Mage Tank</option><option>Healer</option><option>Melee</option><option>Ranged</option>
+        <option>Tank</option><option>Healer</option><option>Melee</option><option>Ranged</option>
       </select>
     </div>
     <div id="profile-list"></div>
@@ -2997,7 +3070,6 @@ function renderProfileList(){
     const attended=raidSchedule.filter(r=>r.status==='completed'&&!/kara/i.test(r.name)&&effAttended(r).includes(p.name)).length;
     const attPct=total?Math.round((attended/total)*100):0;
     const alts=(playerAlts[p.name]||[]);
-    const w={Tank:getWeight(p.name,'Tank'),Healer:getWeight(p.name,'Healer'),Melee:getWeight(p.name,'Melee'),Ranged:getWeight(p.name,'Ranged')};
     const cc=CC[p.cls]||'#aaa';
     return`<div class="card" style="cursor:pointer;transition:border-color .15s" onclick="openProfile('${p.name}')"
         onmouseover="this.style.borderColor='var(--acc)'" onmouseout="this.style.borderColor=''">
@@ -3020,10 +3092,6 @@ function renderProfileList(){
           <div style="text-align:center">
             <div style="font-size:16px;font-weight:700;color:var(--t1)">${attended}</div>
             <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em">Raids</div>
-          </div>
-          <div style="text-align:center">
-            <div style="font-size:12px;font-weight:600;color:var(--acc)">${w[p.type]||3}/5</div>
-            <div style="font-size:9px;color:var(--t3);text-transform:uppercase;letter-spacing:.05em">Weight</div>
           </div>
         </div>
         <i class="ti ti-chevron-right" style="color:var(--t3)"></i>
@@ -3056,20 +3124,6 @@ function openProfile(name){
           '<span style="color:var(--t3)">—</span>'}
       </td>
     </tr>`;
-  }).join('');
-
-  // Role weights display
-  const roles=['Tank','Healer','Melee','Ranged'];
-  const wColors={Tank:'#e07060',Healer:'#5DCAA5',Melee:'#e09a65',Ranged:'#6ab4e8'};
-  const weightRows=roles.map(r=>{
-    const v=getWeight(name,r);
-    const stars=[1,2,3,4,5].map(i=>'<span style="color:'+(i<=v?wColors[r]:'rgba(255,255,255,.15)')+'">★</span>').join('');
-    const eligible=(CLASS_ROLES[p.cls]||[]).includes(r);
-    return eligible?`<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-      <span style="font-size:11px;color:var(--t2);width:55px">${r}</span>
-      <div>${stars}</div>
-      <span style="font-size:10px;color:var(--t3)">${v}/5</span>
-    </div>`:'';
   }).join('');
 
   const mainOf=getMainOf(name);
@@ -3175,9 +3229,6 @@ function openProfile(name){
           </select>
           <div style="font-size:10px;color:var(--t3)">Raid times will display in your local timezone.</div>
           `:`<div style="font-size:11px;color:var(--t2)">${p.timezone?(TIMEZONES.find(t=>t.v===p.timezone)?.l||p.timezone):'Server time (CET/CEST)'}</div>`}
-
-          <div class="ct" style="margin:14px 0 8px"><i class="ti ti-star" style="color:var(--acc)"></i>Assignment Weights</div>
-          ${weightRows||'<div style="font-size:11px;color:var(--t3)">No eligible roles</div>'}
 
           <div class="ct" style="margin:14px 0 8px;cursor:pointer" onclick="toggleGEProfile('${name}')">
             <i class="ti ti-shopping-cart" style="color:var(--gold)"></i>Guild Effort
@@ -3563,8 +3614,11 @@ function sortRoster(col){
 function renderRoster(){
   const rfType=document.getElementById('rf-type')?.value||'';
   const rfCls=document.getElementById('rf-cls')?.value||'';
-  const rfPres=document.getElementById('rf-pres')?.checked||false;
-  const rfAlt=document.getElementById('rf-alt')?.value||'';
+  // sync switch visuals to state
+  document.getElementById('sw-pres')?.classList.toggle('on',rosterPresOnly);
+  document.getElementById('sw-alts')?.classList.toggle('on',rosterShowAlts);
+  document.getElementById('sw-active')?.classList.toggle('on',rosterShowActive);
+  document.getElementById('sw-group')?.classList.toggle('on',rosterGroupAlts);
   // populate class filter
   const clsSel=document.getElementById('rf-cls');
   if(clsSel&&clsSel.options.length<=1){['Warrior','Paladin','Hunter','Rogue','Priest','Shaman','Mage','Warlock','Druid'].forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;clsSel.appendChild(o);});}
@@ -3579,16 +3633,29 @@ function renderRoster(){
     const flexRole=p.flexSpec?SPEC_TO_ROLE[p.flexSpec]:'';
     const roleMatch=!rfType||(p.type===rfType)||(flexRole===rfType);
     const isAlt=!!getMainOf(p.name);
-    const altMatch=!rfAlt||(rfAlt==='main'&&!isAlt)||(rfAlt==='alt'&&isAlt);
-    return roleMatch&&(!rfCls||p.cls===rfCls)&&(!rfPres||p.present)&&altMatch;
-  }).sort((a,b)=>{
-    let av,bv;
-    if(rosterSortCol==='isAlt'){av=getMainOf(a.name)?1:0;bv=getMainOf(b.name)?1:0;}
-    else{av=a[rosterSortCol]??'';bv=b[rosterSortCol]??'';}
-    if(typeof av==='boolean')return rosterSortDir*(av===bv?0:av?-1:1);
-    if(typeof av==='number')return rosterSortDir*(av-bv);
-    return rosterSortDir*String(av).localeCompare(String(bv));
+    if(!rosterShowAlts&&isAlt) return false;              // hide alts switch
+    if(!rosterShowActive&&isActiveRaider(p)) return false; // hide active raiders switch
+    return roleMatch&&(!rfCls||p.cls===rfCls)&&(!rosterPresOnly||p.present);
   });
+  if(rosterGroupAlts){
+    // Group alts directly under their main; groups ordered alphabetically by main.
+    sortable.sort((a,b)=>{
+      const ma=getMainOf(a.name)||a.name, mb=getMainOf(b.name)||b.name;
+      if(ma!==mb) return ma.localeCompare(mb);
+      const aAlt=getMainOf(a.name)?1:0, bAlt=getMainOf(b.name)?1:0; // main before its alts
+      if(aAlt!==bAlt) return aAlt-bAlt;
+      return a.name.localeCompare(b.name);
+    });
+  }else{
+    sortable.sort((a,b)=>{
+      let av,bv;
+      if(rosterSortCol==='isAlt'){av=getMainOf(a.name)?1:0;bv=getMainOf(b.name)?1:0;}
+      else{av=a[rosterSortCol]??'';bv=b[rosterSortCol]??'';}
+      if(typeof av==='boolean')return rosterSortDir*(av===bv?0:av?-1:1);
+      if(typeof av==='number')return rosterSortDir*(av-bv);
+      return rosterSortDir*String(av).localeCompare(String(bv));
+    });
+  }
   // sort arrows
   ['name','cls','spec','type','flexSpec','present','isAlt'].forEach(c=>{const el=document.getElementById('sort-'+c);if(el)el.textContent=rosterSortCol===c?(rosterSortDir===1?'↑':'↓'):'';});
   // stats
@@ -3597,110 +3664,16 @@ function renderRoster(){
   // rows
   document.getElementById('roster-tbody').innerHTML=sortable.map(p=>`<tr>
     <td><div class="tog ${p.present?'on':''}" ${(isRL()||(isNamed()&&p.name===CURRENT_USER.name))?`onclick="togglePresent('${p.name}')"`:'style="opacity:.4;cursor:not-allowed"'}></div></td>
-    <td>${pill(p.name,!p.present)}</td>
+    <td>${rosterGroupAlts&&getMainOf(p.name)?'<span style="color:var(--t3);margin-right:3px" title="alt">↳</span>':''}${pill(p.name,!p.present)}</td>
     <td>${ctag(p.cls)}</td>
     <td>${isRL()?`<select style="font-size:11px;padding:2px 6px;width:auto;background:var(--bg3);border-color:var(--borderl);color:var(--t1)" onchange="setPlayerSpec('${p.name}','spec',this.value)">${(CLASS_SPECS[p.cls]||[p.spec]).map(s=>`<option value="${s}" ${s===p.spec?'selected':''}>${s}</option>`).join('')}</select>`:`<span style="font-size:11px;color:var(--t2)">${p.spec}</span>`}</td>
-    <td>${(()=>{const rs={'Tank':'color:#e07060;background:rgba(200,80,60,.15);border-color:rgba(200,80,60,.4)','Mage Tank':'color:#e07060;background:rgba(200,80,60,.15);border-color:rgba(200,80,60,.4)','Healer':'color:#5DCAA5;background:rgba(26,158,114,.15);border-color:rgba(26,158,114,.4)','Melee':'color:#e09a65;background:rgba(200,120,65,.15);border-color:rgba(200,120,65,.4)','Ranged':'color:#6ab4e8;background:rgba(41,128,185,.15);border-color:rgba(41,128,185,.4)'};const s=rs[p.type]||'color:var(--t2);background:var(--bg3);border-color:var(--borderl)';return isRL()?`<select style="font-size:11px;padding:2px 9px;width:auto;border-radius:20px;font-weight:600;${s}" onchange="setPlayerRole('${p.name}',this.value)"><option ${p.type==='Tank'?'selected':''}>Tank</option><option ${p.type==='Mage Tank'?'selected':''}>Mage Tank</option><option ${p.type==='Healer'?'selected':''}>Healer</option><option ${p.type==='Melee'?'selected':''}>Melee</option><option ${p.type==='Ranged'?'selected':''}>Ranged</option></select>`:rtag(p.type);})()}</td>
+    <td>${(()=>{const rs={'Tank':'color:#e07060;background:rgba(200,80,60,.15);border-color:rgba(200,80,60,.4)','Mage Tank':'color:#e07060;background:rgba(200,80,60,.15);border-color:rgba(200,80,60,.4)','Healer':'color:#5DCAA5;background:rgba(26,158,114,.15);border-color:rgba(26,158,114,.4)','Melee':'color:#e09a65;background:rgba(200,120,65,.15);border-color:rgba(200,120,65,.4)','Ranged':'color:#6ab4e8;background:rgba(41,128,185,.15);border-color:rgba(41,128,185,.4)'};const s=rs[p.type]||'color:var(--t2);background:var(--bg3);border-color:var(--borderl)';return isRL()?`<select style="font-size:11px;padding:2px 9px;width:auto;border-radius:20px;font-weight:600;${s}" onchange="setPlayerRole('${p.name}',this.value)"><option ${p.type==='Tank'?'selected':''}>Tank</option><option ${p.type==='Healer'?'selected':''}>Healer</option><option ${p.type==='Melee'?'selected':''}>Melee</option><option ${p.type==='Ranged'?'selected':''}>Ranged</option></select>`:rtag(p.type);})()}</td>
     <td>${isRL()?`<select style="font-size:11px;padding:2px 6px;width:auto;background:var(--bg3);border-color:var(--borderl);color:var(--t3)" onchange="setPlayerSpec('${p.name}','flexSpec',this.value)"><option value="">—</option>${(CLASS_SPECS[p.cls]||[]).map(s=>`<option value="${s}" ${s===p.flexSpec?'selected':''}>${s}</option>`).join('')}</select>`:`<span style="font-size:11px;color:var(--t3)">${p.flexSpec||'—'}</span>`}</td>
     <td>${(()=>{const m=getMainOf(p.name);return m?`<span class="badge" style="background:rgba(124,111,224,.12);color:var(--acc);border:0.5px solid rgba(124,111,224,.3);gap:4px"><i class="ti ti-user-share" style="font-size:10px"></i>Alt of ${m}</span>`:'<span style="color:var(--t3);font-size:11px">—</span>'})()}</td>
     ${isRL()?`<td><button class="btn btn-sm" style="font-size:10px;padding:3px 7px" onclick="swapSpecs('${p.name}')" title="Swap main ↔ flex spec"><i class="ti ti-switch-horizontal"></i></button></td><td><button class="btn btn-sm" style="font-size:10px;background:var(--redd);border-color:rgba(192,57,43,.25);color:#e07b72" onclick="removePlayer('${p.name}')"><i class="ti ti-trash"></i></button></td>`:'<td style="display:none"></td><td style="display:none"></td>'}
   </tr>`).join('');
-  // RL-only weight panel
-  const wp=document.getElementById('weight-panel');
-  if(wp) wp.style.display=isRL()?'block':'none';
-  if(isRL()&&wp) renderWeightPanel();
 }
 
-function renderWeightPanel(){
-  const wp=document.getElementById('weight-panel');
-  if(!wp) return;
-  // Group roster by class, show only roles relevant to each class
-  const classes=['Warrior','Paladin','Hunter','Rogue','Priest','Shaman','Mage','Warlock','Druid'];
-  const roleColors={Tank:'#e07060',Healer:'#5DCAA5',Melee:'#e09a65',Ranged:'#6ab4e8'};
-  const roleBg={Tank:'rgba(200,80,60,.1)',Healer:'rgba(26,158,114,.1)',Melee:'rgba(200,120,65,.1)',Ranged:'rgba(41,128,185,.1)'};
-
-  function starWidget(name, role, currentVal){
-    const stars=[1,2,3,4,5].map(v=>`<span
-      onclick="setWeight('${name}','${role}',${v});renderWeightPanel()"
-      title="${v}"
-      style="cursor:pointer;font-size:14px;color:${v<=currentVal?roleColors[role]:'rgba(255,255,255,.15)'};
-             transition:color .1s;padding:0 1px;user-select:none"
-      onmouseover="highlightStars(this,${v},'${roleColors[role]}')"
-      onmouseout="unhighlightStars(this,'${name}','${role}','${roleColors[role]}')"
-    >★</span>`).join('');
-    return `<div style="display:flex;align-items:center;gap:2px">${stars}</div>`;
-  }
-
-  const byClass={};
-  ROSTER.forEach(p=>{if(!byClass[p.cls])byClass[p.cls]=[];byClass[p.cls].push(p);});
-
-  wp.innerHTML=`
-    <div style="margin-top:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px">
-        <div>
-          <div style="font-family:Cinzel,serif;font-size:15px;font-weight:600">Assignment Weights</div>
-          <div style="font-size:11px;color:var(--t3);margin-top:2px">Rate 1–5 per player per role · ★★★ = default · Used to auto-assign MT, healers, runners · Mage Tank = Spellsteal (Krosh/Void Reaver)</div>
-        </div>
-        <button class="btn btn-sm" onclick="resetAllWeights()"><i class="ti ti-refresh"></i> Reset all to 3</button>
-      </div>
-      ${classes.filter(cls=>byClass[cls]?.length).map(cls=>{
-        const players=byClass[cls];
-        // Determine which roles are valid for this class
-        const validRoles=(CLASS_ROLES[cls]||['Melee','Ranged']).filter(r=>players.some(p=>p.type===r||p.flexSpec));
-        const allRoles=[...new Set(players.flatMap(p=>[p.type,...(CLASS_ROLES[cls]||[])])).values()].filter(r=>['Tank','Healer','Melee','Ranged'].includes(r));
-
-        return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);padding:12px 14px;margin-bottom:8px">
-          <div style="font-size:10px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;display:flex;align-items:center;gap:8px">
-            <span style="background:${(()=>{const cc={'Warrior':'rgba(199,156,110,.15)','Paladin':'rgba(245,140,186,.15)','Hunter':'rgba(171,212,115,.15)','Rogue':'rgba(255,245,105,.1)','Priest':'rgba(220,220,220,.1)','Shaman':'rgba(41,128,220,.18)','Mage':'rgba(105,204,240,.15)','Warlock':'rgba(148,130,201,.15)','Druid':'rgba(255,125,10,.15)'};return cc[cls]||'rgba(100,100,100,.1)';})()};color:${(()=>{const cc={'Warrior':'#C79C6E','Paladin':'#F58CBA','Hunter':'#ABD473','Rogue':'#FFF569','Priest':'#e8e8e8','Shaman':'#5ab4f8','Mage':'#69CCF0','Warlock':'#9482C9','Druid':'#FF7D0A'};return cc[cls]||'#aaa';})()};padding:2px 8px;border-radius:20px">${cls}</span>
-            <span style="color:var(--t3);font-weight:400">${players.length} player${players.length!==1?'s':''}</span>
-          </div>
-          <div style="overflow-x:auto">
-            <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:380px">
-              <thead><tr>
-                <th style="text-align:left;padding:4px 8px;font-size:10px;font-weight:600;color:var(--t2);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.06em">Player</th>
-                ${allRoles.map(r=>`<th style="text-align:center;padding:4px 8px;font-size:10px;font-weight:600;color:${roleColors[r]};border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">
-                  <span style="background:${roleBg[r]};padding:2px 7px;border-radius:20px">${r}</span>
-                </th>`).join('')}
-              </tr></thead>
-              <tbody>
-                ${players.map(p=>`<tr style="border-bottom:1px solid var(--border)">
-                  <td style="padding:5px 8px">
-                    <div style="display:flex;align-items:center;gap:6px">
-                      <span style="font-size:12px;font-weight:500;color:var(--t1)">${p.name}</span>
-                      <span style="font-size:10px;color:var(--t3)">${p.spec}${p.flexSpec?' / '+p.flexSpec:''}</span>
-                    </div>
-                  </td>
-                  ${allRoles.map(r=>{
-                    const isPlayerRole=p.type===r||(CLASS_ROLES[p.cls]||[]).includes(r);
-                    const val=getWeight(p.name,r);
-                    return `<td style="padding:5px 8px;text-align:center;${!isPlayerRole?'opacity:.25':''}">
-                      ${isPlayerRole?starWidget(p.name,r,val):`<span style="color:var(--t3);font-size:10px">N/A</span>`}
-                    </td>`;
-                  }).join('')}
-                </tr>`).join('')}
-              </tbody>
-            </table>
-          </div>
-        </div>`;
-      }).join('')}
-    </div>`;
-}
-
-function highlightStars(el, val, color){
-  const stars=el.parentElement.querySelectorAll('span');
-  stars.forEach((s,i)=>s.style.color=i<val?color:'rgba(255,255,255,.15)');
-}
-function unhighlightStars(el, name, role, color){
-  const val=getWeight(name,role);
-  const stars=el.parentElement.querySelectorAll('span');
-  stars.forEach((s,i)=>s.style.color=i<val?color:'rgba(255,255,255,.15)');
-}
-function resetAllWeights(){
-  playerWeights={};
-  saveWeights();
-  renderWeightPanel();
-  toast('All weights reset to default (3)','ok');
-}
 
 function toggleAddPlayer(){const c=document.getElementById('add-player-card');c.style.display=c.style.display==='none'?'block':'none';updateNPSpecs();}
 function updateNPSpecs(){
@@ -4147,151 +4120,6 @@ function quickAssignRes(name, key){
 function toggleRes(name,key,val){const p=gp(name);if(p)p[key]=val;renderRes();}
 function toggleResWarlock(name,val){const p=gp(name);if(p)p.resFire=val;renderRes();}
 
-// ============================================================
-// LOOT
-// ============================================================
-const LOOT=[
-  {item:'Dragonspine Trophy',slot:'Trinket',boss:'Maulgar',raid:'Gruul',prio:['Melee','Ranged'],note:"BiS melee/physical trinket — Wolvke, Zandalai, Cakemon, Harryshotter first",wowheadId:28830},
-  {item:'Pauldrons of the Fallen Hero (T4)',slot:'Shoulders',boss:'Maulgar',raid:'Gruul',prio:['Rogue','Shaman','Druid'],note:'T4 token — Rogues first, then Enh Shaman',wowheadId:29762},
-  {item:'Pauldrons of the Fallen Champion (T4)',slot:'Shoulders',boss:'Maulgar',raid:'Gruul',prio:['Hunter','Mage'],note:'T4 — Mage 2pc first, Hunter after',wowheadId:29763},
-  {item:"Netherwing Essence Shard",slot:'Trinket',boss:'Magtheridon',raid:'Mag',prio:['Tank'],note:'Tank survivability trinket — Xullue, Frostor, Cadbaladin',wowheadId:28789},
-  {item:"Magtheridon's Head",slot:'Quest',boss:'Magtheridon',raid:'Mag',prio:['All'],note:'Stat buff quest — turn in weekly without fail',wowheadId:32385},
-  {item:"Helm of the Fallen Champion (T5)",slot:'Head',boss:'Void Reaver',raid:'TK',prio:['Mage','Hunter'],note:'Mage 2pc BiS. Hunter: complete 4pc Rift Stalker.',wowheadId:30242},
-  {item:"Helm of the Fallen Defender (T5)",slot:'Head',boss:'Void Reaver',raid:'TK',prio:['Priest','Warlock'],note:'Holy Priests first, then Shadow/Warlock',wowheadId:30243},
-  {item:"Thalassian Wildercloak",slot:'Cloak',boss:"Kael'thas",raid:'TK',prio:['Hunter','Rogue'],note:'Premier hunter cloak — Harryshotter',wowheadId:29994},
-  {item:"The Sun King's Talisman",slot:'Trinket',boss:"Kael'thas",raid:'TK',prio:['Mage','Shaman'],note:'Spellpower trinket — Mantine, Moondoggo',wowheadId:30015},
-  {item:"Gloves of the Fallen Hero (T5)",slot:'Hands',boss:'Hydross',raid:'SSC',prio:['Rogue','Shaman','Druid'],note:'Rogue 4pc Deathmantle priority — Cakemon, Csoti',wowheadId:30241},
-  {item:"Tsunami Talisman",slot:'Trinket',boss:'Lurker',raid:'SSC',prio:['Melee','Hunter'],note:'Top physical DPS trinket — Wolvke, Zandalai, Cakemon first',wowheadId:30627},
-  {item:"Vestments of the Sea-Witch",slot:'Chest',boss:'Leotheras',raid:'SSC',prio:['Warlock'],note:'Warlock BiS chest — Dethclok first',wowheadId:30107},
-  {item:"Fathomstone",slot:'Trinket',boss:'Karathress',raid:'SSC',prio:['Ranged','Healer'],note:'Spell crit trinket — Mage/Ele Shaman/Warlock',wowheadId:30049},
-  {item:"Coilfang Hammer of Renewal",slot:'Mace',boss:'Morogrim',raid:'SSC',prio:['Healer'],note:'Healer weapon — Vvambull, Kalaveijo, Swagmon',wowheadId:24378},
-  {item:"Vashj's Vial Remnant",slot:'Quest',boss:'Lady Vashj',raid:'SSC',prio:['All'],note:'Required for MH/BT attunement — guild-wide priority',wowheadId:29906},
-  {item:"The Curator's Leash",slot:'Trinket',boss:'Curator',raid:'Kara',prio:['Tank'],note:'Tank threat trinket — all tanks need this for progression',wowheadId:0},
-  {item:"Jade Ring of the Everliving",slot:'Ring',boss:'Moroes',raid:'Kara',prio:['Healer'],note:'Strong healing ring — all healers',wowheadId:28763},
-  {item:"Ribbon of Sacrifice",slot:'Ring',boss:'Opera',raid:'Kara',prio:['Healer'],note:'Holy Paladin BiS ring — Palastuff, Unholysparkz',wowheadId:28590},
-  {item:"Nightbane Staff",slot:'Staff',boss:'Nightbane',raid:'Kara',prio:['Healer','Caster'],note:'Strong caster staff — healers or caster DPS',wowheadId:28604},
-];
-
-let lootTab='prio';
-function switchLootTab(tab){
-  lootTab=tab;
-  document.getElementById('loot-tab-prio')?.classList.toggle('active',tab==='prio');
-  document.getElementById('loot-tab-vortex')?.classList.toggle('active',tab==='vortex');
-  document.getElementById('loot-tab-prio-content').style.display=tab==='prio'?'':'none';
-  document.getElementById('loot-tab-vortex-content').style.display=tab==='vortex'?'':'none';
-  if(tab==='vortex') renderVortex();
-}
-function renderLoot(){
-  const rfRaid=document.getElementById('lf-raid')?.value||'';
-  const rfRole=document.getElementById('lf-role')?.value||'';
-  const filtered=LOOT.filter(l=>(!rfRaid||l.raid===rfRaid)&&(!rfRole||l.prio.some(r=>r.toLowerCase().includes(rfRole.toLowerCase())||rfRole.toLowerCase().includes(r.toLowerCase()))));
-  const byRaid={};filtered.forEach(l=>{(byRaid[l.raid]=byRaid[l.raid]||[]).push(l);});
-  document.getElementById('loot-content').innerHTML=Object.entries(byRaid).map(([raid,items])=>`
-    <div class="card" style="margin-bottom:12px">
-      <div class="ct"><i class="ti ti-trophy" style="color:var(--gold)"></i>${{Gruul:"Gruul's Lair",Mag:"Magtheridon",TK:'Tempest Keep',SSC:'Serpent Shrine Cavern',Kara:'Karazhan'}[raid]}</div>
-      <table><thead><tr><th>Item</th><th>Slot</th><th>Boss</th><th>Priority</th>${isRL()?'<th>Note</th>':''}</tr></thead>
-      <tbody>${items.map(l=>`<tr>
-        <td>${l.wowheadId?`<a href="https://www.wowhead.com/tbc/item=${l.wowheadId}" target="_blank" rel="noopener" style="color:var(--gold);font-weight:600;text-decoration:none" onmouseover="this.style.textDecoration='underline'" onmouseout="this.style.textDecoration='none'">${l.item}</a>`:`<strong style="color:var(--gold)">${l.item}</strong>`}</td>
-        <td><span style="font-size:11px;color:var(--t2)">${l.slot}</span></td>
-        <td><span style="font-size:11px;color:var(--t3)">${l.boss}</span></td>
-        <td>${l.prio.map(r=>`<span class="badge" style="background:${RB[r]||'rgba(124,111,224,.1)'};color:${RC[r]||'var(--acc)'};">${r}</span>`).join(' ')}</td>
-        ${isRL()?`<td><span style="font-size:11px;color:var(--t2)">${l.note}</span></td>`:''}
-      </tr>`).join('')}</tbody></table>
-    </div>`).join('')||'<div class="empty"><i class="ti ti-trophy"></i><p>No loot items match these filters.</p></div>';
-}
-
-function renderVortex(){
-  if(!document.getElementById('vortex-content')) return; // Loot/Vortex page removed in relaunch
-  const sorted=Object.entries(vortexCounts).sort((a,b)=>b[1]-a[1]);
-  const maxV=Math.max(1,...Object.values(vortexCounts));
-  const pendingReqs=vortexRequests.filter(r=>r.status==='pending');
-
-  let html=`
-  <div class="card">
-    <div class="ct"><i class="ti ti-hexagon" style="color:var(--acc)"></i>Nether Vortex Tally
-      ${isRL()?`<button class="btn btn-sm" style="margin-left:auto;font-size:10px" onclick="resetAllVortex()"><i class="ti ti-refresh"></i> Reset all</button>`:''}
-    </div>
-    <div style="font-size:11px;color:var(--t3);margin-bottom:10px">Tracks how many Nether Vortexes each player has collected this phase. Required to craft top-tier TBC gear.</div>
-    ${sorted.map(([name,count])=>{
-      const p=gp(name);const pct=Math.round((count/maxV)*100)||0;
-      return`<div class="sbar" style="margin-bottom:4px">
-        <div class="sbar-l">${pill(name,p&&!p.present)}</div>
-        <div class="sbar-t"><div class="sbar-f" style="width:${pct}%;background:var(--acc)"></div></div>
-        <div class="sbar-v" style="color:var(--acc);display:flex;align-items:center;gap:4px">
-          ${count}
-          ${isRL()?`<button onclick="changeVortex('${name}',-1)" style="background:none;border:1px solid var(--borderl);border-radius:4px;color:var(--t2);cursor:pointer;padding:0 4px;font-size:12px;line-height:1.4">−</button>
-          <button onclick="changeVortex('${name}',1)" style="background:none;border:1px solid var(--borderl);border-radius:4px;color:var(--t2);cursor:pointer;padding:0 4px;font-size:12px;line-height:1.4">+</button>`:''}
-        </div>
-      </div>`;
-    }).join('')}
-  </div>`;
-
-  // Participant request form
-  if(!isRL()){
-    html+=`<div class="card ab">
-      <div class="ct"><i class="ti ti-send" style="color:var(--acc)"></i>Submit a Vortex Request</div>
-      <div class="fg"><span class="fl">Your character name</span><input id="vx-player" placeholder="In-game name"></div>
-      <div class="fg"><span class="fl">Item you want to craft</span><input id="vx-item" placeholder="e.g. Sunfire Robe, Spellstrike Pants…"></div>
-      <div class="fg"><span class="fl">How many vortexes you need</span><input id="vx-count" type="number" min="1" max="10" value="2" style="width:80px"></div>
-      <div class="fg"><span class="fl">Notes</span><textarea id="vx-note" placeholder="Current vortex count, priority justification…" style="min-height:50px;resize:vertical"></textarea></div>
-      <button class="btn btn-p" onclick="submitVortexRequest()"><i class="ti ti-send"></i>Submit Request</button>
-    </div>`;
-  }
-
-  // RL: pending requests
-  if(isRL()&&vortexRequests.length){
-    html+=`<div class="card">
-      <div class="ct"><i class="ti ti-inbox" style="color:var(--ora)"></i>Vortex Requests (${pendingReqs.length} pending)</div>
-      ${vortexRequests.slice().reverse().map(req=>`
-        <div style="background:var(--bg3);border-radius:var(--r);padding:10px 12px;margin-bottom:6px;border-left:3px solid ${req.status==='pending'?'var(--ora)':req.status==='approved'?'var(--gre)':'var(--red)'}">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;flex-wrap:wrap;gap:5px">
-            <div>${pill(req.player)} <strong style="font-size:12px">${req.item}</strong> <span style="font-size:10px;color:var(--t3)">×${req.need}</span></div>
-            <span class="badge" style="background:${req.status==='pending'?'var(--orad)':req.status==='approved'?'var(--gred)':'var(--redd)'};color:${req.status==='pending'?'var(--ora)':req.status==='approved'?'#5DCAA5':'#e07b72'}">${req.status.toUpperCase()}</span>
-          </div>
-          ${req.note?`<div style="font-size:11px;color:var(--t3);margin-bottom:6px">${req.note}</div>`:''}
-          ${req.status==='pending'?`<div style="display:flex;gap:5px">
-            <button class="btn btn-s btn-sm" onclick="decideVortex('${req.id}','approved')"><i class="ti ti-check"></i>Approve</button>
-            <button class="btn btn-d btn-sm" onclick="decideVortex('${req.id}','declined')"><i class="ti ti-x"></i>Decline</button>
-          </div>`:''}
-        </div>`).join('')}
-    </div>`;
-  }
-
-  document.getElementById('vortex-content').innerHTML=html;
-}
-
-function changeVortex(name,delta){
-  vortexCounts[name]=Math.max(0,(vortexCounts[name]||0)+delta);
-  saveVortex();renderVortex();
-}
-function resetAllVortex(){
-  if(!confirm('Reset all Nether Vortex counts to 0?')) return;
-  Object.keys(vortexCounts).forEach(k=>vortexCounts[k]=0);
-  saveVortex();renderVortex();toast('Vortex counts reset','ok');
-}
-function submitVortexRequest(){
-  const player=document.getElementById('vx-player')?.value.trim();
-  const item=document.getElementById('vx-item')?.value.trim();
-  const need=parseInt(document.getElementById('vx-count')?.value)||1;
-  const note=document.getElementById('vx-note')?.value.trim();
-  if(!player||!item){toast('Fill in your name and the item','err');return;}
-  vortexRequests.push({id:genId(),player,item,need,note,status:'pending'});
-  saveVortexRequests();
-  toast('Request submitted!','ok');
-  renderVortex();
-}
-function decideVortex(id,decision){
-  const req=vortexRequests.find(r=>r.id===id);
-  if(!req) return;
-  req.status=decision;
-  if(decision==='approved'){
-    vortexCounts[req.player]=(vortexCounts[req.player]||0)+req.need;
-    saveVortex();
-  }
-  saveVortexRequests();
-  renderVortex();
-  toast('Request '+decision,'ok');
-}
 
 let diagView='all'; // 'all' or 'solo'
 
@@ -7414,7 +7242,7 @@ function fullRaidCard(r,highlight){
     </div>`:'';
 
   // Raid-specific group grid (2 groups for 10-man, 5 for 25-man)
-  const numGroups=r.max<=10?2:5;
+  const numGroups=Math.max(1,Math.ceil(r.max/5));
   const maxPerGrp=Math.ceil(r.max/numGroups);
   const rg=Array.from({length:numGroups},(_,i)=>Array.isArray(r.raidGroups?.[i])?r.raidGroups[i]:[]);
   const rgGrouped=new Set(rg.flat());
@@ -7606,8 +7434,11 @@ function fullRaidCard(r,highlight){
           </select>
         </div>
         <div class="fg" style="margin-bottom:0">
-          <span class="fl">Max players</span>
-          <input type="number" id="re-max-${r.id}" value="${r.max}" min="1" max="40" style="width:70px">
+          <span class="fl">Raid size</span>
+          <select id="re-max-${r.id}" style="width:auto">
+            ${[40,20,10].map(n=>`<option value="${n}" ${r.max===n?'selected':''}>${n}-man</option>`).join('')}
+            ${[40,20,10].includes(r.max)?'':`<option value="${r.max}" selected>${r.max}</option>`}
+          </select>
         </div>
         <div class="fg" style="flex:1;min-width:100px;margin-bottom:0">
           <span class="fl">Raid Leader</span>
@@ -7750,7 +7581,7 @@ function saveRaidEdit(raidId){
   const start  = document.getElementById('re-start-'+raidId)?.value;
   const end    = document.getElementById('re-end-'+raidId)?.value;
   const extra  = parseInt(document.getElementById('re-extra-'+raidId)?.value)||0;
-  const max    = parseInt(document.getElementById('re-max-'+raidId)?.value)||25;
+  const max    = parseInt(document.getElementById('re-max-'+raidId)?.value)||40;
   const rl     = document.getElementById('re-rl-'+raidId)?.value?.trim()||'TBD';
   const notes   = document.getElementById('re-notes-'+raidId)?.value?.trim()||'';
   const srLink  = document.getElementById('re-srlink-'+raidId)?.value?.trim()||'';
@@ -7810,7 +7641,7 @@ function createCleanupRaid(raidId){
     signedUp:[],confirmed:[],attended:[],signupStatus:{},
     status:isPast(dateInput)?'completed':'upcoming',
     rosterPosted:false,pug:false,cleanup:true,
-    raidGroups:Array.from({length:src.max<=10?2:5},()=>[])
+    raidGroups:Array.from({length:Math.max(1,Math.ceil(src.max/5))},()=>[])
   };
   applyLeavesToRaid(newRaid);
   raidSchedule.push(newRaid);
@@ -8041,23 +7872,23 @@ function crNameChange(){
   const name=document.getElementById('cr-name')?.value||'';
   const maxEl=document.getElementById('cr-max');
   if(!maxEl) return;
-  if(/ahn'?qiraj|aq40|naxx/i.test(name)) maxEl.value=40;
-  else if(/kara|zul.?aman/i.test(name)) maxEl.value=10;
-  else maxEl.value=25;
+  // Classic raid sizes: ZG / Ruins of AQ (AQ20) are 20-man; everything else defaults to 40.
+  if(/zul.?gurub|\bzg\b|ruins|aq20/i.test(name)) maxEl.value=20;
+  else maxEl.value=40;
 }
 function createRaid(){
   const name=document.getElementById('cr-name').value;
   const date=document.getElementById('cr-date').value;
   const start=document.getElementById('cr-start').value;
   const end=document.getElementById('cr-end').value;
-  const max=parseInt(document.getElementById('cr-max').value)||25;
+  const max=parseInt(document.getElementById('cr-max').value)||40;
   const extra=parseInt(document.getElementById('cr-extra').value)||0;
   const rl=document.getElementById('cr-rl').value.trim()||'TBD';
   const notes=document.getElementById('cr-notes').value.trim();
   if(!date){toast('Select a date','err');return;}
   if(date<todayKey()){toast('Cannot create a raid in the past','err');return;}
   if(!canManageRaids()){toast('Raid Leaders only','err');return;}
-  const numGrp=max<=10?2:5;
+  const numGrp=Math.max(1,Math.ceil(max/5));
   const newRaid={id:genId(),name,date,start,end,max,extra,rl,notes,signedUp:[],confirmed:[],attended:[],signupStatus:{},status:isPast(date)?'completed':'upcoming',rosterPosted:false,pug:false,cleanup:false,raidGroups:Array.from({length:numGrp},()=>[])};
   applyLeavesToRaid(newRaid); // auto-decline anyone on leave during this date
   raidSchedule.push(newRaid);
@@ -8478,7 +8309,7 @@ function initSwipeGesture(){
 
 // ═══════════════════════════════════════════════════════════════════
 // FIREBASE REAL-TIME SYNC
-// Enables cross-device sync for raids, roster presence, and vortex.
+// Enables cross-device sync for raids, roster, and guild data.
 //
 // SETUP (one-time, 5 minutes):
 //  1. Go to https://console.firebase.google.com
@@ -8516,9 +8347,8 @@ function _fbSync(arr,data){arr.length=0;data.forEach(x=>arr.push(x));}
 function applyFirebaseKey(key,data){
   _fbIgnore=true;
   try{
-    if(key==='raids'){if(data&&typeof data==='object'){const d=_fbArr(data).map(r=>r?({...r,signedUp:r.signedUp?_fbArr(r.signedUp):[],confirmed:r.confirmed?_fbArr(r.confirmed):[],attended:r.attended?_fbArr(r.attended):[],signupStatus:r.signupStatus&&typeof r.signupStatus==='object'?{...r.signupStatus}:{},assignments:(()=>{const a=r.assignments||{};const tl=a.tankList?_fbArr(a.tankList):[a.MT,a.OT1,a.OT2].filter(Boolean);return{...a,tankList:tl,healerTargets:a.healerTargets||{}};})(),raidGroups:(()=>{const ng=r.max<=10?2:5;return Array.from({length:ng},(_,i)=>{const g=(r.raidGroups||{})[i];return g?_fbArr(g):[];});})()} ):null).filter(Boolean);raidSchedule=d;normalizeRaidStatuses();try{localStorage.setItem('whaapp-raids',JSON.stringify(raidSchedule));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();if(document.getElementById('pov-search')?.value)renderPOV?.();}
+    if(key==='raids'){if(data&&typeof data==='object'){const d=_fbArr(data).map(r=>r?({...r,signedUp:r.signedUp?_fbArr(r.signedUp):[],confirmed:r.confirmed?_fbArr(r.confirmed):[],attended:r.attended?_fbArr(r.attended):[],signupStatus:r.signupStatus&&typeof r.signupStatus==='object'?{...r.signupStatus}:{},assignments:(()=>{const a=r.assignments||{};const tl=a.tankList?_fbArr(a.tankList):[a.MT,a.OT1,a.OT2].filter(Boolean);return{...a,tankList:tl,healerTargets:a.healerTargets||{}};})(),raidGroups:(()=>{const ng=Math.max(1,Math.ceil(r.max/5));return Array.from({length:ng},(_,i)=>{const g=(r.raidGroups||{})[i];return g?_fbArr(g):[];});})()} ):null).filter(Boolean);raidSchedule=d;normalizeRaidStatuses();try{localStorage.setItem('whaapp-raids',JSON.stringify(raidSchedule));}catch(e){}}renderRaids?.();renderCalendar?.();startRaidTimer?.();if(document.getElementById('pov-search')?.value)renderPOV?.();}
     else if(key==='roster'){if(data&&typeof data==='object'){const d=_fbArr(data).map(p=>p?({...p,dispel:p.dispel?_fbArr(p.dispel):[]}):null).filter(Boolean);_fbSync(ROSTER,d);normalizeRosterRoles();try{localStorage.setItem('whaapp-roster',JSON.stringify(ROSTER));}catch(e){}}renderRoster?.();renderAttendance?.();renderRoles?.();renderRes?.();renderProfiles?.();}
-    else if(key==='vortex'){if(data&&typeof data==='object'){Object.assign(vortexCounts,data);try{localStorage.setItem('whaapp-vortex',JSON.stringify(vortexCounts));}catch(e){}}renderVortex?.();}
     else if(key==='weights'){if(data&&typeof data==='object'){Object.keys(playerWeights).forEach(k=>delete playerWeights[k]);Object.assign(playerWeights,data);try{localStorage.setItem('whaapp-weights',JSON.stringify(playerWeights));}catch(e){}}}
     else if(key==='alts'){if(data&&typeof data==='object'){Object.keys(playerAlts).forEach(k=>delete playerAlts[k]);Object.assign(playerAlts,data);try{localStorage.setItem('whaapp-alts',JSON.stringify(playerAlts));}catch(e){}}}
     else if(key==='roleOverrides'){Object.keys(roleOverrides).forEach(k=>delete roleOverrides[k]);if(data&&typeof data==='object')Object.assign(roleOverrides,data);try{localStorage.setItem('whaapp-roleOverrides',JSON.stringify(roleOverrides));}catch(e){}renderRoles?.();renderAttendance?.();}
@@ -8526,7 +8356,6 @@ function applyFirebaseKey(key,data){
     else if(key==='specRequests'){const d=_fbArr(data);_fbSync(specRequests,d);try{localStorage.setItem('whaapp-specRequests',JSON.stringify(specRequests));}catch(e){}renderSRList?.();renderSpecReq?.();updateSRBadge?.();}
     else if(key==='reviews'){if(data&&typeof data==='object'){const list=_fbArr(data.list);_fbSync(reviews,list);if(data.stars&&typeof data.stars==='object'){Object.keys(reviewStars).forEach(k=>delete reviewStars[k]);Object.assign(reviewStars,data.stars);}try{localStorage.setItem('whaapp-reviews',JSON.stringify({list:reviews,stars:reviewStars}));}catch(e){}}renderReviews?.();updateRevBadge?.();}
     else if(key==='leaves'){const d=_fbArr(data);_fbSync(leaves,d);try{localStorage.setItem('whaapp-leaves',JSON.stringify(leaves));}catch(e){}renderLeave?.();setTimeout(()=>{try{applyAllLeaves();}catch(e){}},0);}
-    else if(key==='vortexRequests'){const d=_fbArr(data);_fbSync(vortexRequests,d);try{localStorage.setItem('whaapp-vortexRequests',JSON.stringify(vortexRequests));}catch(e){}renderVortex?.();}
     else if(key==='healerTanks'){const d=_fbArr(data);if(d.length){_fbSync(healerTanks,d);try{localStorage.setItem('whaapp-healerTanks',JSON.stringify(healerTanks));}catch(e){}}renderRoles?.();}
     else if(key==='groups'){if(data){const outer=_fbArr(data);if(outer.length){groups.length=0;outer.forEach(g=>groups.push(_fbArr(g)));try{localStorage.setItem('whaapp-groups',JSON.stringify(groups));}catch(e){}}}renderRoles?.();}
     else if(key==='bossAssignments'){if(data&&typeof data==='object'){Object.keys(bossAssignments).forEach(k=>delete bossAssignments[k]);Object.assign(bossAssignments,data);try{localStorage.setItem('whaapp-bossAssignments',JSON.stringify(bossAssignments));}catch(e){}}Object.keys(BOSSES).forEach(rk=>{const el=document.getElementById(rk+'-content');if(el&&el.children.length)renderBossPage(rk);});}
@@ -8555,8 +8384,8 @@ function initFirebaseSync(){
   if(!_fbDB){setSyncDot('offline');return;}
   setSyncDot('syncing');
   let synced=false;
-  const keys=['raids','roster','vortex','weights','alts','roleOverrides','applications',
-   'specRequests','reviews','vortexRequests','healerTanks','groups','bossAssignments','killLog','leaves','guildEffort','diagramPositions'];
+  const keys=['raids','roster','weights','alts','roleOverrides','applications',
+   'specRequests','reviews','healerTanks','groups','bossAssignments','killLog','leaves','guildEffort','diagramPositions'];
   keys.forEach(key=>{
     _fbDB.ref(FB_NS+key).on('value', snap=>{
       const data=snap.val();
@@ -8573,14 +8402,12 @@ window.onload=function(){
   try{const sw=localStorage.getItem('whaapp-weights');if(sw){const w=JSON.parse(sw);if(w&&typeof w==='object')playerWeights=w;}}catch(e){}
   try{const srd=localStorage.getItem('whaapp-raids');if(srd){const r=JSON.parse(srd);if(Array.isArray(r)&&r.length)raidSchedule=r;}}catch(e){}
   normalizeRaidStatuses();
-  try{const sv=localStorage.getItem('whaapp-vortex');if(sv){const v=JSON.parse(sv);if(v&&typeof v==='object')Object.assign(vortexCounts,v);}}catch(e){}
   try{const sa=localStorage.getItem('whaapp-alts');if(sa){const a=JSON.parse(sa);if(a&&typeof a==='object')Object.assign(playerAlts,a);}}catch(e){}
   try{const sro=localStorage.getItem('whaapp-roleOverrides');if(sro){const o=JSON.parse(sro);if(o&&typeof o==='object')Object.assign(roleOverrides,o);}}catch(e){}
   try{const sap=localStorage.getItem('whaapp-applications');if(sap){const a=JSON.parse(sap);if(Array.isArray(a))a.forEach(x=>applications.push(x));}}catch(e){}
   try{const ssp=localStorage.getItem('whaapp-specRequests');if(ssp){const s=JSON.parse(ssp);if(Array.isArray(s))s.forEach(x=>specRequests.push(x));}}catch(e){}
   try{const srv=localStorage.getItem('whaapp-reviews');if(srv){const d=JSON.parse(srv);if(d&&Array.isArray(d.list))d.list.forEach(x=>reviews.push(x));if(d&&d.stars&&typeof d.stars==='object')Object.assign(reviewStars,d.stars);}}catch(e){}
   try{const slv=localStorage.getItem('whaapp-leaves');if(slv){const l=JSON.parse(slv);if(Array.isArray(l))l.forEach(x=>leaves.push(x));}}catch(e){}
-  try{const svr=localStorage.getItem('whaapp-vortexRequests');if(svr){const v=JSON.parse(svr);if(Array.isArray(v))v.forEach(x=>vortexRequests.push(x));}}catch(e){}
   try{const sht=localStorage.getItem('whaapp-healerTanks');if(sht){const h=JSON.parse(sht);if(Array.isArray(h)&&h.length){healerTanks.length=0;h.forEach(x=>healerTanks.push(x));}}}catch(e){}
   try{const sg=localStorage.getItem('whaapp-groups');if(sg){const g=JSON.parse(sg);if(Array.isArray(g)&&g.length){groups.length=0;g.forEach(x=>groups.push(Array.isArray(x)?x:[])); }}}catch(e){}
   try{const sba=localStorage.getItem('whaapp-bossAssignments');if(sba){const b=JSON.parse(sba);if(b&&typeof b==='object')Object.assign(bossAssignments,b);}}catch(e){}
