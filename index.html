@@ -429,6 +429,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'attendance')"><i class="ti ti-calendar-check"></i><span>Attendance</span></div>
       <div class="ni" onclick="nav(this,'roster')"><i class="ti ti-users"></i><span>Roster</span></div>
       <div class="ni" onclick="nav(this,'roles')"><i class="ti ti-shield"></i><span>Roles &amp; Groups</span></div>
+      <div class="ni" onclick="nav(this,'buffs')"><i class="ti ti-shield-bolt"></i><span>Buff Assignments</span></div>
       <div class="ni" onclick="nav(this,'dispels')"><i class="ti ti-wand"></i><span>Dispels &amp; CCs</span></div>
       <div class="ni" onclick="nav(this,'res')"><i class="ti ti-sparkles"></i><span>Resistances</span></div>
     </div>
@@ -474,6 +475,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <div class="sbs"><div class="sbl">Raid Info</div>
       <div class="ni" onclick="nav(this,'pov')"><i class="ti ti-user-circle"></i><span>Player POV</span></div>
       <div class="ni" onclick="nav(this,'roster')"><i class="ti ti-users"></i><span>Roster</span></div>
+      <div class="ni" onclick="nav(this,'buffs')"><i class="ti ti-shield-bolt"></i><span>Buff Assignments</span></div>
       <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
     </div>
     <div class="sbs" id="par-ge-section" style="display:none"><div class="sbl">Guild Effort</div>
@@ -496,6 +498,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'leave')"><i class="ti ti-plane"></i><span>Leave of Absence</span></div>
     </div>
     <div class="sbs"><div class="sbl">Raids</div>
+      <div class="ni" onclick="nav(this,'buffs')"><i class="ti ti-shield-bolt"></i><span>Buff Assignments</span></div>
       <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
     </div>
     <div class="sbs"><div class="sbl">Analysis</div>
@@ -616,8 +619,8 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <div class="card"><div class="ct"><i class="ti ti-heart" style="color:#5DCAA5"></i>Healers (present)</div><div id="roles-healers"></div></div>
   </div>
   <div class="card">
-    <div class="ct" style="display:flex;align-items:center;gap:6px"><i class="ti ti-layout-columns" style="color:var(--acc)"></i>Raid Groups <button id="clear-groups-btn" class="btn btn-sm" style="margin-left:auto;font-size:10px;display:none" onclick="clearAllGroups()"><i class="ti ti-eraser"></i> Clear groups</button></div>
-    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:4px" id="group-grid"></div>
+    <div class="ct" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><i class="ti ti-layout-columns" style="color:var(--acc)"></i>Raid Groups <span id="build-comp-wrap" style="margin-left:auto;display:none;gap:4px;flex-wrap:wrap"><span style="font-size:10px;color:var(--t3);align-self:center">Build:</span><button class="btn btn-s btn-sm" style="font-size:10px" onclick="buildRaidComp(2)" title="Auto-fill 2 groups (10-man), a Shaman in each melee group"><i class="ti ti-wand"></i> 10</button><button class="btn btn-s btn-sm" style="font-size:10px" onclick="buildRaidComp(4)" title="Auto-fill 4 groups (20-man)"><i class="ti ti-wand"></i> 20</button><button class="btn btn-s btn-sm" style="font-size:10px" onclick="buildRaidComp(8)" title="Auto-fill 8 groups (40-man)"><i class="ti ti-wand"></i> 40</button><button id="clear-groups-btn" class="btn btn-sm" style="font-size:10px;display:none" onclick="clearAllGroups()"><i class="ti ti-eraser"></i> Clear</button></span></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px;margin-top:4px" id="group-grid"></div>
     <div id="group-unassigned" style="display:none;margin-top:8px"></div>
     <div style="margin-top:6px;font-size:10px;color:var(--t3)">Greyed out = absent tonight</div>
   </div>
@@ -630,6 +633,11 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <div class="ct"><i class="ti ti-heart-handshake" style="color:#5DCAA5"></i>Healer → Tank Assignments</div>
     <div id="ht-assign"></div>
   </div>
+</div>
+
+<div class="page" id="page-buffs">
+  <div class="ph"><div class="pt">Buff Assignments</div><div class="ps">Paladin Blessings &amp; Shaman totems — set by Raid Leaders/Officers, visible to everyone</div></div>
+  <div id="buffs-content"></div>
 </div>
 
 <div class="page" id="page-dispels">
@@ -1003,7 +1011,7 @@ function renderQuests(){
       <div class="ct"><i class="ti ti-target-arrow" style="color:var(--acc)"></i>Post a Quest</div>
       <div class="fg"><span class="fl">Title</span><input id="q-title" placeholder="e.g. Everyone hits 300 First Aid before Molten Core"></div>
       <div class="fg"><span class="fl">Goal / details</span><textarea id="q-desc" placeholder="What does the guild need to achieve?" style="min-height:60px;resize:vertical"></textarea></div>
-      <div class="fg"><span class="fl">Reward / incentive (optional)</span><input id="q-reward" placeholder="e.g. DKP, gold, bragging rights"></div>
+      <div class="fg"><span class="fl">Reward / incentive (optional)</span><input id="q-reward" placeholder="e.g. gold, loot priority, bragging rights"></div>
       <button class="btn btn-p" onclick="postQuest()"><i class="ti ti-plus"></i>Post Quest</button>
     </div>`;
   } else {
@@ -1012,6 +1020,21 @@ function renderQuests(){
   const card=(q)=>{
     const mine=canManageQuest(q);
     const d=q.status==='done';
+    const editing = window._editQuestId===q.id && mine;
+    if(editing){
+      return `<div class="card" style="margin:0;border-top:3px solid var(--acc)">
+        <div class="fg"><span class="fl">Title</span><input id="qe-title-${q.id}" value="${qesc(q.title)}"></div>
+        <div class="fg"><span class="fl">Goal / details</span><textarea id="qe-desc-${q.id}" style="min-height:54px;resize:vertical">${qesc(q.desc||'')}</textarea></div>
+        <div class="fg" style="margin-bottom:8px"><span class="fl">Reward (optional)</span><input id="qe-reward-${q.id}" value="${qesc(q.reward||'')}"></div>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-p btn-sm" onclick="saveQuestEdit('${q.id}')"><i class="ti ti-device-floppy"></i>Save</button>
+          <button class="btn btn-sm" onclick="cancelQuestEdit()">Cancel</button>
+        </div>
+      </div>`;
+    }
+    const named = isNamed()&&CURRENT_USER;
+    const workers = Array.isArray(q.workers)?q.workers:[];
+    const iAmOnIt = named && workers.includes(CURRENT_USER.name);
     return `<div class="card" style="margin:0;display:flex;flex-direction:column;gap:6px;${d?'opacity:.62;':''}border-top:3px solid ${d?'var(--gre)':'var(--acc)'}">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px">
         <div style="font-size:13.5px;font-weight:700;color:var(--t1);line-height:1.3;${d?'text-decoration:line-through':''}">${qesc(q.title)}</div>
@@ -1019,12 +1042,15 @@ function renderQuests(){
       </div>
       ${q.desc?`<div style="font-size:11.5px;color:var(--t2);white-space:pre-wrap">${qesc(q.desc)}</div>`:''}
       ${q.reward?`<div style="font-size:11px;color:var(--gold)"><i class="ti ti-gift"></i> ${qesc(q.reward)}</div>`:''}
+      ${workers.length?`<div style="font-size:11px;color:var(--t2)"><i class="ti ti-user-check" style="color:var(--gre)"></i> Working on it: <span style="color:var(--t1)">${workers.map(n=>qesc(n)).join(', ')}</span></div>`:''}
       <div style="margin-top:auto;padding-top:7px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap">
         <span style="font-size:10px;color:var(--t3)">${qesc(q.by||'—')}${q.date?' · '+fmtKey(q.date):''}</span>
-        ${mine?`<div style="display:flex;gap:4px">
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          ${(named&&!d)?`<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;${iAmOnIt?'background:var(--gred);border-color:rgba(26,158,114,.3);color:#5DCAA5':''}" onclick="toggleQuestWorker('${q.id}')" title="${iAmOnIt?'Stop working on this':'Apply to work on this'}"><i class="ti ti-${iAmOnIt?'check':'hand-finger'}"></i>${iAmOnIt?"On it":'Apply'}</button>`:''}
+          ${mine?`<button class="btn btn-sm" style="font-size:10px;padding:3px 7px" onclick="editQuest('${q.id}')" title="Edit"><i class="ti ti-pencil"></i></button>
           <button class="btn btn-sm" style="font-size:10px;padding:3px 7px" onclick="toggleQuestDone('${q.id}')"><i class="ti ti-${d?'rotate':'check'}"></i>${d?'Reopen':'Done'}</button>
-          <button class="btn btn-sm" style="font-size:10px;padding:3px 7px;background:var(--redd);border-color:rgba(192,57,43,.25);color:#e07b72" onclick="deleteQuest('${q.id}')"><i class="ti ti-trash"></i></button>
-        </div>`:''}
+          <button class="btn btn-sm" style="font-size:10px;padding:3px 7px;background:var(--redd);border-color:rgba(192,57,43,.25);color:#e07b72" onclick="deleteQuest('${q.id}')"><i class="ti ti-trash"></i></button>`:''}
+        </div>
       </div>
     </div>`;
   };
@@ -1043,7 +1069,7 @@ function postQuest(){
   const desc=document.getElementById('q-desc').value.trim();
   const reward=document.getElementById('q-reward').value.trim();
   if(!title){toast('Enter a quest title','err');return;}
-  quests.unshift({id:genId(),title,desc,reward,by:currentActorName(),date:todayKey(),status:'open'});
+  quests.unshift({id:genId(),title,desc,reward,workers:[],by:currentActorName(),date:todayKey(),status:'open'});
   saveQuests(); renderQuests();
   toast('Quest posted','ok');
 }
@@ -1057,6 +1083,94 @@ function deleteQuest(id){
   if(!confirm('Delete this quest?')) return;
   quests=quests.filter(x=>x.id!==id);
   saveQuests(); renderQuests();
+}
+// Any signed-in player can apply to (volunteer for) a quest — toggles their name.
+function toggleQuestWorker(id){
+  if(!(isNamed()&&CURRENT_USER)){ toast('Sign in with your character to apply','warn'); return; }
+  const q=quests.find(x=>x.id===id); if(!q) return;
+  if(!Array.isArray(q.workers)) q.workers=[];
+  const me=CURRENT_USER.name;
+  if(q.workers.includes(me)){ q.workers=q.workers.filter(n=>n!==me); }
+  else { q.workers.push(me); }
+  saveQuests(); renderQuests();
+}
+// Edit a quest — the creator or any RL/Officer.
+function editQuest(id){ const q=quests.find(x=>x.id===id); if(!q||!canManageQuest(q)) return; window._editQuestId=id; renderQuests(); }
+function cancelQuestEdit(){ window._editQuestId=null; renderQuests(); }
+function saveQuestEdit(id){
+  const q=quests.find(x=>x.id===id); if(!q||!canManageQuest(q)) return;
+  const t=(document.getElementById('qe-title-'+id)?.value||'').trim();
+  if(!t){ toast('Title cannot be empty','err'); return; }
+  q.title=t;
+  q.desc=(document.getElementById('qe-desc-'+id)?.value||'').trim();
+  q.reward=(document.getElementById('qe-reward-'+id)?.value||'').trim();
+  window._editQuestId=null;
+  saveQuests(); renderQuests();
+  toast('Quest updated','ok');
+}
+
+// ── Buff Assignments: Paladin Blessings + Shaman totems ───────────────
+let buffAssign={blessings:{},totems:{}};
+function saveBuffAssign(){
+  try{localStorage.setItem('whaapp-buffAssign',JSON.stringify(buffAssign));}catch(e){}
+  fbSet('buffAssign', buffAssign);
+}
+const BLESSINGS=['Kings','Might','Wisdom','Salvation','Light','Sanctuary'];
+const TOTEM_OPTS={
+  air:['Windfury Totem','Grace of Air','Tranquil Air','Nature Resistance','Grounding','Windwall'],
+  earth:['Strength of Earth','Stoneskin','Tremor','Earthbind','Stoneclaw'],
+  water:['Mana Spring','Healing Stream','Poison Cleansing','Disease Cleansing','Fire Resistance'],
+  fire:['Searing','Magma','Fire Nova','Flametongue','Frost Resistance']
+};
+function setBlessing(pala,field,val){ if(!canManageRaids())return; if(!buffAssign.blessings[pala])buffAssign.blessings[pala]={blessing:'',classes:[]}; buffAssign.blessings[pala][field]=val; saveBuffAssign(); renderBuffs(); }
+function toggleBlessingClass(pala,cls){ if(!canManageRaids())return; if(!buffAssign.blessings[pala])buffAssign.blessings[pala]={blessing:'',classes:[]}; const c=buffAssign.blessings[pala].classes||[]; buffAssign.blessings[pala].classes=c.includes(cls)?c.filter(x=>x!==cls):[...c,cls]; saveBuffAssign(); renderBuffs(); }
+function setTotem(gi,element,val){ if(!canManageRaids())return; if(!buffAssign.totems[gi])buffAssign.totems[gi]={}; buffAssign.totems[gi][element]=val; saveBuffAssign(); renderBuffs(); }
+function renderBuffs(){
+  const el=document.getElementById('buffs-content'); if(!el) return;
+  if(!buffAssign||typeof buffAssign!=='object') buffAssign={blessings:{},totems:{}};
+  if(!buffAssign.blessings) buffAssign.blessings={}; if(!buffAssign.totems) buffAssign.totems={};
+  const rl=canManageRaids();
+  const pr=ROSTER.filter(p=>p.present);
+  const paladins=pr.filter(p=>p.cls==='Paladin');
+  const CLASSES=['Druid','Hunter','Mage','Paladin','Priest','Rogue','Shaman','Warlock','Warrior'];
+  // Paladin Blessings
+  let html=`<div class="card" style="margin-bottom:12px"><div class="ct"><i class="ti ti-shield-bolt" style="color:#F58CBA"></i>Paladin Blessings</div>`;
+  if(!paladins.length){ html+=`<div style="font-size:11px;color:var(--t3)">No Paladins present tonight.</div>`; }
+  else html+=paladins.map(p=>{
+    const a=buffAssign.blessings[p.name]||{blessing:'',classes:[]};
+    const cls2=a.classes||[];
+    const classChips=CLASSES.map(c=>{const on=cls2.includes(c);
+      return rl?`<label class="rtogl" style="font-size:10px"><span class="tog sm ${on?'on':''}" onclick="toggleBlessingClass('${p.name}','${c}')"></span> ${c}</label>`
+               :(on?`<span class="badge" style="font-size:9px;background:var(--bg2)">${c}</span>`:'');
+    }).join('');
+    return `<div style="background:var(--bg3);border-radius:var(--r);padding:8px 10px;margin-bottom:6px">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+        ${pill(p.name,!p.present)} ${ctag(p.cls)}
+        ${rl?`<select onchange="setBlessing('${p.name}','blessing',this.value)" style="font-size:11px;width:auto"><option value="">— Blessing —</option>${BLESSINGS.map(b=>`<option ${a.blessing===b?'selected':''}>${b}</option>`).join('')}</select>`
+            :`<span class="badge" style="background:var(--accg);color:var(--acc)">${a.blessing?'Blessing of '+a.blessing:'—'}</span>`}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px">${classChips||'<span style="font-size:10px;color:var(--t3)">No classes assigned</span>'}</div>
+    </div>`;
+  }).join('');
+  html+=`</div>`;
+  // Shaman totems per group
+  html+=`<div class="card"><div class="ct"><i class="ti ti-flame" style="color:#e09a65"></i>Shaman Totems by Group</div>`;
+  const groupRows=groups.map((g,i)=>{
+    const members=g.filter(n=>gp(n)); if(!members.length) return '';
+    const shams=members.filter(n=>gp(n)?.cls==='Shaman');
+    const t=buffAssign.totems[i]||{};
+    return `<div style="background:var(--bg3);border-radius:var(--r);padding:8px 10px;margin-bottom:6px">
+      <div style="font-size:11px;font-weight:700;color:var(--t2);margin-bottom:5px">Group ${i+1} ${shams.length?`· <span style="color:var(--t1)">${shams.join(', ')}</span>`:'<span style="color:var(--red)">· no Shaman</span>'}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        ${['air','earth','water','fire'].map(elm=>rl
+          ?`<select onchange="setTotem(${i},'${elm}',this.value)" style="font-size:10px;width:auto"><option value="">${elm[0].toUpperCase()+elm.slice(1)} —</option>${TOTEM_OPTS[elm].map(x=>`<option ${t[elm]===x?'selected':''}>${x}</option>`).join('')}</select>`
+          :`<span class="badge" style="font-size:9px;background:var(--bg2)">${t[elm]||elm+': —'}</span>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+  html+= groupRows || '<div style="font-size:11px;color:var(--t3)">No raid groups yet — build them in Roles &amp; Groups → Build 40-man.</div>';
+  html+=`</div>`;
+  el.innerHTML=html;
 }
 function saveSpecRequests(){
   try{localStorage.setItem('whaapp-specRequests',JSON.stringify(specRequests));}catch(e){}
@@ -1219,6 +1333,45 @@ function clearAllGroups(){
   for(let i=0;i<groups.length;i++) groups[i]=[];
   saveGroups(); renderRoles();
   toast('Raid groups cleared','ok');
+}
+// Auto-build raid groups for 10/20/40-man (ng = 2/4/8 groups). Horde Windfury
+// optimisation: a Shaman is placed in each melee group, melee/tanks fill those
+// groups, then ranged/casters and healers fill the rest. Fully editable afterwards.
+function buildRaidComp(ng){
+  if(!isRL()) return;
+  ng=[2,4,8].includes(ng)?ng:8;
+  const src=(ROSTER.filter(p=>p.present).length?ROSTER.filter(p=>p.present):ROSTER.slice());
+  if(!src.length){ toast('No players to build from','warn'); return; }
+  const cap=ng*5;
+  const roleOf=p=>(typeof effectiveRole==='function'?effectiveRole(p):p.type);
+  const isSham=p=>p.cls==='Shaman';
+  const G=Array.from({length:ng},()=>[]);
+  const used=new Set();
+  const place=(p,i)=>{ if(p&&!used.has(p.name)&&G[i].length<5){G[i].push(p.name);used.add(p.name);return true;} return false; };
+  const tanks=src.filter(p=>roleOf(p)==='Tank');
+  const melee=src.filter(p=>roleOf(p)==='Melee'&&!isSham(p));
+  const enhSham=src.filter(p=>isSham(p)&&roleOf(p)==='Melee');
+  const otherSham=src.filter(p=>isSham(p)&&roleOf(p)!=='Melee');
+  const ranged=src.filter(p=>roleOf(p)==='Ranged'&&!isSham(p));
+  const healers=src.filter(p=>roleOf(p)==='Healer'&&!isSham(p));
+  const meleeCount=tanks.length+melee.length+enhSham.length;
+  const meleeGroups=Math.min(ng,Math.max(1,Math.ceil(meleeCount/5)));
+  // 1 shaman per melee group (Enhancement first for Windfury, then any other shaman)
+  const shamFor=[...enhSham,...otherSham];
+  for(let i=0;i<meleeGroups;i++){ place(shamFor.shift(),i); }
+  // tanks, then melee, round-robin into the melee groups
+  let ti=0; tanks.forEach(p=>{ for(let t=0;t<meleeGroups;t++){const idx=(ti+t)%meleeGroups; if(place(p,idx)){ti=idx+1;break;}} });
+  let mi=0; [...melee,...enhSham].forEach(p=>{ for(let t=0;t<meleeGroups;t++){const idx=(mi+t)%meleeGroups; if(place(p,idx)){mi=idx+1;break;}} });
+  // ranged + leftover shamans into the later groups
+  let ri=meleeGroups; [...ranged,...shamFor].forEach(p=>{ for(let t=0;t<ng;t++){const idx=(ri+t)%ng; if(place(p,idx)){ri=idx+1;break;}} });
+  // healers spread across all groups
+  let hi=0; healers.forEach(p=>{ for(let t=0;t<ng;t++){const idx=(hi+t)%ng; if(place(p,idx)){hi=idx+1;break;}} });
+  // anyone left over (up to the raid cap)
+  src.forEach(p=>{ if(!used.has(p.name)){ for(let t=0;t<ng;t++){ if(place(p,t)) break; } } });
+  groups.length=0; G.forEach(g=>groups.push(g));
+  saveGroups(); renderRoles();
+  const overflow=src.length-used.size;
+  toast(`${ng*5}-man comp built (${ng} groups) — Shaman in each melee group for Windfury.${overflow>0?' '+overflow+' player(s) over the '+cap+' cap left unassigned.':''}`,'ok');
 }
 function sanitizeGroups(){
   if(!ROSTER.length) return false;
@@ -3631,7 +3784,7 @@ function nav(el,page){
   if(window.innerWidth<=768) collapseSidebar();
   updateMobTitle(page);
   updateMobNav(page);
-  ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,coc:renderCoC,quests:renderQuests,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),za:()=>renderBossPage('za'),stats:renderStats,profiles:renderProfiles,progression:renderProgression,'guild-effort':renderGuildEffort})[page]?.();
+  ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,buffs:renderBuffs,coc:renderCoC,quests:renderQuests,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),za:()=>renderBossPage('za'),stats:renderStats,profiles:renderProfiles,progression:renderProgression,'guild-effort':renderGuildEffort})[page]?.();
 }
 
 // ============================================================
@@ -4110,6 +4263,7 @@ function renderRoles(){
     ovEl.innerHTML=overridden.length?overridden.map(p=>`<div class="rrow">${pill(p.name)} <span class="badge" style="background:var(--orad);color:var(--ora)">Was ${p.type} → Playing ${roleOverrides[p.name]}</span> ${roleBtn(p)}</div>`).join(''):'<div style="font-size:11px;color:var(--t3)">None tonight</div>';
   }
   // groups
+  const bcw=document.getElementById('build-comp-wrap'); if(bcw) bcw.style.display=isRL()?'inline-flex':'none';
   const cgb=document.getElementById('clear-groups-btn'); if(cgb) cgb.style.display=(isRL()&&groups.some(g=>g.length))?'':'none';
   const gg=document.getElementById('group-grid');
   const rosterNames=ROSTER.map(p=>p.name);
@@ -8369,39 +8523,8 @@ function resetBossKill(bossId,bossName){
 // ============================================================
 // BUFF COVERAGE
 // ============================================================
-function renderBuffs(){
-  const el=document.getElementById('buffs-content');if(!el)return;
-  const pr=present();
-  const cats=['Raid','Melee','Caster','Cooldowns'];
-  const missing=RAID_BUFFS.filter(b=>b.critical&&!pr.some(p=>b.check(p)));
-  let html='';
-  if(missing.length){
-    html+=`<div class="miss-banner" style="margin-bottom:10px"><i class="ti ti-alert-triangle"></i> Critical buffs missing tonight: <strong>${missing.map(b=>b.label).join(', ')}</strong></div>`;
-  }
-  html+=`<div style="font-size:11px;color:var(--t3);margin-bottom:12px">Coverage based on <strong style="color:var(--t1)">${pr.length}</strong> present players. Absent players are excluded.</div>`;
-  cats.forEach(cat=>{
-    const buffs=RAID_BUFFS.filter(b=>b.cat===cat);
-    const coveredCount=buffs.filter(b=>pr.some(p=>b.check(p))).length;
-    html+=`<div class="card" style="margin-bottom:10px">
-      <div class="ct"><i class="ti ti-checklist" style="color:var(--acc)"></i>${cat} Buffs
-        <span class="badge" style="margin-left:auto;background:${coveredCount===buffs.length?'rgba(26,158,114,.12)':'rgba(200,120,65,.12)'};color:${coveredCount===buffs.length?'#5DCAA5':'#e09a65'}">${coveredCount}/${buffs.length}</span>
-      </div>
-      ${buffs.map(b=>{
-        const providers=pr.filter(p=>b.check(p));
-        const ok=providers.length>0;
-        return`<div class="bm-row">
-          <i class="ti ${b.icon}" style="font-size:14px;width:18px;text-align:center;color:${ok?'#5DCAA5':b.critical?'#e07b72':'var(--t3)'}"></i>
-          <span style="flex:1;color:${ok?'var(--t1)':b.critical?'#e07b72':'var(--t2)'};font-weight:${b.critical&&!ok?600:400}">${b.label}</span>
-          <span style="font-size:10px;color:var(--t3);flex-shrink:0;margin:0 6px">${b.note}</span>
-          ${ok
-            ?`<span class="bm-prov">${providers.map(p=>p.name).join(', ')}</span>`
-            :`<span style="font-size:10px;color:${b.critical?'#e07b72':'var(--t3)'};white-space:nowrap">${b.critical?'⚠ MISSING':'—'}</span>`}
-        </div>`;
-      }).join('')}
-    </div>`;
-  });
-  el.innerHTML=html;
-}
+// (Old "Buff coverage" renderBuffs removed — replaced by the Buff Assignments
+//  page, renderBuffAssign, earlier in the script.)
 
 // ============================================================
 // DISCORD EXPORT
@@ -8491,7 +8614,7 @@ function restoreSidebarState(){
     }
   }catch(e){}
 }
-const MOB_PAGE_NAMES={attendance:'Attendance',roster:'Roster',roles:'Roles & Groups',dispels:'Dispels & CCs',res:'Resistances',coc:'Code of Conduct',quests:'Quest Board',pov:'Player POV',specreq:'Change My Spec',signup:'Apply for Raid','rl-review':'RL Review',calendar:'Calendar',raids:'Upcoming Raids','create-raid':'Create Raid/Event',leave:'Leave of Absence',gruul:"Gruul's Lair",mag:'Magtheridon',tk:'Tempest Keep',ssc:'Serpent Shrine',kara:'Karazhan',hyjal:'Mount Hyjal',bt:'Black Temple',za:"Zul'Aman",stats:'Statistics',profiles:'Profiles',progression:'Progression','guild-effort':'Guild Effort'};
+const MOB_PAGE_NAMES={attendance:'Attendance',roster:'Roster',roles:'Roles & Groups',dispels:'Dispels & CCs',res:'Resistances',buffs:'Buff Assignments',coc:'Code of Conduct',quests:'Quest Board',pov:'Player POV',specreq:'Change My Spec',signup:'Apply for Raid','rl-review':'RL Review',calendar:'Calendar',raids:'Upcoming Raids','create-raid':'Create Raid/Event',leave:'Leave of Absence',gruul:"Gruul's Lair",mag:'Magtheridon',tk:'Tempest Keep',ssc:'Serpent Shrine',kara:'Karazhan',hyjal:'Mount Hyjal',bt:'Black Temple',za:"Zul'Aman",stats:'Statistics',profiles:'Profiles',progression:'Progression','guild-effort':'Guild Effort'};
 function updateMobTitle(page){
   const el=document.getElementById('mob-title');
   if(el) el.textContent=MOB_PAGE_NAMES[page]||'We Have An App';
@@ -8511,7 +8634,7 @@ function mobNav(page){
     if(pg)pg.classList.add('active');
     const mainEl=document.querySelector('.main');if(mainEl)mainEl.scrollTop=0;
     collapseSidebar();updateMobTitle(page);updateMobNav(page);
-    ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,coc:renderCoC,quests:renderQuests,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),za:()=>renderBossPage('za'),stats:renderStats,profiles:renderProfiles,progression:renderProgression,'guild-effort':renderGuildEffort})[page]?.();
+    ({attendance:renderAttendance,roster:renderRoster,roles:renderRoles,dispels:renderDispels,res:renderRes,buffs:renderBuffs,coc:renderCoC,quests:renderQuests,pov:renderPOV,specreq:renderSpecReq,signup:renderSignup,'rl-review':renderRLReview,calendar:renderCalendar,raids:renderRaids,'create-raid':renderCreateRaid,leave:renderLeave,gruul:()=>renderBossPage('gruul'),mag:()=>renderBossPage('mag'),tk:()=>renderBossPage('tk'),ssc:()=>renderBossPage('ssc'),kara:()=>renderBossPage('kara'),hyjal:()=>renderBossPage('hyjal'),bt:()=>renderBossPage('bt'),za:()=>renderBossPage('za'),stats:renderStats,profiles:renderProfiles,progression:renderProgression,'guild-effort':renderGuildEffort})[page]?.();
   }
 }
 function initSwipeGesture(){
@@ -8577,6 +8700,7 @@ function applyFirebaseKey(key,data){
     else if(key==='roleOverrides'){Object.keys(roleOverrides).forEach(k=>delete roleOverrides[k]);if(data&&typeof data==='object')Object.assign(roleOverrides,data);try{localStorage.setItem('whaapp-roleOverrides',JSON.stringify(roleOverrides));}catch(e){}renderRoles?.();renderAttendance?.();}
     else if(key==='applications'){const d=_fbArr(data);_fbSync(applications,d);try{localStorage.setItem('whaapp-applications',JSON.stringify(applications));}catch(e){}renderRLReview?.();updatePendingBadge?.();renderSignup?.();}
     else if(key==='quests'){const d=_fbArr(data);_fbSync(quests,d);try{localStorage.setItem('whaapp-quests',JSON.stringify(quests));}catch(e){}if(document.getElementById('quests-content')?.children.length||document.getElementById('page-quests')?.classList.contains('active'))renderQuests();}
+    else if(key==='buffAssign'){if(data&&typeof data==='object'){buffAssign={blessings:data.blessings||{},totems:data.totems||{}};try{localStorage.setItem('whaapp-buffAssign',JSON.stringify(buffAssign));}catch(e){}}if(document.getElementById('buffs-content')?.children.length||document.getElementById('page-buffs')?.classList.contains('active'))renderBuffs?.();}
     else if(key==='specRequests'){const d=_fbArr(data);_fbSync(specRequests,d);try{localStorage.setItem('whaapp-specRequests',JSON.stringify(specRequests));}catch(e){}renderSRList?.();renderSpecReq?.();updateSRBadge?.();}
     else if(key==='reviews'){if(data&&typeof data==='object'){const list=_fbArr(data.list);_fbSync(reviews,list);if(data.stars&&typeof data.stars==='object'){Object.keys(reviewStars).forEach(k=>delete reviewStars[k]);Object.assign(reviewStars,data.stars);}try{localStorage.setItem('whaapp-reviews',JSON.stringify({list:reviews,stars:reviewStars}));}catch(e){}}renderReviews?.();updateRevBadge?.();}
     else if(key==='leaves'){const d=_fbArr(data);_fbSync(leaves,d);try{localStorage.setItem('whaapp-leaves',JSON.stringify(leaves));}catch(e){}renderLeave?.();setTimeout(()=>{try{applyAllLeaves();}catch(e){}},0);}
@@ -8609,7 +8733,7 @@ function initFirebaseSync(){
   setSyncDot('syncing');
   let synced=false;
   const keys=['raids','roster','weights','alts','roleOverrides','applications',
-   'specRequests','reviews','healerTanks','groups','bossAssignments','killLog','leaves','guildEffort','diagramPositions','quests'];
+   'specRequests','reviews','healerTanks','groups','bossAssignments','killLog','leaves','guildEffort','diagramPositions','quests','buffAssign'];
   keys.forEach(key=>{
     _fbDB.ref(FB_NS+key).on('value', snap=>{
       const data=snap.val();
@@ -8630,6 +8754,7 @@ window.onload=function(){
   try{const sro=localStorage.getItem('whaapp-roleOverrides');if(sro){const o=JSON.parse(sro);if(o&&typeof o==='object')Object.assign(roleOverrides,o);}}catch(e){}
   try{const sap=localStorage.getItem('whaapp-applications');if(sap){const a=JSON.parse(sap);if(Array.isArray(a))a.forEach(x=>applications.push(x));}}catch(e){}
   try{const sq=localStorage.getItem('whaapp-quests');if(sq){const q=JSON.parse(sq);if(Array.isArray(q))quests=q;}}catch(e){}
+  try{const sb=localStorage.getItem('whaapp-buffAssign');if(sb){const b=JSON.parse(sb);if(b&&typeof b==='object')buffAssign={blessings:b.blessings||{},totems:b.totems||{}};}}catch(e){}
   try{const ssp=localStorage.getItem('whaapp-specRequests');if(ssp){const s=JSON.parse(ssp);if(Array.isArray(s))s.forEach(x=>specRequests.push(x));}}catch(e){}
   try{const srv=localStorage.getItem('whaapp-reviews');if(srv){const d=JSON.parse(srv);if(d&&Array.isArray(d.list))d.list.forEach(x=>reviews.push(x));if(d&&d.stars&&typeof d.stars==='object')Object.assign(reviewStars,d.stars);}}catch(e){}
   try{const slv=localStorage.getItem('whaapp-leaves');if(slv){const l=JSON.parse(slv);if(Array.isArray(l))l.forEach(x=>leaves.push(x));}}catch(e){}
