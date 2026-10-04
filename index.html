@@ -1109,8 +1109,23 @@ function saveQuestEdit(id){
   toast('Quest updated','ok');
 }
 
-// ── Buff Assignments: Paladin Blessings + Shaman totems ───────────────
-let buffAssign={blessings:{},totems:{}};
+// ── Buff Assignments: Paladin Blessings + Shaman totems + class buffs ──
+let buffAssign={blessings:{},totems:{},classBuffs:{},classBuffsSkip:{}};
+// Raid-wide class buffs that need a responsible caster (Classic).
+const CLASS_BUFFS=[
+  {key:'brilliance', label:'Arcane Brilliance', note:'Intellect',          cls:'Mage',    icon:'ti-wand'},
+  {key:'gotw',       label:'Gift of the Wild',  note:'All stats + resists', cls:'Druid',   icon:'ti-paw'},
+  {key:'thorns',     label:'Thorns',            note:'Reflect (tanks)',      cls:'Druid',   icon:'ti-plant-2'},
+  {key:'fortitude',  label:'Prayer of Fortitude', note:'Stamina',            cls:'Priest',  icon:'ti-shield'},
+  {key:'spirit',     label:'Prayer of Spirit',  note:'Spirit',               cls:'Priest',  icon:'ti-sparkles'},
+  {key:'shadowprot', label:'Prayer of Shadow Protection', note:'Shadow res', cls:'Priest',  icon:'ti-moon'},
+  {key:'battleshout',label:'Battle Shout',      note:'Attack power (per group)', cls:'Warrior', icon:'ti-swords'},
+  {key:'trueshot',   label:'Trueshot Aura',     note:'Attack power',         cls:'Hunter',  icon:'ti-crosshair'},
+  {key:'bloodpact',  label:'Blood Pact (Imp)',  note:'Stamina',              cls:'Warlock', icon:'ti-flame'},
+];
+function addClassBuff(key,name){ if(!canManageRaids()||!name)return; if(!buffAssign.classBuffs)buffAssign.classBuffs={}; const a=buffAssign.classBuffs[key]||[]; if(!a.includes(name))a.push(name); buffAssign.classBuffs[key]=a; saveBuffAssign(); renderBuffs(); }
+function removeClassBuff(key,name){ if(!canManageRaids())return; if(!buffAssign.classBuffs)buffAssign.classBuffs={}; buffAssign.classBuffs[key]=(buffAssign.classBuffs[key]||[]).filter(n=>n!==name); saveBuffAssign(); renderBuffs(); }
+function toggleSkipBuff(key){ if(!canManageRaids())return; if(!buffAssign.classBuffsSkip)buffAssign.classBuffsSkip={}; buffAssign.classBuffsSkip[key]=!buffAssign.classBuffsSkip[key]; saveBuffAssign(); renderBuffs(); }
 function saveBuffAssign(){
   try{localStorage.setItem('whaapp-buffAssign',JSON.stringify(buffAssign));}catch(e){}
   fbSet('buffAssign', buffAssign);
@@ -1128,7 +1143,7 @@ function setTotem(gi,element,val){ if(!canManageRaids())return; if(!buffAssign.t
 function renderBuffs(){
   const el=document.getElementById('buffs-content'); if(!el) return;
   if(!buffAssign||typeof buffAssign!=='object') buffAssign={blessings:{},totems:{}};
-  if(!buffAssign.blessings) buffAssign.blessings={}; if(!buffAssign.totems) buffAssign.totems={};
+  if(!buffAssign.blessings) buffAssign.blessings={}; if(!buffAssign.totems) buffAssign.totems={}; if(!buffAssign.classBuffs) buffAssign.classBuffs={}; if(!buffAssign.classBuffsSkip) buffAssign.classBuffsSkip={};
   const rl=canManageRaids();
   const pr=ROSTER.filter(p=>p.present);
   const paladins=pr.filter(p=>p.cls==='Paladin');
@@ -1169,6 +1184,32 @@ function renderBuffs(){
     </div>`;
   }).join('');
   html+= groupRows || '<div style="font-size:11px;color:var(--t3)">No raid groups yet — build them in Roles &amp; Groups → Build 40-man.</div>';
+  html+=`</div>`;
+  // Class buffs (Mage / Priest / Druid / Warrior / Hunter / Warlock)
+  html+=`<div class="card" style="margin-top:12px"><div class="ct"><i class="ti ti-stars" style="color:var(--acc)"></i>Class Buffs</div>
+    <div style="font-size:10px;color:var(--t3);margin-bottom:8px">Assign who's responsible for each raid-wide buff.</div>`;
+  html+=CLASS_BUFFS.map(b=>{
+    const assigned=(buffAssign.classBuffs[b.key]||[]).filter(n=>gp(n));
+    const cc=CC[b.cls]||'#aaa';
+    const eligible=pr.filter(p=>p.cls===b.cls&&!assigned.includes(p.name));
+    const skipped=!!buffAssign.classBuffsSkip[b.key];
+    return `<div style="background:var(--bg3);border-radius:var(--r);padding:7px 10px;margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;${skipped?'opacity:.55':''}">
+      <i class="ti ${b.icon}" style="color:${cc};width:16px;text-align:center"></i>
+      <div style="min-width:150px"><div style="font-size:12px;font-weight:600;color:var(--t1);${skipped?'text-decoration:line-through':''}">${b.label}</div><div style="font-size:9px;color:var(--t3)">${b.note} · ${b.cls}</div></div>
+      <div style="display:flex;gap:4px;flex-wrap:wrap;flex:1;align-items:center">
+        ${skipped
+          ? `<span class="badge" style="background:var(--bg2);color:var(--t3)">Skipped</span>`
+          : (assigned.length?assigned.map(n=>`<span class="badge" style="background:${cc}22;color:${cc};border:0.5px solid ${cc}66;display:inline-flex;align-items:center;gap:3px">${n}${rl?`<span onclick="removeClassBuff('${b.key}','${n}')" style="cursor:pointer;opacity:.7" title="Remove">✕</span>`:''}</span>`).join(''):`<span style="font-size:10px;color:var(--t3)">${rl?'Unassigned':'—'}</span>`)}
+      </div>
+      ${rl?`<div style="display:flex;gap:4px;align-items:center">
+        ${skipped?'':`<select onchange="addClassBuff('${b.key}',this.value);this.value=''" style="font-size:10px;width:auto">
+          <option value="">＋ Assign ${b.cls}…</option>
+          ${eligible.map(p=>`<option value="${p.name}">${p.name}</option>`).join('')}
+        </select>`}
+        <button class="btn btn-sm" style="font-size:9px;padding:2px 6px${skipped?';background:var(--accg);border-color:rgba(124,111,224,.3);color:var(--acc)':''}" onclick="toggleSkipBuff('${b.key}')" title="${skipped?'Mark as needed again':'Mark this buff as not used'}">${skipped?'Un-skip':'Skip'}</button>
+      </div>`:''}
+    </div>`;
+  }).join('');
   html+=`</div>`;
   el.innerHTML=html;
 }
@@ -8700,7 +8741,7 @@ function applyFirebaseKey(key,data){
     else if(key==='roleOverrides'){Object.keys(roleOverrides).forEach(k=>delete roleOverrides[k]);if(data&&typeof data==='object')Object.assign(roleOverrides,data);try{localStorage.setItem('whaapp-roleOverrides',JSON.stringify(roleOverrides));}catch(e){}renderRoles?.();renderAttendance?.();}
     else if(key==='applications'){const d=_fbArr(data);_fbSync(applications,d);try{localStorage.setItem('whaapp-applications',JSON.stringify(applications));}catch(e){}renderRLReview?.();updatePendingBadge?.();renderSignup?.();}
     else if(key==='quests'){const d=_fbArr(data);_fbSync(quests,d);try{localStorage.setItem('whaapp-quests',JSON.stringify(quests));}catch(e){}if(document.getElementById('quests-content')?.children.length||document.getElementById('page-quests')?.classList.contains('active'))renderQuests();}
-    else if(key==='buffAssign'){if(data&&typeof data==='object'){buffAssign={blessings:data.blessings||{},totems:data.totems||{}};try{localStorage.setItem('whaapp-buffAssign',JSON.stringify(buffAssign));}catch(e){}}if(document.getElementById('buffs-content')?.children.length||document.getElementById('page-buffs')?.classList.contains('active'))renderBuffs?.();}
+    else if(key==='buffAssign'){if(data&&typeof data==='object'){buffAssign={blessings:data.blessings||{},totems:data.totems||{},classBuffs:data.classBuffs||{},classBuffsSkip:data.classBuffsSkip||{}};try{localStorage.setItem('whaapp-buffAssign',JSON.stringify(buffAssign));}catch(e){}}if(document.getElementById('buffs-content')?.children.length||document.getElementById('page-buffs')?.classList.contains('active'))renderBuffs?.();}
     else if(key==='specRequests'){const d=_fbArr(data);_fbSync(specRequests,d);try{localStorage.setItem('whaapp-specRequests',JSON.stringify(specRequests));}catch(e){}renderSRList?.();renderSpecReq?.();updateSRBadge?.();}
     else if(key==='reviews'){if(data&&typeof data==='object'){const list=_fbArr(data.list);_fbSync(reviews,list);if(data.stars&&typeof data.stars==='object'){Object.keys(reviewStars).forEach(k=>delete reviewStars[k]);Object.assign(reviewStars,data.stars);}try{localStorage.setItem('whaapp-reviews',JSON.stringify({list:reviews,stars:reviewStars}));}catch(e){}}renderReviews?.();updateRevBadge?.();}
     else if(key==='leaves'){const d=_fbArr(data);_fbSync(leaves,d);try{localStorage.setItem('whaapp-leaves',JSON.stringify(leaves));}catch(e){}renderLeave?.();setTimeout(()=>{try{applyAllLeaves();}catch(e){}},0);}
@@ -8754,7 +8795,7 @@ window.onload=function(){
   try{const sro=localStorage.getItem('whaapp-roleOverrides');if(sro){const o=JSON.parse(sro);if(o&&typeof o==='object')Object.assign(roleOverrides,o);}}catch(e){}
   try{const sap=localStorage.getItem('whaapp-applications');if(sap){const a=JSON.parse(sap);if(Array.isArray(a))a.forEach(x=>applications.push(x));}}catch(e){}
   try{const sq=localStorage.getItem('whaapp-quests');if(sq){const q=JSON.parse(sq);if(Array.isArray(q))quests=q;}}catch(e){}
-  try{const sb=localStorage.getItem('whaapp-buffAssign');if(sb){const b=JSON.parse(sb);if(b&&typeof b==='object')buffAssign={blessings:b.blessings||{},totems:b.totems||{}};}}catch(e){}
+  try{const sb=localStorage.getItem('whaapp-buffAssign');if(sb){const b=JSON.parse(sb);if(b&&typeof b==='object')buffAssign={blessings:b.blessings||{},totems:b.totems||{},classBuffs:b.classBuffs||{},classBuffsSkip:b.classBuffsSkip||{}};}}catch(e){}
   try{const ssp=localStorage.getItem('whaapp-specRequests');if(ssp){const s=JSON.parse(ssp);if(Array.isArray(s))s.forEach(x=>specRequests.push(x));}}catch(e){}
   try{const srv=localStorage.getItem('whaapp-reviews');if(srv){const d=JSON.parse(srv);if(d&&Array.isArray(d.list))d.list.forEach(x=>reviews.push(x));if(d&&d.stars&&typeof d.stars==='object')Object.assign(reviewStars,d.stars);}}catch(e){}
   try{const slv=localStorage.getItem('whaapp-leaves');if(slv){const l=JSON.parse(slv);if(Array.isArray(l))l.forEach(x=>leaves.push(x));}}catch(e){}
