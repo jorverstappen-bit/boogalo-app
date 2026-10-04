@@ -435,7 +435,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <div class="sbs"><div class="sbl">Schedule</div>
       <div class="ni" onclick="nav(this,'calendar')"><i class="ti ti-calendar"></i><span>Calendar</span></div>
       <div class="ni" onclick="nav(this,'raids')"><i class="ti ti-list"></i><span>Upcoming Raids</span></div>
-      <div class="ni" onclick="nav(this,'create-raid')"><i class="ti ti-plus"></i><span>Create Raid</span></div>
+      <div class="ni" onclick="nav(this,'create-raid')"><i class="ti ti-plus"></i><span>Create Raid/Event</span></div>
       <div class="ni" onclick="nav(this,'leave')"><i class="ti ti-plane"></i><span>Leave of Absence</span></div>
     </div>
     <div class="sbs"><div class="sbl">Tools</div>
@@ -445,7 +445,6 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'coc')"><i class="ti ti-scale"></i><span>Code of Conduct</span></div>
     </div>
     <div class="sbs"><div class="sbl">Sign-up</div>
-      <div class="ni" onclick="nav(this,'signup')"><i class="ti ti-forms"></i><span>Apply for Raid</span></div>
       <div class="ni" onclick="nav(this,'rl-review')"><i class="ti ti-shield-check"></i><span>RL Review<span class="nbadge" id="pending-badge">0</span></span></div>
     </div>
     <div class="sbs"><div class="sbl">Raids</div>
@@ -460,11 +459,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
   <div id="nav-guest" style="display:none">
     <div class="sbs"><div class="sbl">Raid Info</div>
       <div class="ni" onclick="nav(this,'roster')"><i class="ti ti-users"></i><span>Roster (view)</span></div>
-      <div class="ni" onclick="nav(this,'guild-effort')"><i class="ti ti-shopping-cart"></i><span>Guild Effort</span></div>
-      <div class="ni" onclick="nav(this,'pov')"><i class="ti ti-user-circle"></i><span>Player POV</span></div>
-      <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
       <div class="ni" onclick="nav(this,'coc')"><i class="ti ti-scale"></i><span>Code of Conduct</span></div>
-      <div class="ni" onclick="nav(this,'quests')"><i class="ti ti-target-arrow"></i><span>Quest Board</span></div>
     </div>
     <div class="sbs"><div class="sbl">Schedule</div>
       <div class="ni" onclick="nav(this,'calendar')"><i class="ti ti-calendar"></i><span>Calendar</span></div>
@@ -490,7 +485,6 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'guild-effort')"><i class="ti ti-user-plus"></i><span>Apply for Guild Effort</span></div>
     </div>
     <div class="sbs"><div class="sbl">My Account</div>
-      <div class="ni" onclick="nav(this,'signup')"><i class="ti ti-forms"></i><span>Apply for Raid</span></div>
       <div class="ni" onclick="nav(this,'profiles');goMyProfile()"><i class="ti ti-user-circle"></i><span>Profile</span></div>
     </div>
   </div>
@@ -498,11 +492,8 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <div class="sbs"><div class="sbl">Schedule</div>
       <div class="ni" onclick="nav(this,'calendar')"><i class="ti ti-calendar"></i><span>Calendar</span></div>
       <div class="ni" onclick="nav(this,'raids')"><i class="ti ti-list"></i><span>Upcoming Raids</span></div>
-      <div class="ni" onclick="nav(this,'create-raid')"><i class="ti ti-plus"></i><span>Create Raid</span></div>
+      <div class="ni" onclick="nav(this,'create-raid')"><i class="ti ti-plus"></i><span>Create Raid/Event</span></div>
       <div class="ni" onclick="nav(this,'leave')"><i class="ti ti-plane"></i><span>Leave of Absence</span></div>
-    </div>
-    <div class="sbs"><div class="sbl">Sign-up</div>
-      <div class="ni" onclick="nav(this,'signup')"><i class="ti ti-forms"></i><span>Apply for Raid</span></div>
     </div>
     <div class="sbs"><div class="sbl">Raids</div>
       <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
@@ -625,7 +616,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <div class="card"><div class="ct"><i class="ti ti-heart" style="color:#5DCAA5"></i>Healers (present)</div><div id="roles-healers"></div></div>
   </div>
   <div class="card">
-    <div class="ct"><i class="ti ti-layout-columns" style="color:var(--acc)"></i>Raid Groups</div>
+    <div class="ct" style="display:flex;align-items:center;gap:6px"><i class="ti ti-layout-columns" style="color:var(--acc)"></i>Raid Groups <button id="clear-groups-btn" class="btn btn-sm" style="margin-left:auto;font-size:10px;display:none" onclick="clearAllGroups()"><i class="ti ti-eraser"></i> Clear groups</button></div>
     <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:4px" id="group-grid"></div>
     <div id="group-unassigned" style="display:none;margin-top:8px"></div>
     <div style="margin-top:6px;font-size:10px;color:var(--t3)">Greyed out = absent tonight</div>
@@ -1219,6 +1210,26 @@ function removeFromGroup(gi,name){
   groups[gi]=groups[gi].filter(n=>n!==name);
   saveGroups(); renderRoles();
 }
+// Drop any group / healer-tank entries whose player isn't in the current roster
+// (clears stale names left over from the old TBC roster). Only runs when the
+// roster is loaded so a transient empty roster can't wipe valid groups.
+function clearAllGroups(){
+  if(!isRL()) return;
+  if(!confirm('Clear all raid groups? Everyone will be unassigned.')) return;
+  for(let i=0;i<groups.length;i++) groups[i]=[];
+  saveGroups(); renderRoles();
+  toast('Raid groups cleared','ok');
+}
+function sanitizeGroups(){
+  if(!ROSTER.length) return false;
+  const names=new Set(ROSTER.map(p=>p.name));
+  let changed=false;
+  for(let i=0;i<groups.length;i++){ const f=groups[i].filter(n=>names.has(n)); if(f.length!==groups[i].length){groups[i]=f;changed=true;} }
+  const hb=healerTanks.length;
+  healerTanks=healerTanks.filter(ht=>names.has(ht.healer));
+  if(healerTanks.length!==hb) changed=true;
+  return changed;
+}
 function addToRaidGroup(raidId,gi,name){
   if(!name||!canManageRaids()) return;
   const r=raidSchedule.find(x=>x.id===raidId); if(!r) return;
@@ -1415,25 +1426,9 @@ function classCapabilities(cls, spec){
 function effectiveDispels(p){ return p?classCapabilities(p.cls,p.spec).dispels:[]; }
 function canInterrupt(p){ return !!p && classCapabilities(p.cls,p.spec).interrupt; }
 
-let healerTanks=[
-  {healer:'Vvambull',tank:'Xullue'},
-  {healer:'Leundeadpres',tank:'Holsteinbeef'},
-  {healer:'Sappheal',tank:'Frostor'},
-  {healer:'Unholysparkz',tank:'Cadbaladin'},
-  {healer:'Enchanter',tank:'General raid'},
-  {healer:'Swagmon',tank:'General raid'},
-  {healer:'Palastuff',tank:'General raid'},
-  {healer:'Kalaveijo',tank:'General raid'},
-  {healer:'Tinybm',tank:'General raid'},
-];
+let healerTanks=[];
 
-let groups=[
-  ['Xullue','Holsteinbeef','Cadbaladin','Frostor','Wolvke'],
-  ['Cakemon','Csoti','Teeko','Oilsmoke','Communicator'],
-  ['Hatthor','Zandalai','Qhan','Dethclok','Macknetron'],
-  ['Brudersilik','Mantine','Noonii','Moondoggo'],
-  ['Vvambull','Leundeadpres','Enchanter','Sappheal','Swagmon'],
-];
+let groups=[];
 
 
 
@@ -2149,23 +2144,9 @@ const BOSS_INTERRUPTS={
 // ============================================================
 let killLog={}; // {bossId:{firstKill:'yyyy-mm-dd',kills:0}}
 
+// Classic raids not added yet — progression starts empty. Add instances here
+// (each {key, name, color, bosses:[{id,name}]}) when the new raids go in.
 const INSTANCE_DEFS=[
-  {key:'gruul',name:"Gruul's Lair",color:'#e07060',
-    bosses:[{id:'maulgar',name:'High King Maulgar'},{id:'gruul',name:'Gruul the Dragonkiller'}]},
-  {key:'mag',name:"Magtheridon's Lair",color:'#e09a65',
-    bosses:[{id:'mag',name:'Magtheridon'}]},
-  {key:'tk',name:'Tempest Keep',color:'#6ab4e8',
-    bosses:[{id:'alar',name:"Al'ar"},{id:'vr',name:'Void Reaver'},{id:'solarian',name:'Solarian'},{id:'kaelthas',name:"Kael'thas"}]},
-  {key:'ssc',name:'Serpent Shrine Cavern',color:'#5DCAA5',
-    bosses:[{id:'hydross',name:'Hydross'},{id:'lurker',name:'The Lurker Below'},{id:'leo',name:'Leotheras'},{id:'karathress',name:'Karathress'},{id:'morogrim',name:'Morogrim'},{id:'vashj',name:'Lady Vashj'}]},
-  {key:'kara',name:'Karazhan',color:'#9482C9',
-    bosses:[{id:'attumen',name:'Attumen'},{id:'moroes',name:'Moroes'},{id:'opera',name:'Opera Event'},{id:'curator',name:'The Curator'},{id:'chess',name:'Chess Event'},{id:'prince',name:'Prince Malchezaar'},{id:'nightbane',name:'Nightbane'}]},
-  {key:'hyjal',name:'Mount Hyjal',color:'#d4884a',
-    bosses:[{id:'winterchill',name:'Rage Winterchill'},{id:'anetheron',name:'Anetheron'},{id:'kazrogal',name:"Kaz'rogal"},{id:'azgalor',name:'Azgalor'},{id:'archimonde',name:'Archimonde'}]},
-  {key:'bt',name:'Black Temple',color:'#7a5fb0',
-    bosses:[{id:'najentus',name:"High Warlord Naj'entus"},{id:'supremus',name:'Supremus'},{id:'akama',name:'Shade of Akama'},{id:'teron',name:'Teron Gorefiend'},{id:'gurtogg',name:'Gurtogg Bloodboil'},{id:'ros',name:'Reliquary of Souls'},{id:'shahraz',name:'Mother Shahraz'},{id:'council',name:'Illidari Council'},{id:'illidan',name:'Illidan Stormrage'}]},
-  {key:'za',name:"Zul'Aman",color:'#5fa86b',
-    bosses:[{id:'akilzon',name:"Akil'zon"},{id:'nalorakk',name:'Nalorakk'},{id:'janalai',name:"Jan'alai"},{id:'halazzi',name:'Halazzi'},{id:'malacrass',name:'Hex Lord Malacrass'},{id:'zuljin',name:"Zul'jin"}]},
 ];
 
 // ============================================================
@@ -4089,6 +4070,7 @@ function autoAssignHealers(presentPlayers){
 }
 
 function renderRoles(){
+  if(sanitizeGroups()){ try{saveGroups();saveHealerTanks();}catch(e){} }
   const pr=present();
   const tanks=pr.filter(p=>p.type==='Tank'&&!roleOverrides[p.name]);
   const healers=pr.filter(p=>p.type==='Healer'&&!roleOverrides[p.name]);
@@ -4128,14 +4110,15 @@ function renderRoles(){
     ovEl.innerHTML=overridden.length?overridden.map(p=>`<div class="rrow">${pill(p.name)} <span class="badge" style="background:var(--orad);color:var(--ora)">Was ${p.type} → Playing ${roleOverrides[p.name]}</span> ${roleBtn(p)}</div>`).join(''):'<div style="font-size:11px;color:var(--t3)">None tonight</div>';
   }
   // groups
+  const cgb=document.getElementById('clear-groups-btn'); if(cgb) cgb.style.display=(isRL()&&groups.some(g=>g.length))?'':'none';
   const gg=document.getElementById('group-grid');
   const rosterNames=ROSTER.map(p=>p.name);
-  const groupedNames=new Set(groups.flat());
+  const groupedNames=new Set(groups.flat().filter(n=>gp(n)));
   const unassigned=rosterNames.filter(n=>!groupedNames.has(n));
   gg.innerHTML=groups.map((g,i)=>`
     <div style="background:var(--bg3);border-radius:var(--r);padding:8px">
       <div style="font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px">Group ${i+1}</div>
-      ${g.map(n=>{const p=gp(n);return`<div style="display:flex;align-items:center;gap:2px;padding:1px 0">
+      ${g.filter(n=>gp(n)).map(n=>{const p=gp(n);return`<div style="display:flex;align-items:center;gap:2px;padding:1px 0">
         ${pill(n,!(p?.present??true))}
         ${isRL()?`<button onclick="removeFromGroup(${i},'${n}')" title="Remove from group" style="background:none;border:none;color:var(--t3);cursor:pointer;padding:0 3px;font-size:13px;line-height:1;flex-shrink:0;opacity:.6" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=.6">×</button>`:''}
       </div>`;}).join('')}
@@ -6865,10 +6848,12 @@ function showCalDay(k){
   const raids=raidSchedule.filter(r=>r.date===k);
   const det=document.getElementById('cal-detail');
   if(!det) return;
-  if(!raids.length){det.innerHTML=`<div class="card" style="margin-top:6px"><div style="font-size:12px;color:var(--t3);display:flex;align-items:center;gap:8px"><i class="ti ti-calendar-off"></i>${fmtKey(k)} — no raids scheduled.<button class="btn btn-sm" style="margin-left:8px" onclick="prefillCreate('${k}')"><i class="ti ti-plus"></i>Create raid</button></div></div>`;return;}
-  det.innerHTML=`<div style="margin-top:8px"><div style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px"><i class="ti ti-calendar-event" style="margin-right:4px"></i>${fmtKey(k)}</div>`+raids.map(r=>r.type==='event'?eventCard(r):fullRaidCard(r)).join('')+'</div>';
+  const createBtns=canManageRaids()?`<button class="btn btn-sm" style="margin-left:8px" onclick="prefillCreate('${k}')"><i class="ti ti-plus"></i>Create raid</button><button class="btn btn-sm" onclick="prefillCreateEvent('${k}')"><i class="ti ti-calendar-star"></i>Create event</button>`:'';
+  if(!raids.length){det.innerHTML=`<div class="card" style="margin-top:6px"><div style="font-size:12px;color:var(--t3);display:flex;align-items:center;gap:8px;flex-wrap:wrap"><i class="ti ti-calendar-off"></i>${fmtKey(k)} — nothing scheduled.${createBtns}</div></div>`;return;}
+  det.innerHTML=`<div style="margin-top:8px"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px"><span style="font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.05em"><i class="ti ti-calendar-event" style="margin-right:4px"></i>${fmtKey(k)}</span>${createBtns}</div>`+raids.map(r=>r.type==='event'?eventCard(r):fullRaidCard(r)).join('')+'</div>';
 }
-function prefillCreate(k){document.getElementById('cr-date').value=k;document.querySelector('#nav-rl .ni:nth-child(3)')?.click();}
+function prefillCreate(k){ const ni=document.querySelector('.ni[onclick*="create-raid"]'); if(ni) ni.click(); setCreateMode?.('raid'); const d=document.getElementById('cr-date'); if(d) d.value=k; }
+function prefillCreateEvent(k){ const ni=document.querySelector('.ni[onclick*="create-raid"]'); if(ni) ni.click(); setCreateMode?.('event'); const d=document.getElementById('ev-date'); if(d) d.value=k; }
 
 // ============================================================
 // RAIDS LIST
@@ -8325,6 +8310,10 @@ function submitReview(raidId){
 function renderProgression(){
   const el=document.getElementById('progression-content');if(!el)return;
   const rl=isRL();
+  if(!INSTANCE_DEFS.length){
+    el.innerHTML='<div class="empty"><i class="ti ti-chart-bar"></i><p>No raids to track yet.<br>Boss progression will appear here once the Classic raids are added.</p></div>';
+    return;
+  }
   let totalKilled=0,totalBosses=0;
   INSTANCE_DEFS.forEach(inst=>{
     totalKilled+=inst.bosses.filter(b=>killLog[b.id]?.kills>0).length;
@@ -8502,7 +8491,7 @@ function restoreSidebarState(){
     }
   }catch(e){}
 }
-const MOB_PAGE_NAMES={attendance:'Attendance',roster:'Roster',roles:'Roles & Groups',dispels:'Dispels & CCs',res:'Resistances',coc:'Code of Conduct',quests:'Quest Board',pov:'Player POV',specreq:'Change My Spec',signup:'Apply for Raid','rl-review':'RL Review',calendar:'Calendar',raids:'Upcoming Raids','create-raid':'Create Raid',leave:'Leave of Absence',gruul:"Gruul's Lair",mag:'Magtheridon',tk:'Tempest Keep',ssc:'Serpent Shrine',kara:'Karazhan',hyjal:'Mount Hyjal',bt:'Black Temple',za:"Zul'Aman",stats:'Statistics',profiles:'Profiles',progression:'Progression','guild-effort':'Guild Effort'};
+const MOB_PAGE_NAMES={attendance:'Attendance',roster:'Roster',roles:'Roles & Groups',dispels:'Dispels & CCs',res:'Resistances',coc:'Code of Conduct',quests:'Quest Board',pov:'Player POV',specreq:'Change My Spec',signup:'Apply for Raid','rl-review':'RL Review',calendar:'Calendar',raids:'Upcoming Raids','create-raid':'Create Raid/Event',leave:'Leave of Absence',gruul:"Gruul's Lair",mag:'Magtheridon',tk:'Tempest Keep',ssc:'Serpent Shrine',kara:'Karazhan',hyjal:'Mount Hyjal',bt:'Black Temple',za:"Zul'Aman",stats:'Statistics',profiles:'Profiles',progression:'Progression','guild-effort':'Guild Effort'};
 function updateMobTitle(page){
   const el=document.getElementById('mob-title');
   if(el) el.textContent=MOB_PAGE_NAMES[page]||'We Have An App';
