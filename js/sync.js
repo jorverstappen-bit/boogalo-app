@@ -12,7 +12,7 @@
 // database rules are what protect the data.
 // prod: Firebase console → Project settings → Your apps → Web app → config.
 const FB_ENVS={
-  prod:{ apiKey:'', authDomain:'boogalo-app.firebaseapp.com', projectId:'boogalo-app',
+  prod:{ apiKey:'AIzaSyCL7ycITYNlFgyf8mo1N4ML_9hOy1hx4FU', authDomain:'boogalo-app.firebaseapp.com', projectId:'boogalo-app',
          databaseURL:'https://boogalo-app-default-rtdb.europe-west1.firebasedatabase.app' },
   staging:{ apiKey:'', authDomain:'', projectId:'', databaseURL:'' },
   // Local Firebase emulators (cd dev && npm run dev)
