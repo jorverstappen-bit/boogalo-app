@@ -6,3 +6,10 @@
   [headers.values]
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
+
+# Dev tooling (emulator, rules generator, tests) is not part of the site
+[[redirects]]
+  from = "/dev/*"
+  to = "/index.html"
+  status = 404
+  force = true
