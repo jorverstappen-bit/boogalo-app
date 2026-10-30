@@ -1,0 +1,141 @@
+{
+  "rules": {
+    "whaapp-v2": {
+      "meta": {
+        ".read": true,
+        ".write": "(auth != null && root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl')"
+      },
+      "users": {
+        ".read": "(auth != null && (root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer'))",
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "(auth != null && root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl') || (auth != null && auth.uid === $uid && !data.exists() && newData.child('role').val() === 'member' && newData.child('nameOnly').val() === true && newData.child('main').isString() && root.child('whaapp-v2/members/'+newData.child('main').val()).exists() && !root.child('whaapp-v2/owners/'+newData.child('main').val()).exists())",
+          ".validate": "newData.hasChildren(['main','role']) && newData.child('role').isString() && newData.child('role').val().matches(/^(gl|rl|officer|member)$/) && (newData.child('nameOnly').val() !== true || newData.child('role').val() === 'member')",
+          "main": {
+            ".write": "auth != null && auth.uid === $uid && data.exists() && newData.parent().parent().parent().child('owners/'+newData.val()).val() === auth.uid"
+          }
+        }
+      },
+      "requests": {
+        ".read": "(auth != null && (root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer'))",
+        "$uid": {
+          ".read": "auth != null && auth.uid === $uid",
+          ".write": "(auth != null && root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl') || (auth != null && auth.uid === $uid && !root.child('whaapp-v2/users/'+$uid).exists())",
+          ".validate": "newData.hasChildren(['char','name','email']) && newData.child('char').isString() && newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 60 && newData.child('email').isString() && newData.child('email').val().length <= 100"
+        }
+      },
+      "owners": {
+        ".read": true,
+        "$k": {
+          ".write": "(auth != null && root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl') || (auth != null && newData.val() === auth.uid && !data.exists() && ((auth != null && (root.child('whaapp-v2/owners/'+$k).val() === auth.uid || (root.child('whaapp-v2/users/'+auth.uid+'/main').isString() && root.child('whaapp-v2/alts/'+root.child('whaapp-v2/users/'+auth.uid+'/main').val()+'/'+$k).exists()))) || (newData.parent().parent().child('users/'+auth.uid+'/main').val() === $k && newData.parent().parent().child('users/'+auth.uid+'/nameOnly').val() === true && !root.child('whaapp-v2/users/'+auth.uid).exists())))"
+        }
+      },
+      "loginIndex": {
+        ".read": true,
+        "$k": {
+          ".write": "(auth != null && root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl') || (auth != null && !data.exists() && newData.val() === auth.token.email && (newData.parent().parent().child('users/'+auth.uid+'/main').val() === $k && newData.parent().parent().child('users/'+auth.uid+'/nameOnly').val() === true && !root.child('whaapp-v2/users/'+auth.uid).exists()))"
+        }
+      },
+      "members": {
+        ".read": true,
+        "$k": {
+          ".write": "((auth != null && (root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer')) && (!data.exists() || !newData.exists() || (newData.child('spec').val() === data.child('spec').val() && newData.child('flexSpec').val() === data.child('flexSpec').val() && newData.child('type').val() === data.child('type').val() && newData.child('timezone').val() === data.child('timezone').val()))) || (data.exists() && newData.exists() && (auth != null && (root.child('whaapp-v2/owners/'+$k).val() === auth.uid || (root.child('whaapp-v2/users/'+auth.uid+'/main').isString() && root.child('whaapp-v2/alts/'+root.child('whaapp-v2/users/'+auth.uid+'/main').val()+'/'+$k).exists())))) || (auth != null && !data.exists() && newData.exists() && newData.parent().parent().child('alts/'+root.child('whaapp-v2/users/'+auth.uid+'/main').val()+'/'+$k).exists())",
+          ".validate": "newData.child('name').isString() && newData.child('name').val().length <= 60",
+          "professions": {
+            "$i": {
+              "name": {
+                ".validate": "(auth != null && (root.child('whaapp-v2/owners/'+$k).val() === auth.uid || (root.child('whaapp-v2/users/'+auth.uid+'/main').isString() && root.child('whaapp-v2/alts/'+root.child('whaapp-v2/users/'+auth.uid+'/main').val()+'/'+$k).exists()))) || !root.child('whaapp-v2/members/'+$k).exists() || newData.val() === data.val()"
+              }
+            }
+          },
+          "secProfessions": {
+            "$i": {
+              ".validate": "(auth != null && (root.child('whaapp-v2/owners/'+$k).val() === auth.uid || (root.child('whaapp-v2/users/'+auth.uid+'/main').isString() && root.child('whaapp-v2/alts/'+root.child('whaapp-v2/users/'+auth.uid+'/main').val()+'/'+$k).exists()))) || !root.child('whaapp-v2/members/'+$k).exists() || newData.val() === data.val()"
+            }
+          },
+          "resVals": {
+            "$s": {
+              ".validate": "(auth != null && (root.child('whaapp-v2/owners/'+$k).val() === auth.uid || (root.child('whaapp-v2/users/'+auth.uid+'/main').isString() && root.child('whaapp-v2/alts/'+root.child('whaapp-v2/users/'+auth.uid+'/main').val()+'/'+$k).exists()))) || !root.child('whaapp-v2/members/'+$k).exists() || newData.val() === data.val()"
+            }
+          }
+        }
+      },
+      "alts": {
+        ".read": true,
+        "$main": {
+          ".write": "(auth != null && (root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer')) || (auth != null && root.child('whaapp-v2/owners/'+$main).val() === auth.uid)",
+          "$alt": {
+            ".validate": "(auth != null && (root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer')) || data.exists() || root.child('whaapp-v2/owners/'+$alt).val() === auth.uid || (!root.child('whaapp-v2/owners/'+$alt).exists() && !root.child('whaapp-v2/members/'+$alt).exists())"
+          }
+        }
+      },
+      "raids": {
+        ".read": true,
+        "$raid": {
+          ".write": "(auth != null && root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl') || ((auth != null && root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer') && (!newData.exists() || newData.child('leaderUid').val() === data.child('leaderUid').val())) || ((auth != null && root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl') && ((!data.exists() && newData.child('leaderUid').val() === auth.uid) || (data.child('leaderUid').val() === auth.uid && (!newData.exists() || newData.child('leaderUid').val() === auth.uid))))"
+        }
+      },
+      "signups": {
+        ".read": true,
+        "$raid": {
+          "$k": {
+            ".write": "((auth != null && root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl') || (auth != null && root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer') || ((auth != null && root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl') && root.child('whaapp-v2/raids/'+$raid+'/leaderUid').val() === auth.uid)) || (auth != null && (root.child('whaapp-v2/owners/'+$k).val() === auth.uid || (root.child('whaapp-v2/users/'+auth.uid+'/main').isString() && root.child('whaapp-v2/alts/'+root.child('whaapp-v2/users/'+auth.uid+'/main').val()+'/'+$k).exists())))",
+            ".validate": "newData.child('status').isString() && newData.child('status').val().matches(/^(ready|tentative|bench|absent)$/) && newData.parent().parent().parent().child('raids/'+$raid).exists()"
+          }
+        }
+      },
+      "operaVotes": {
+        ".read": true,
+        "$raid": {
+          "$k": {
+            ".write": "((auth != null && root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl') || (auth != null && root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer') || ((auth != null && root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl') && root.child('whaapp-v2/raids/'+$raid+'/leaderUid').val() === auth.uid)) || (auth != null && (root.child('whaapp-v2/owners/'+$k).val() === auth.uid || (root.child('whaapp-v2/users/'+auth.uid+'/main').isString() && root.child('whaapp-v2/alts/'+root.child('whaapp-v2/users/'+auth.uid+'/main').val()+'/'+$k).exists())))",
+            ".validate": "newData.child('event').isString()"
+          }
+        }
+      },
+      "applications": {
+        ".read": "(auth != null && (root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer'))",
+        "$id": {
+          ".write": "(auth != null && (root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer')) || (!data.exists() && newData.exists() && newData.child('status').val() === 'pending')",
+          ".validate": "newData.child('name').isString() && newData.child('name').val().length > 0 && newData.child('name').val().length <= 60 && (!newData.child('note').exists() || (newData.child('note').isString() && newData.child('note').val().length <= 1000))"
+        }
+      },
+      "quests": {
+        ".read": true,
+        "$id": {
+          ".write": "(auth != null && (root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer')) || ((auth != null && root.child('whaapp-v2/users/'+auth.uid).exists()) && ( (!data.exists() && newData.child('uid').val() === auth.uid) || (data.exists() && newData.exists() && newData.child('uid').val() === data.child('uid').val()) || (data.exists() && !newData.exists() && data.child('uid').val() === auth.uid)))"
+        }
+      },
+      "leaves": {
+        ".read": "(auth != null && root.child('whaapp-v2/users/'+auth.uid).exists())",
+        "$id": {
+          ".write": "(auth != null && (root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer')) || (newData.exists() && (auth != null && (root.child('whaapp-v2/owners/'+newData.child('ck').val()).val() === auth.uid || (root.child('whaapp-v2/users/'+auth.uid+'/main').isString() && root.child('whaapp-v2/alts/'+root.child('whaapp-v2/users/'+auth.uid+'/main').val()+'/'+newData.child('ck').val()).exists()))) && (!data.exists() || (auth != null && (root.child('whaapp-v2/owners/'+data.child('ck').val()).val() === auth.uid || (root.child('whaapp-v2/users/'+auth.uid+'/main').isString() && root.child('whaapp-v2/alts/'+root.child('whaapp-v2/users/'+auth.uid+'/main').val()+'/'+data.child('ck').val()).exists()))))) || (!newData.exists() && (auth != null && (root.child('whaapp-v2/owners/'+data.child('ck').val()).val() === auth.uid || (root.child('whaapp-v2/users/'+auth.uid+'/main').isString() && root.child('whaapp-v2/alts/'+root.child('whaapp-v2/users/'+auth.uid+'/main').val()+'/'+data.child('ck').val()).exists()))))"
+        }
+      },
+      "ge": {
+        ".read": true,
+        "players": {
+          "$k": {
+            ".write": "(auth != null && (root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer')) || ((auth != null && (root.child('whaapp-v2/owners/'+$k).val() === auth.uid || (root.child('whaapp-v2/users/'+auth.uid+'/main').isString() && root.child('whaapp-v2/alts/'+root.child('whaapp-v2/users/'+auth.uid+'/main').val()+'/'+$k).exists()))) && newData.child('data/isGEMember').val() === data.child('data/isGEMember').val() && newData.child('data/lastContrib').val() === data.child('data/lastContrib').val())"
+          }
+        },
+        "bank": {
+          ".write": "(auth != null && (root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer')) || (auth != null && root.child('whaapp-v2/ge/players/'+root.child('whaapp-v2/users/'+auth.uid+'/main').val()+'/data/isGEMember').val() === true)"
+        },
+        "extra": {
+          ".write": "(auth != null && (root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer'))"
+        }
+      },
+      "staff": {
+        "$key": {
+          ".read": "$key !== 'weights' || (auth != null && (root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer'))",
+          ".write": "(auth != null && (root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer'))"
+        }
+      }
+    },
+    "$other": {
+      ".read": "(auth != null && (root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'gl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'rl' || root.child('whaapp-v2/users/'+auth.uid+'/role').val() === 'officer'))",
+      ".write": false
+    }
+  }
+}

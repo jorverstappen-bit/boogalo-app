@@ -1,0 +1,40 @@
+# Nightly backup of the live database - for a PRIVATE repository only.
+# Copy this file to .github/workflows/backup.yml in a new private GitHub repo
+# (never into the public app repos: backups contain player notes and applications).
+#
+# Setup (once):
+#  1. Firebase console → Project settings → Service accounts → Generate new private key.
+#  2. Private repo → Settings → Secrets and variables → Actions → New secret
+#     FIREBASE_SERVICE_ACCOUNT = the whole JSON file. Then delete the downloaded file.
+#  3. Actions tab → "Database backup" → Run workflow, to test it.
+# Restore: Firebase console → Realtime Database → Data → (node) ⋮ → Import JSON.
+name: Database backup
+on:
+  schedule: [{ cron: '30 3 * * *' }]   # every night, 03:30 UTC
+  workflow_dispatch: {}
+permissions:
+  contents: write
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Export the database
+        env:
+          SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          mkdir -p backups
+          printf '%s' "$SA" > "$RUNNER_TEMP/sa.json"
+          GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json" \
+            npx -y firebase-tools@14 database:get / --project boogalo-app --output "backups/$(date -u +%F).json"
+          rm "$RUNNER_TEMP/sa.json"
+          test -s "backups/$(date -u +%F).json"
+      - name: Keep the last 30 days
+        run: ls -1 backups/*.json | sort | head -n -30 | xargs -r rm -f
+      - name: Commit
+        run: |
+          git config user.name "backup-bot"
+          git config user.email "backup-bot@users.noreply.github.com"
+          git add -A backups
+          git commit -m "Backup $(date -u +%F)" || echo "No changes"
+          git push

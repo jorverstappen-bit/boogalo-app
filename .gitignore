@@ -3,3 +3,9 @@ Thumbs.db
 .vscode/
 .idea/
 *.log
+node_modules/
+dev/emulator-data/
+firebase-debug.log
+database-debug.log
+.claude/worktrees/
+.claude/
