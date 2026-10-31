@@ -991,6 +991,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
     <label class="ck"><input type="checkbox" id="sw-alts" onchange="toggleRosterFilter('alts')"> Show alts</label>
     <label class="ck"><input type="checkbox" id="sw-active" onchange="toggleRosterFilter('active')"> Active raiders</label>
     <label class="ck"><input type="checkbox" id="sw-group" onchange="toggleRosterFilter('group')"> Group alts under main</label>
+    <label class="ck"><input type="checkbox" id="sw-lastnames" onchange="toggleShowLastNames()"> Show last names</label>
     <div style="flex:1"></div>
     <button class="btn btn-s" id="add-player-toggle" onclick="toggleAddPlayer()" style="display:none;height:40px"><i class="ti ti-plus"></i>Add player</button>
   </div>
@@ -4553,7 +4554,7 @@ function renderRoster(){
   const fa=document.activeElement;
   const focusKey=fa&&fa.closest&&fa.closest('#roster-tbody')&&fa.dataset?{pn:fa.dataset.pn,k:fa.dataset.k}:null;
   // sync view switches
-  [['sw-pres',rosterPresOnly],['sw-alts',rosterShowAlts],['sw-active',rosterShowActive],['sw-group',rosterGroupAlts]].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.checked=v;});
+  [['sw-pres',rosterPresOnly],['sw-alts',rosterShowAlts],['sw-active',rosterShowActive],['sw-group',rosterGroupAlts],['sw-lastnames',showLastNames]].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.checked=v;});
   // populate class filter
   const clsSel=document.getElementById('rf-cls');
   if(clsSel&&clsSel.options.length<=1){['Warrior','Paladin','Hunter','Rogue','Priest','Shaman','Mage','Warlock','Druid'].forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;clsSel.appendChild(o);});}
@@ -4625,8 +4626,8 @@ function renderRoster(){
     const isMe=mine.includes(p.name);
     const dot=CC[p.cls]||'var(--t3)';
     const hiddenAlts=(!main&&rosterGroupAlts)?(playerAlts[p.name]||[]).filter(a=>gp(a)&&!shown.has(a)):[];
-    const hint=hiddenAlts.length?`<span class="rhint">+ ${hiddenAlts.map(esc).join(', ')}</span>`
-      :(main?`<span class="rhint">Alt of ${esc(main)}</span>`:'');
+    const hint=hiddenAlts.length?`<span class="rhint">+ ${hiddenAlts.map(a=>esc(dispName(a))).join(', ')}</span>`
+      :(main?`<span class="rhint">Alt of ${esc(dispName(main))}</span>`:'');
     const indent=(main&&rosterGroupAlts&&shown.has(main))?'<span class="rind" aria-hidden="true">↳</span>':'';
     const role=mainRoleOf(p), rcol=ROSTER_ROLE_VAR[role]||'var(--t3)';
     const specs=CLASS_SPECS[p.cls]||[p.spec];
@@ -4643,7 +4644,7 @@ function renderRoster(){
       ?`<button type="button" class="tgb" role="switch" aria-checked="${!!p.present}" aria-label="${esc(p.name)} present tonight" data-pn="${esc(p.name)}" data-k="t" onclick="togglePresent(${jsArg(p.name)})"><span class="tog sm ${p.present?'on':''}"></span></button>`
       :`<span style="color:${p.present?'var(--ok)':'var(--t3)'}">${p.present?'Present':'Absent'}</span>`;
     return `<tr class="${isMe?'me':''} ${p.present?'':'off'}">
-    <td>${indent}<button type="button" class="rn" data-pn="${esc(p.name)}" data-k="n" onclick="gotoProfile(${jsArg(p.name)})"><span class="d" aria-hidden="true" style="background:${dot}"></span><span class="nm"><span class="f">${esc(sp.first)}</span>${sp.last?` <span class="l">${esc(sp.last)}</span>`:''}</span>${isMe?'<span class="you">You</span>':''}</button>${hint}</td>
+    <td>${indent}<button type="button" class="rn" data-pn="${esc(p.name)}" data-k="n" onclick="gotoProfile(${jsArg(p.name)})"><span class="d" aria-hidden="true" style="background:${dot}"></span><span class="nm"><span class="f">${esc(sp.first)}</span>${(sp.last&&showLastNames)?` <span class="l">${esc(sp.last)}</span>`:''}</span>${isMe?'<span class="you">You</span>':''}</button>${hint}</td>
     <td class="rcl">${spCell}</td>
     <td>${roleCell}</td>
     <td style="color:var(--t2)">${pf.length?pf.map(esc).join(', '):'<span style="color:var(--t3)">-</span>'}</td>
