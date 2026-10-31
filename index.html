@@ -857,13 +857,13 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'buffs')"><i class="ti ti-shield-bolt"></i><span>Buff Assignments</span></div>
       <div class="ni" onclick="nav(this,'progression')"><i class="ti ti-chart-bar"></i><span>Progression</span></div>
     </div>
-    <div class="sbs" id="par-ge-section" style="display:none"><div class="sbl">Guild Effort</div>
+    <div class="sbs" id="par-ge-section"><div class="sbl">Guild Effort</div>
       <div class="ni" onclick="nav(this,'guild-effort')"><i class="ti ti-shopping-cart"></i><span>Guild Effort</span></div>
     </div>
     <div class="sbs"><div class="sbl">Guild Info</div>
       <div class="ni" onclick="nav(this,'quests')"><i class="ti ti-target-arrow"></i><span>Quest Board</span></div>
       <div class="ni" onclick="nav(this,'coc')"><i class="ti ti-scale"></i><span>Code of Conduct</span></div>
-      <div class="ni" onclick="nav(this,'guild-effort')"><i class="ti ti-user-plus"></i><span>Apply for Guild Effort</span></div>
+      <div class="ni" id="par-ge-apply" onclick="nav(this,'guild-effort')"><i class="ti ti-user-plus"></i><span>Apply for Guild Effort</span></div>
     </div>
     <div class="sbs"><div class="sbl">My Account</div>
       <div class="ni" onclick="nav(this,'profiles');goMyProfile()"><i class="ti ti-user-circle"></i><span>Profile</span></div>
@@ -894,6 +894,7 @@ tr:hover td{background:rgba(255,255,255,.013)}
       <div class="ni" onclick="nav(this,'profiles')"><i class="ti ti-user-circle"></i><span>Profiles</span></div>
       <div class="ni" onclick="nav(this,'coc')"><i class="ti ti-scale"></i><span>Code of Conduct</span></div>
       <div class="ni" onclick="nav(this,'quests')"><i class="ti ti-target-arrow"></i><span>Quest Board</span></div>
+      <div class="ni" onclick="nav(this,'guild-effort')"><i class="ti ti-shopping-cart"></i><span>Guild Effort</span></div>
     </div>
     <div class="sbs tbc-raids"><div class="sbl">TBC Raids</div>
       <div class="ni" onclick="nav(this,'gruul')"><i class="ti ti-sword"></i><span>Gruul's Lair</span></div>
@@ -1430,6 +1431,8 @@ function saveQuests(){
 }
 // Who may post on the Quest Board: RL, Officers, and enrolled Guild Effort members.
 function canPostQuest(){ return isRL() || isOfficer() || (isNamed() && CURRENT_USER && !!guildEffortData[CURRENT_USER.name]?.isGEMember); }
+// Only Guild Effort members can sign up (volunteer) to work on a quest.
+function canWorkQuest(){ return isNamed() && CURRENT_USER && !!guildEffortData[CURRENT_USER.name]?.isGEMember; }
 function canManageQuest(q){ return isRL() || isOfficer() || (isNamed() && CURRENT_USER && q && q.by===CURRENT_USER.name); }
 function currentActorName(){ if(isNamed()&&CURRENT_USER) return CURRENT_USER.name; if(isRL()) return 'Raid Leader'; if(isOfficer()) return 'Officer'; return 'Someone'; }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -1452,6 +1455,9 @@ function renderQuests(){
     </div>`;
   } else {
     html+=`<div class="bnote" style="margin-bottom:12px"><i class="ti ti-info-circle"></i> Only Raid Leaders, Officers, and Guild Effort members can post quests - anyone can view them.</div>`;
+  }
+  if(isNamed()&&CURRENT_USER&&!canWorkQuest()){
+    html+=`<div class="bnote" style="margin-bottom:12px"><i class="ti ti-info-circle"></i> Signing up to work on a quest is for Guild Effort members - join the Guild Effort to volunteer.</div>`;
   }
   const card=(q)=>{
     const mine=canManageQuest(q);
@@ -1482,7 +1488,7 @@ function renderQuests(){
       <div style="margin-top:auto;padding-top:7px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap">
         <span style="font-size:10px;color:var(--t3)">${qesc(q.by||'-')}${q.date?' · '+fmtKey(q.date):''}</span>
         <div style="display:flex;gap:4px;flex-wrap:wrap">
-          ${(named&&!d)?`<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;${iAmOnIt?'background:var(--gred);border-color:rgba(26,158,114,.3);color:#5DCAA5':''}" onclick="toggleQuestWorker(${jsArg(q.id)})" title="${iAmOnIt?'Stop working on this':'Apply to work on this'}"><i class="ti ti-${iAmOnIt?'check':'hand-finger'}"></i>${iAmOnIt?"On it":'Apply'}</button>`:''}
+          ${((canWorkQuest()||iAmOnIt)&&!d)?`<button class="btn btn-sm" style="font-size:10px;padding:3px 7px;${iAmOnIt?'background:var(--gred);border-color:rgba(26,158,114,.3);color:#5DCAA5':''}" onclick="toggleQuestWorker(${jsArg(q.id)})" title="${iAmOnIt?'Stop working on this':'Apply to work on this'}"><i class="ti ti-${iAmOnIt?'check':'hand-finger'}"></i>${iAmOnIt?"On it":'Apply'}</button>`:''}
           ${mine?`<button class="btn btn-sm" style="font-size:10px;padding:3px 7px" onclick="editQuest(${jsArg(q.id)})" title="Edit"><i class="ti ti-pencil"></i></button>
           <button class="btn btn-sm" style="font-size:10px;padding:3px 7px" onclick="toggleQuestDone(${jsArg(q.id)})"><i class="ti ti-${d?'rotate':'check'}"></i>${d?'Reopen':'Done'}</button>
           <button class="btn btn-sm" style="font-size:10px;padding:3px 7px;background:var(--redd);border-color:rgba(192,57,43,.25);color:#e07b72" onclick="deleteQuest(${jsArg(q.id)})"><i class="ti ti-trash"></i></button>`:''}
@@ -1520,13 +1526,15 @@ function deleteQuest(id){
   quests=quests.filter(x=>x.id!==id);
   saveQuests(); renderQuests();
 }
-// Any signed-in player can apply to (volunteer for) a quest - toggles their name.
+// Only Guild Effort members can sign up (volunteer) for a quest; anyone already on it can remove themselves.
 function toggleQuestWorker(id){
   if(!(isNamed()&&CURRENT_USER)){ toast('Sign in with your character to apply','warn'); return; }
   const q=quests.find(x=>x.id===id); if(!q) return;
   if(!Array.isArray(q.workers)) q.workers=[];
   const me=CURRENT_USER.name;
-  if(q.workers.includes(me)){ q.workers=q.workers.filter(n=>n!==me); }
+  const onIt=q.workers.includes(me);
+  if(!onIt && !canWorkQuest()){ toast('Only Guild Effort members can sign up for quests','warn'); return; }
+  if(onIt){ q.workers=q.workers.filter(n=>n!==me); }
   else { q.workers.push(me); }
   saveQuests(); renderQuests();
 }
@@ -3547,9 +3555,9 @@ function applyGE(name, val){
 }
 // Shows/hides the participant's "Guild Effort" nav section based on membership.
 function updateParGETab(){
-  const sec=document.getElementById('par-ge-section'); if(!sec) return;
+  // Guild Effort is visible to all members; the "Apply" shortcut only shows for non-members.
   const member=isNamed()&&CURRENT_USER&&!!guildEffortData[CURRENT_USER.name]?.isGEMember;
-  sec.style.display=member?'':'none';
+  const apply=document.getElementById('par-ge-apply'); if(apply) apply.style.display=member?'none':'';
 }
 function setGERequest(name, itemId, qty){
   if(!(isMyChar(name))) return;
