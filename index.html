@@ -3395,33 +3395,33 @@ const CONSUMABLES = {
   ],
 };
 // ── Extra raid consumables for the per-spec consume plan ──────────────────
-// Custom WoW Forever items link to warcraft.wiki.gg (WoW Forever item wiki); Classic items to Wowhead.
+// Custom WoW Forever items link to wowhead.com/forever (item= pages); Classic items to wowhead.com/classic.
 const _wf=(skill)=>({skill:skill||'Alchemy (WoW Forever)', reagents:['See the linked WoW Forever DB page for the recipe']});
 CONSUMABLES.battle.push(
-  {id:'elx_cunning', name:'Elixir of Cunning', stat:'+25 Agility & Intellect', url:'https://warcraft.wiki.gg/wiki/Elixir_of_Cunning', roles:['Melee','Ranged'], recipe:_wf()},
-  {id:'elx_owl', name:'Elixir of the Owl', stat:'+25 Intellect, +2% spell crit', url:'https://warcraft.wiki.gg/wiki/Elixir_of_the_Owl', roles:['Healer','Ranged'], recipe:_wf()},
-  {id:'elx_whale', name:'Elixir of the Whale', stat:'+25 Spirit, +2% crit', url:'https://warcraft.wiki.gg/wiki/Elixir_of_the_Whale', roles:['Healer'], recipe:_wf()},
-  {id:'elx_grizzly', name:'Elixir of the Grizzly', stat:'+25 Strength, +2% crit', url:'https://warcraft.wiki.gg/wiki/Elixir_of_the_Grizzly', roles:['Tank','Melee'], recipe:_wf()},
-  {id:'elx_holypower', name:'Elixir of Holy Power', stat:'+40 Holy spell damage', url:'https://warcraft.wiki.gg/wiki/Elixir_of_Holy_Power', roles:['Melee'], recipe:_wf()},
-  {id:'elx_naturepower', name:'Elixir of Nature Power', stat:'+40 Nature spell damage', url:'https://warcraft.wiki.gg/wiki/Elixir_of_Nature_Power', roles:['Ranged'], recipe:_wf()},
+  {id:'elx_cunning', name:'Elixir of Cunning', stat:'+25 Agility & Intellect (30 min)', url:'https://www.wowhead.com/forever/item=250328/elixir-of-cunning', roles:['Melee','Ranged'], recipe:_wf()},
+  {id:'elx_owl', name:'Elixir of the Owl', stat:'+25 Intellect, +2% spell crit (30 min)', url:'https://www.wowhead.com/forever/item=250337/elixir-of-the-owl', roles:['Healer','Ranged'], recipe:_wf()},
+  {id:'elx_whale', name:'Elixir of the Whale', stat:'+25 Spirit, +2% crit (30 min)', url:'https://www.wowhead.com/forever/item=250348/elixir-of-the-whale', roles:['Healer'], recipe:_wf()},
+  {id:'elx_grizzly', name:'Elixir of the Grizzly', stat:'+25 Strength, +2% crit (30 min)', url:'https://www.wowhead.com/forever/item=250351/elixir-of-the-grizzly', roles:['Tank','Melee'], recipe:_wf()},
+  {id:'elx_holypower', name:'Elixir of Holy Power', stat:'+40 Holy spell damage (30 min)', url:'https://www.wowhead.com/forever/item=21546/elixir-of-holy-power', roles:['Melee'], recipe:_wf()},
+  {id:'elx_naturepower', name:'Elixir of Nature Power', stat:'+40 Nature spell damage (30 min)', url:'https://www.wowhead.com/forever/item=250343/elixir-of-nature-power', roles:['Ranged'], recipe:_wf()},
 );
 CONSUMABLES.guardian.push(
-  {id:'gelx_clerics', name:"Greater Cleric's Elixir", stat:'+40 healing power', url:'https://warcraft.wiki.gg/wiki/Greater_Cleric%27s_Elixir', roles:['Healer'], recipe:_wf()},
-  {id:'gelx_gmageblood', name:'Greater Mageblood Elixir', stat:'+20 mana per 5 sec', url:'https://warcraft.wiki.gg/wiki/Greater_Mageblood_Elixir', roles:['Healer','Ranged'], recipe:_wf()},
-  {id:'gelx_phalanx', name:'Elixir of the Phalanx', stat:'+400 max HP, +500 Armor', url:'https://warcraft.wiki.gg/wiki/Elixir_of_the_Phalanx', roles:['Tank'], recipe:_wf()},
+  {id:'gelx_clerics', name:"Greater Cleric's Elixir", stat:'+40 healing power (30 min)', url:'https://www.wowhead.com/forever/item=250333/greater-clerics-elixir', roles:['Healer'], recipe:_wf()},
+  {id:'gelx_gmageblood', name:'Greater Mageblood Elixir', stat:'+20 mana per 5 sec (30 min)', url:'https://www.wowhead.com/forever/item=250341/greater-mageblood-elixir', roles:['Healer','Ranged'], recipe:_wf()},
+  {id:'gelx_phalanx', name:'Elixir of the Phalanx', stat:'+400 max HP, +500 Armor (30 min)', url:'https://www.wowhead.com/forever/item=250329/elixir-of-the-phalanx', roles:['Tank'], recipe:_wf()},
 );
 CONSUMABLES.potion.push(
   {id:'pot_stoneshield', name:'Greater Stoneshield Potion', stat:'+2000 Armor (2 min)', url:'https://www.wowhead.com/classic/item=13455', roles:['Tank'], recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
-  {id:'pot_menders', name:"Major Mender's Potion", stat:'+88 spell healing for 30 sec', url:'https://warcraft.wiki.gg/wiki/Major_Mender%27s_Potion', roles:['Healer'], recipe:_wf()},
-  {id:'pot_frenzy', name:'Major Frenzy Potion', stat:'+80 Attack Power for 30 sec', url:'https://warcraft.wiki.gg/wiki/Major_Frenzy_Potion', roles:['Melee'], recipe:_wf()},
-  {id:'pot_spellblast', name:'Major Spellblasting Potion', stat:'+47 spell damage for 30 sec', url:'https://warcraft.wiki.gg/wiki/Major_Spellblasting_Potion', roles:['Ranged'], recipe:_wf()},
+  {id:'pot_menders', name:"Major Mender's Potion", stat:'+88 spell healing for 30 sec', url:'https://www.wowhead.com/forever/item=250949/major-menders-potion', roles:['Healer'], recipe:_wf()},
+  {id:'pot_frenzy', name:'Major Frenzy Potion', stat:'+80 Attack Power for 30 sec', url:'https://www.wowhead.com/forever/item=250943/major-frenzy-potion', roles:['Melee'], recipe:_wf()},
+  {id:'pot_spellblast', name:'Major Spellblasting Potion', stat:'+47 spell damage for 30 sec (shares potion CD)', url:'https://www.wowhead.com/forever/item=250937/major-spellblasting-potion', roles:['Ranged'], recipe:_wf()},
   {id:'pot_thistle', name:'Thistle Tea', stat:'Restores 100 Energy (Rogue)', url:'https://www.wowhead.com/classic/item=7676', roles:['Melee'], recipe:{skill:'Rogue - learned ability', reagents:['Made by Rogues']}},
 );
 CONSUMABLES.food.push(
-  {id:'food_flankpoivre', name:'Flank au Poivre', stat:'+20 Agility (well fed) — approx', url:'https://warcraft.wiki.gg/wiki/Flank_au_Poivre', roles:['Melee','Ranged'], recipe:{skill:'Cooking (WoW Forever)', reagents:['See the linked WoW Forever DB page']}},
-  {id:'food_sagestea', name:"Sage's Tea", stat:'+44 healing power (well fed)', url:'https://warcraft.wiki.gg/wiki/Sage%27s_Tea', roles:['Healer'], recipe:{skill:'Cooking (WoW Forever)', reagents:['See the linked WoW Forever DB page']}},
-  {id:'food_turtlestew', name:'Savory Turtle Stew', stat:'+20 Stamina (well fed)', url:'https://warcraft.wiki.gg/wiki/Savory_Turtle_Stew', roles:['Tank'], recipe:{skill:'Cooking (WoW Forever)', reagents:['See the linked WoW Forever DB page']}},
-  {id:'food_lobster', name:'Lobster Stew', stat:'~+28 spell power (well fed) — approx', url:'https://warcraft.wiki.gg/wiki/Lobster_Stew', roles:['Ranged'], recipe:{skill:'Cooking (WoW Forever)', reagents:['See the linked WoW Forever DB page']}},
+  {id:'food_flankpoivre', name:'Flank au Poivre', stat:'+20 Agility (well fed)', url:'https://www.wowhead.com/forever/item=250069/flank-au-poivre', roles:['Melee','Ranged'], recipe:{skill:'Cooking (WoW Forever)', reagents:['See the linked WoW Forever DB page']}},
+  {id:'food_sagestea', name:"Sage's Tea", stat:'+44 healing power (well fed)', url:'https://www.wowhead.com/forever/item=249870/sages-tea', roles:['Healer'], recipe:{skill:'Cooking (WoW Forever)', reagents:['See the linked WoW Forever DB page']}},
+  {id:'food_turtlestew', name:'Savory Turtle Stew', stat:'+20 Stamina (well fed)', url:'https://www.wowhead.com/forever/item=250068/savory-turtle-stew', roles:['Tank'], recipe:{skill:'Cooking (WoW Forever)', reagents:['See the linked WoW Forever DB page']}},
+  {id:'food_lobster', name:'Lobster Stew', stat:'+28 spell power (well fed)', url:'https://www.wowhead.com/forever/item=13933/lobster-stew', roles:['Ranged'], recipe:{skill:'Cooking (WoW Forever)', reagents:['See the linked WoW Forever DB page']}},
 );
 // ── CLASS REAGENTS (spell components players must carry) ──────────────────
 CONSUMABLES.reagent=[
@@ -3430,7 +3430,7 @@ CONSUMABLES.reagent=[
   {id:'rgt_arcanepowder', name:'Arcane Powder', stat:'Mage — Arcane Intellect/Brilliance reagent', url:'https://www.wowhead.com/classic/item=17020', roles:['Ranged'], recipe:{skill:'Reagent vendor', reagents:['Bought from a reagent vendor']}},
   {id:'rgt_sacredcandle', name:'Sacred Candle', stat:'Priest — Prayer / Fortitude reagent', url:'https://www.wowhead.com/classic/item=17029', roles:['Healer','Ranged'], recipe:{skill:'Reagent vendor', reagents:['Bought from a reagent vendor']}},
   {id:'rgt_soulshard', name:'Soul Shard', stat:'Warlock — summon / soulstone reagent', url:'https://www.wowhead.com/classic/item=6265', roles:['Ranged'], recipe:{skill:'Drain Soul', reagents:['Created by Warlocks']}},
-  {id:'rgt_thornroot', name:'Thornroot', stat:'Druid reagent (WoW Forever)', url:'https://warcraft.wiki.gg/wiki/Thornroot', roles:['Healer'], recipe:{skill:'WoW Forever', reagents:['See the linked WoW Forever DB page']}},
+  {id:'rgt_thornroot', name:'Wild Thornroot', stat:'Druid — Gift of the Wild / Rebirth reagent', url:'https://www.wowhead.com/forever/item=17026/wild-thornroot', roles:['Healer','Ranged'], recipe:{skill:'Reagent vendor', reagents:['Bought from a reagent vendor']}},
   {id:'rgt_instantpoison', name:'Instant Poison IV', stat:'Rogue — instant weapon poison', url:'https://www.wowhead.com/classic/item=8928', roles:['Melee'], recipe:{skill:'Poisons (Rogue)', reagents:['Made by Rogues']}},
 ];
 const CONSUMABLE_BY_ID = {};
@@ -3459,7 +3459,7 @@ const SPEC_CONSUMES=(()=>{
   set(['Druid|Restoration'],['gelx_clerics','elx_owl','gelx_gmageblood','elx_whale','pot_majormana','pot_menders','rune_dark','rgt_thornroot','flask_wisdom']);
   set(['Druid|Feral|Tank'],['gelx_phalanx','food_turtlestew','pot_stoneshield','flask_titans']);
   set(['Druid|Feral|DPS'],['elx_mongoose','food_flankpoivre','elx_firewater','pot_frenzy'],['flask_titans']);
-  set(['Druid|Balance'],['elx_naturepower','elx_arcane','food_lobster','pot_spellblast','pot_majormana','rune_dark','rgt_ankh','flask_supreme']);
+  set(['Druid|Balance'],['elx_naturepower','elx_arcane','food_lobster','pot_spellblast','pot_majormana','rune_dark','rgt_thornroot','flask_supreme']);
   set(['Priest|Holy','Priest|Discipline'],['gelx_clerics','elx_owl','gelx_gmageblood','elx_whale','pot_majormana','pot_menders','rune_dark','rgt_sacredcandle','flask_wisdom']);
   set(['Priest|Shadow'],['elx_shadowpower','elx_arcane','food_lobster','pot_spellblast','pot_majormana','rune_dark','rgt_sacredcandle','flask_supreme']);
   set(['Warlock|Affliction','Warlock|Demonology','Warlock|Destruction'],['elx_shadowpower','elx_arcane','food_lobster','pot_spellblast','pot_majormana','rune_dark','rgt_soulshard','flask_supreme']);
