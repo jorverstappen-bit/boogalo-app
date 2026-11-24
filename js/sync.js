@@ -307,6 +307,20 @@ async function _handleUser(u){
   // Accounts (logins and ranks) are the Guild Leader's
   document.querySelectorAll('.ni[onclick*="\'accounts\'"]').forEach(el=>{ el.style.display=rec.role==='gl'?'':'none'; });
   if(rec.role==='gl') try{ checkMigrationNeeded(); }catch(e){}
+  // One-time per deploy: back-fill recommended consumables into current GE members' lists.
+  if(rec.role==='gl') setTimeout(function(){
+    try{
+      if(typeof _whenLoaded!=='function'||typeof syncRecommendedToGE!=='function') return;
+      _whenLoaded('members','ge/players','meta').then(function(){
+        if(_role!=='gl') return;
+        if(_nodeData.meta&&_nodeData.meta.consumesBackfillAt) return;
+        var n=0;
+        ROSTER.forEach(function(p){ var gd=guildEffortData[p.name]; if(gd&&gd.isGEMember){ try{ syncRecommendedToGE(p.name,false); n++; }catch(e){} } });
+        _fbDB.ref(FB_NS+'meta').update({consumesBackfillAt:firebase.database.ServerValue.TIMESTAMP}).catch(function(){});
+        if(n) console.log('[consumes] back-filled recommended consumables for '+n+' GE member(s)');
+      });
+    }catch(e){}
+  }, 4000);
 }
 function initAuth(){
   if(!_fbAuth) return;
