@@ -3394,8 +3394,133 @@ const CONSUMABLES = {
      recipe:{skill:'Vendor / world drop', reagents:['Bought / world drop']}},
   ],
 };
+// ── Extra raid consumables for the per-spec consume plan ──────────────────
+// Custom WoW Forever items link to warcraft.wiki.gg (WoW Forever item wiki); Classic items to Wowhead.
+const _wf=(skill)=>({skill:skill||'Alchemy (WoW Forever)', reagents:['See the linked WoW Forever DB page for the recipe']});
+CONSUMABLES.battle.push(
+  {id:'elx_cunning', name:'Elixir of Cunning', stat:'+25 Agility & Intellect', url:'https://warcraft.wiki.gg/wiki/Elixir_of_Cunning', roles:['Melee','Ranged'], recipe:_wf()},
+  {id:'elx_owl', name:'Elixir of the Owl', stat:'+25 Intellect, +2% spell crit', url:'https://warcraft.wiki.gg/wiki/Elixir_of_the_Owl', roles:['Healer','Ranged'], recipe:_wf()},
+  {id:'elx_whale', name:'Elixir of the Whale', stat:'+25 Spirit, +2% crit', url:'https://warcraft.wiki.gg/wiki/Elixir_of_the_Whale', roles:['Healer'], recipe:_wf()},
+  {id:'elx_grizzly', name:'Elixir of the Grizzly', stat:'+25 Strength, +2% crit', url:'https://warcraft.wiki.gg/wiki/Elixir_of_the_Grizzly', roles:['Tank','Melee'], recipe:_wf()},
+  {id:'elx_holypower', name:'Elixir of Holy Power', stat:'+40 Holy spell damage', url:'https://warcraft.wiki.gg/wiki/Elixir_of_Holy_Power', roles:['Melee'], recipe:_wf()},
+  {id:'elx_naturepower', name:'Elixir of Nature Power', stat:'+40 Nature spell damage', url:'https://warcraft.wiki.gg/wiki/Elixir_of_Nature_Power', roles:['Ranged'], recipe:_wf()},
+);
+CONSUMABLES.guardian.push(
+  {id:'gelx_clerics', name:"Greater Cleric's Elixir", stat:'+40 healing power', url:'https://warcraft.wiki.gg/wiki/Greater_Cleric%27s_Elixir', roles:['Healer'], recipe:_wf()},
+  {id:'gelx_gmageblood', name:'Greater Mageblood Elixir', stat:'+20 mana per 5 sec', url:'https://warcraft.wiki.gg/wiki/Greater_Mageblood_Elixir', roles:['Healer','Ranged'], recipe:_wf()},
+  {id:'gelx_phalanx', name:'Elixir of the Phalanx', stat:'+400 max HP, +500 Armor', url:'https://warcraft.wiki.gg/wiki/Elixir_of_the_Phalanx', roles:['Tank'], recipe:_wf()},
+);
+CONSUMABLES.potion.push(
+  {id:'pot_stoneshield', name:'Greater Stoneshield Potion', stat:'+2000 Armor (2 min)', url:'https://www.wowhead.com/classic/item=13455', roles:['Tank'], recipe:{skill:'Alchemy', reagents:['See Wowhead link for mats']}},
+  {id:'pot_menders', name:"Major Mender's Potion", stat:'+88 spell healing for 30 sec', url:'https://warcraft.wiki.gg/wiki/Major_Mender%27s_Potion', roles:['Healer'], recipe:_wf()},
+  {id:'pot_frenzy', name:'Major Frenzy Potion', stat:'+80 Attack Power for 30 sec', url:'https://warcraft.wiki.gg/wiki/Major_Frenzy_Potion', roles:['Melee'], recipe:_wf()},
+  {id:'pot_spellblast', name:'Major Spellblasting Potion', stat:'+47 spell damage for 30 sec', url:'https://warcraft.wiki.gg/wiki/Major_Spellblasting_Potion', roles:['Ranged'], recipe:_wf()},
+  {id:'pot_thistle', name:'Thistle Tea', stat:'Restores 100 Energy (Rogue)', url:'https://www.wowhead.com/classic/item=7676', roles:['Melee'], recipe:{skill:'Rogue - learned ability', reagents:['Made by Rogues']}},
+);
+CONSUMABLES.food.push(
+  {id:'food_flankpoivre', name:'Flank au Poivre', stat:'+20 Agility (well fed) — approx', url:'https://warcraft.wiki.gg/wiki/Flank_au_Poivre', roles:['Melee','Ranged'], recipe:{skill:'Cooking (WoW Forever)', reagents:['See the linked WoW Forever DB page']}},
+  {id:'food_sagestea', name:"Sage's Tea", stat:'+44 healing power (well fed)', url:'https://warcraft.wiki.gg/wiki/Sage%27s_Tea', roles:['Healer'], recipe:{skill:'Cooking (WoW Forever)', reagents:['See the linked WoW Forever DB page']}},
+  {id:'food_turtlestew', name:'Savory Turtle Stew', stat:'+20 Stamina (well fed)', url:'https://warcraft.wiki.gg/wiki/Savory_Turtle_Stew', roles:['Tank'], recipe:{skill:'Cooking (WoW Forever)', reagents:['See the linked WoW Forever DB page']}},
+  {id:'food_lobster', name:'Lobster Stew', stat:'~+28 spell power (well fed) — approx', url:'https://warcraft.wiki.gg/wiki/Lobster_Stew', roles:['Ranged'], recipe:{skill:'Cooking (WoW Forever)', reagents:['See the linked WoW Forever DB page']}},
+);
+// ── CLASS REAGENTS (spell components players must carry) ──────────────────
+CONSUMABLES.reagent=[
+  {id:'rgt_symbolkings', name:'Symbol of Kings', stat:'Paladin — Greater Blessing reagent', url:'https://www.wowhead.com/classic/item=21229', roles:['Tank','Healer','Melee'], recipe:{skill:'Reagent vendor', reagents:['Bought from a reagent vendor']}},
+  {id:'rgt_ankh', name:'Ankh', stat:'Shaman — Reincarnation reagent', url:'https://www.wowhead.com/classic/item=17030', roles:['Tank','Healer','Melee','Ranged'], recipe:{skill:'Reagent vendor', reagents:['Bought from a reagent vendor']}},
+  {id:'rgt_arcanepowder', name:'Arcane Powder', stat:'Mage — Arcane Intellect/Brilliance reagent', url:'https://www.wowhead.com/classic/item=17020', roles:['Ranged'], recipe:{skill:'Reagent vendor', reagents:['Bought from a reagent vendor']}},
+  {id:'rgt_sacredcandle', name:'Sacred Candle', stat:'Priest — Prayer / Fortitude reagent', url:'https://www.wowhead.com/classic/item=17029', roles:['Healer','Ranged'], recipe:{skill:'Reagent vendor', reagents:['Bought from a reagent vendor']}},
+  {id:'rgt_soulshard', name:'Soul Shard', stat:'Warlock — summon / soulstone reagent', url:'https://www.wowhead.com/classic/item=6265', roles:['Ranged'], recipe:{skill:'Drain Soul', reagents:['Created by Warlocks']}},
+  {id:'rgt_thornroot', name:'Thornroot', stat:'Druid reagent (WoW Forever)', url:'https://warcraft.wiki.gg/wiki/Thornroot', roles:['Healer'], recipe:{skill:'WoW Forever', reagents:['See the linked WoW Forever DB page']}},
+  {id:'rgt_instantpoison', name:'Instant Poison IV', stat:'Rogue — instant weapon poison', url:'https://www.wowhead.com/classic/item=8928', roles:['Melee'], recipe:{skill:'Poisons (Rogue)', reagents:['Made by Rogues']}},
+];
 const CONSUMABLE_BY_ID = {};
 Object.values(CONSUMABLES).flat().forEach(c=>CONSUMABLE_BY_ID[c.id]=c);
+// id -> category, and default "bring this many" per category (for the Guild Effort to-do list)
+const CONSUME_CAT={};
+Object.entries(CONSUMABLES).forEach(([cat,arr])=>arr.forEach(c=>{CONSUME_CAT[c.id]=cat;}));
+const CONSUME_QTY={flask:2,battle:2,guardian:2,protection:5,potion:5,weapon:5,food:20,engineering:5,misc:10,reagent:20};
+function defaultConsumeQty(id){ return CONSUME_QTY[CONSUME_CAT[id]]||5; }
+
+// Expected raid consumables per class+spec (req = expected, opt = "if relevant"/optional).
+// Druid Feral splits Tank vs DPS by role (see recommendedConsumes). CONSUMES_EVERYONE is added to all.
+const SPEC_CONSUMES=(()=>{
+  const M={}; const set=(keys,req,opt=[])=>keys.forEach(k=>{M[k]={req,opt};});
+  set(['Hunter|Beast Mastery','Hunter|Marksmanship','Hunter|Survival'],
+    ['elx_mongoose','elx_cunning','food_flankpoivre'],['pot_majormana','rune_dark','flask_titans']);
+  set(['Paladin|Holy'],['gelx_clerics','elx_owl','gelx_gmageblood','elx_whale','food_sagestea','pot_majormana','pot_menders','rune_dark','flask_wisdom'],['rgt_symbolkings']);
+  set(['Paladin|Protection'],['gelx_phalanx','food_turtlestew','pot_stoneshield','pot_majorheal','pot_majormana']);
+  set(['Paladin|Retribution'],['elx_grizzly','elx_holypower','food_dumplings','pot_frenzy'],['flask_titans']);
+  set(['Shaman|Restoration'],['gelx_clerics','elx_owl','gelx_gmageblood','elx_whale','pot_majormana','pot_menders','rune_dark','rgt_ankh','flask_wisdom']);
+  set(['Shaman|Enhancement'],['elx_grizzly','food_dumplings','elx_firewater','pot_frenzy','rgt_ankh'],['flask_titans']);
+  set(['Shaman|Elemental'],['elx_naturepower','elx_arcane','food_lobster','pot_spellblast','rgt_ankh','flask_supreme']);
+  set(['Warrior|Protection'],['gelx_phalanx','elx_bruteforce','food_turtlestew','pot_majorheal','pot_stoneshield','flask_titans']);
+  set(['Warrior|Fury','Warrior|Arms'],['elx_grizzly','food_dumplings','elx_firewater','pot_frenzy','pot_mightyrage'],['flask_titans']);
+  set(['Mage|Fire','Mage|Frost','Mage|Arcane'],['elx_owl','elx_arcane','food_lobster','pot_majormana','pot_spellblast','rune_dark','flask_supreme'],['rgt_arcanepowder']);
+  set(['Druid|Restoration'],['gelx_clerics','elx_owl','gelx_gmageblood','elx_whale','pot_majormana','pot_menders','rune_dark','rgt_thornroot','flask_wisdom']);
+  set(['Druid|Feral|Tank'],['gelx_phalanx','food_turtlestew','pot_stoneshield','flask_titans']);
+  set(['Druid|Feral|DPS'],['elx_mongoose','food_flankpoivre','elx_firewater','pot_frenzy'],['flask_titans']);
+  set(['Druid|Balance'],['elx_naturepower','elx_arcane','food_lobster','pot_spellblast','pot_majormana','rune_dark','rgt_ankh','flask_supreme']);
+  set(['Priest|Holy','Priest|Discipline'],['gelx_clerics','elx_owl','gelx_gmageblood','elx_whale','pot_majormana','pot_menders','rune_dark','rgt_sacredcandle','flask_wisdom']);
+  set(['Priest|Shadow'],['elx_shadowpower','elx_arcane','food_lobster','pot_spellblast','pot_majormana','rune_dark','rgt_sacredcandle','flask_supreme']);
+  set(['Warlock|Affliction','Warlock|Demonology','Warlock|Destruction'],['elx_shadowpower','elx_arcane','food_lobster','pot_spellblast','pot_majormana','rune_dark','rgt_soulshard','flask_supreme']);
+  set(['Rogue|Assassination','Rogue|Combat','Rogue|Subtlety'],['elx_mongoose','food_flankpoivre','elx_firewater','pot_frenzy','pot_thistle','rgt_instantpoison'],['flask_titans']);
+  return M;
+})();
+const CONSUMES_EVERYONE=['prot_fire','pot_majorheal','pot_freeaction'];
+// -> { req:[ids], opt:[ids] } for a player's class+spec (+ the everyone set)
+function recommendedConsumes(p){
+  if(!p||!p.cls||!p.spec) return {req:[],opt:[]};
+  let key=p.cls+'|'+p.spec;
+  if(p.cls==='Druid'&&p.spec==='Feral') key+=(p.type==='Tank')?'|Tank':'|DPS';
+  const e=SPEC_CONSUMES[key]||{req:[],opt:[]};
+  const req=[...new Set([...(e.req||[]),...CONSUMES_EVERYONE])];
+  const opt=(e.opt||[]).filter(id=>!req.includes(id));
+  return {req,opt};
+}
+// HTML list of a player's recommended consumables, grouped (used in Player POV + Profile)
+function renderRecommendedConsumes(p){
+  const {req,opt}=recommendedConsumes(p);
+  if(!req.length&&!opt.length) return '<div style="font-size:12px;color:var(--t3)">Set your class and spec to see recommended consumables.</div>';
+  const dispGroup={flask:'Flasks',battle:'Elixirs',guardian:'Elixirs',food:'Food',potion:'Potions',protection:'Protection Potions',reagent:'Reagents',weapon:'Weapon',engineering:'Engineering',misc:'Other'};
+  const order=['Flasks','Elixirs','Food','Potions','Protection Potions','Reagents','Weapon','Engineering','Other'];
+  const groups={};
+  const add=(id,isOpt)=>{ const c=CONSUMABLE_BY_ID[id]; if(!c) return; const g=dispGroup[CONSUME_CAT[id]]||'Other'; (groups[g]=groups[g]||[]).push({c,isOpt}); };
+  req.forEach(id=>add(id,false)); opt.forEach(id=>add(id,true));
+  let html='';
+  order.forEach(g=>{ if(!groups[g]) return;
+    html+=`<div style="margin-bottom:9px"><div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--acct);margin-bottom:3px">${g}</div>`;
+    groups[g].forEach(({c,isOpt})=>{
+      html+=`<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:2px 0">
+        <a href="${esc(c.url)}" target="_blank" rel="noopener" style="font-size:12px;color:var(--t1);text-decoration:none">${esc(c.name)}${isOpt?' <span style="color:var(--t3);font-size:10px">(optional)</span>':''}</a>
+        <span style="font-size:10px;color:var(--t3);text-align:right;flex-shrink:0;max-width:52%">${esc(c.stat)}</span>
+      </div>`;
+    });
+    html+='</div>';
+  });
+  return html;
+}
+// Guild Effort auto-population: merge (or reset to) the spec's recommended consumables into a GE member's to-do list.
+function syncRecommendedToGE(name, reset){
+  const ged=getGEData(name);
+  if(!ged.isGEMember) return;
+  if(!Array.isArray(ged.requests)) ged.requests=[];
+  const rec=recommendedConsumes(gp(name)).req;
+  if(reset){
+    ged.requests=rec.map(id=>({id,qty:defaultConsumeQty(id)}));
+  } else {
+    rec.forEach(id=>{ if(!ged.requests.find(r=>r.id===id)) ged.requests.push({id,qty:defaultConsumeQty(id)}); });
+  }
+  saveGE();
+}
+function maybeSyncGE(name){ try{ const gd=guildEffortData[name]; if(gd&&gd.isGEMember) syncRecommendedToGE(name,false); }catch(e){} }
+function resetGEToRecommended(name){
+  if(!isMyChar(name)&&!canManageRaids()) return;
+  if(!confirm('Replace your Guild Effort consumables with the recommended set for your spec?')) return;
+  syncRecommendedToGE(name,true);
+  const el=document.getElementById('ge-profile-'+name); if(el) el.innerHTML=renderGEProfileSection(name);
+  if(document.getElementById('guild-effort-content')?.children.length) renderGuildEffort();
+  toast('Reset to recommended consumables','ok');
+}
 
 // Player professions { playerName: [{prof, spec}, {prof, spec}] }
 let playerProfessions = {};
@@ -3450,10 +3575,11 @@ function renderGEProfileSection(name){
   if(!ged.isGEMember) return ged.pending
     ? '<div style="font-size:11px;color:var(--ora)">Application pending - a Raid Leader or Officer needs to approve it before you can set your consumables.</div>'
     : '<div style="font-size:11px;color:var(--t3)">Not a Guild Effort member yet. Use <strong>Apply</strong> above to request to join.</div>';
-  const catLabels={flask:'Flask',battle:'Battle Elixir',guardian:'Guardian Elixir',protection:'Protection Potion',potion:'Mana/Health Potion',weapon:'Weapon Enhancement',food:'Food',engineering:'Engineering',misc:'Runes · Zanza · Juju · Scrolls'};
-  const catKeys=['flask','battle','guardian','protection','potion','weapon','food','engineering','misc'];
+  const catLabels={flask:'Flask',battle:'Battle Elixir',guardian:'Guardian Elixir',protection:'Protection Potion',potion:'Mana/Health Potion',weapon:'Weapon Enhancement',food:'Food',engineering:'Engineering',reagent:'Class Reagent',misc:'Runes · Zanza · Juju · Scrolls'};
+  const catKeys=['flask','battle','guardian','protection','potion','weapon','food','reagent','engineering','misc'];
   const canEdit=isMyChar(name);
   let html='<div style="font-size:11px;color:var(--t3);margin-bottom:10px">Select which consumables you need each raid night and how many.</div>';
+  if(canEdit) html+=`<button type="button" class="btn btn-sm" onclick="resetGEToRecommended(${jsArg(name)})" style="margin-bottom:12px"><i class="ti ti-wand"></i> Reset to recommended for my spec</button>`;
   catKeys.forEach(cat=>{
     const items=CONSUMABLES[cat];
     html+=`<div style="margin-bottom:10px">
@@ -3535,7 +3661,7 @@ function setGEMember(name, val){
   if(!val && !(canManageRaids()||self)) return;
   const ged=getGEData(name);
   ged.isGEMember=val; ged.pending=false;
-  saveGE();
+  if(val) syncRecommendedToGE(name,false); else saveGE();
   const el=document.getElementById('ge-profile-'+name);
   if(el){
     el.innerHTML=renderGEProfileSection(name);
@@ -3576,7 +3702,7 @@ function setGERequest(name, itemId, qty){
 function setGEGuideRole(r){ window._geGuideRole=r; renderGuildEffort(); }
 function renderGEGuide(){
   const role=window._geGuideRole||'';
-  const catLabels={flask:'🧪 Flasks',battle:'⚔ Battle Elixirs',guardian:'🛡 Guardian Elixirs',protection:'❄ Protection Potions',potion:'⚗ Potions',weapon:'🗡 Weapon Enhancements',food:'🍖 Food',engineering:'🛠 Engineering',misc:'🔮 Runes · Zanza · Juju · Scrolls'};
+  const catLabels={flask:'🧪 Flasks',battle:'⚔ Battle Elixirs',guardian:'🛡 Guardian Elixirs',protection:'❄ Protection Potions',potion:'⚗ Potions',weapon:'🗡 Weapon Enhancements',food:'🍖 Food',reagent:'🔸 Class Reagents',engineering:'🛠 Engineering',misc:'🔮 Runes · Zanza · Juju · Scrolls'};
   const roleColors={Tank:'#5b9bd5',Healer:'#4db87a',Melee:'#e05c3a',Ranged:'#d4a93a'};
   const roles=['Tank','Healer','Melee','Ranged'];
   const chip=(r,label)=>`<button class="btn btn-sm" onclick="setGEGuideRole(${jsArg(r)})" style="font-size:11px;${role===r?`background:${r?roleColors[r]+'33':'var(--accg)'};border-color:${r?roleColors[r]:'var(--acc)'};color:var(--t1)`:''}">${label}</button>`;
@@ -3611,8 +3737,8 @@ function renderGuildEffort(){
   });
   guildExtraItems.forEach(ex=>{ totals[ex.id]=(totals[ex.id]||0)+ex.qty; });
   const members=ROSTER.filter(p=>guildEffortData[p.name]?.isGEMember);
-  const catLabels={flask:'🧪 Flasks',battle:'⚔ Battle Elixirs',guardian:'🛡 Guardian Elixirs',protection:'❄ Protection Potions',potion:'⚗ Potions',weapon:'🗡 Weapon Enhancements',food:'🍖 Food',engineering:'🛠 Engineering',misc:'🔮 Runes · Zanza · Juju'};
-  const catBorders={flask:'rgba(110,95,230,.4)',battle:'rgba(200,80,60,.3)',guardian:'rgba(41,128,185,.3)',protection:'rgba(105,204,240,.3)',potion:'rgba(26,158,114,.3)',weapon:'rgba(200,121,65,.3)',food:'rgba(214,160,60,.3)',engineering:'rgba(150,150,160,.3)',misc:'rgba(150,90,200,.3)'};
+  const catLabels={flask:'🧪 Flasks',battle:'⚔ Battle Elixirs',guardian:'🛡 Guardian Elixirs',protection:'❄ Protection Potions',potion:'⚗ Potions',weapon:'🗡 Weapon Enhancements',food:'🍖 Food',reagent:'🔸 Class Reagents',engineering:'🛠 Engineering',misc:'🔮 Runes · Zanza · Juju'};
+  const catBorders={flask:'rgba(110,95,230,.4)',battle:'rgba(200,80,60,.3)',guardian:'rgba(41,128,185,.3)',protection:'rgba(105,204,240,.3)',potion:'rgba(26,158,114,.3)',weapon:'rgba(200,121,65,.3)',food:'rgba(214,160,60,.3)',reagent:'rgba(214,160,60,.25)',engineering:'rgba(150,150,160,.3)',misc:'rgba(150,90,200,.3)'};
   const activeTab=window._geTab||'shopping';
   let html=`
     <div class="tabs" style="margin-bottom:14px">
@@ -4016,6 +4142,10 @@ function openProfile(name){
     <div class="pf-ge">${geStatus}</div>
     <div id="ge-profile-${esc(name)}" style="display:none">${renderGEProfileSection(name)}</div>
   </section>`;
+  const consumeCard=`<section class="pf-c" aria-labelledby="pf-h-cons">
+    <h3 id="pf-h-cons"><i class="ti ti-flask-2" aria-hidden="true"></i>Recommended consumables <span class="pf-hn">${esc(p.spec)} ${esc(p.cls)}</span></h3>
+    ${renderRecommendedConsumes(p)}
+  </section>`;
 
   // Character switcher (main + alts)
   const sw=alts.length?`<nav class="pf-sw" aria-label="Characters">
@@ -4061,7 +4191,7 @@ function openProfile(name){
             ${rv.mvp===name?'<div style="color:var(--gold)">Named MVP</div>':''}
             ${rv.notes?`<div>${esc(rv.notes.substring(0,120))}${rv.notes.length>120?'…':''}</div>`:''}
           </div>`).join('')}</section>`:''}
-        ${tzCard}${geCard}
+        ${tzCard}${consumeCard}${geCard}
       </div>
     </div>`;
 }
@@ -4839,6 +4969,7 @@ function setPlayerSpec(name, field, value){
     if(role) p.type=role;
   }
   saveRoster();
+  if(field==='spec') maybeSyncGE(name);
   renderRoster?.();
   toast(`${name} → ${field==='spec'?'Main':'Flex'}: ${value||'-'}`,'ok');
 }
@@ -4848,6 +4979,7 @@ function setPlayerRole(name, role){
   if(!p||!isMyChar(name)) return;
   p.type=role;
   saveRoster();
+  maybeSyncGE(name);
   renderRoster?.();
   toast(`${name} → ${role}`,'ok');
 }
@@ -7040,6 +7172,12 @@ function renderPOV(){
 
   // Interrupts & Dispels summary
   html+=`<div style="background:var(--bg2);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;border:1px solid var(--border)"><div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px"><span style="color:var(--t2)">Interrupt: <strong style="color:${canInterrupt(player)?'#6ab4e8':'var(--t3)'}">${canInterrupt(player)?'Yes':'No'}</strong></span><span style="color:var(--t2)">Dispels: <strong style="color:var(--t1)">${effectiveDispels(player).length?effectiveDispels(player).join(', '):'None'}</strong></span><span style="color:var(--t2)">Role type: <strong style="color:var(--t1)">${esc(player.type)}</strong></span></div></div>`;
+
+  // Recommended consumables for this player's class + spec
+  html+=`<div style="background:var(--bg2);border-radius:var(--r);padding:12px 14px;margin-bottom:12px;border:1px solid var(--border)">
+    <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--t2);margin-bottom:9px"><i class="ti ti-flask-2"></i> Recommended Consumables - ${esc(player.spec)} ${esc(player.cls)}</div>
+    ${renderRecommendedConsumes(player)}
+  </div>`;
 
   raidsToShow.forEach(rk=>{
     const raidBosses=BOSSES[rk];if(!raidBosses)return;
