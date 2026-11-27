@@ -8,7 +8,10 @@ function _v2(){ return _fbDB.ref(FB_NS.slice(0,-1)); }
 // Name as on the roster: class-colour dot, first name, muted last name
 function _acctName(name){
   const p=gp(name), s=splitName(name);
-  return `<span style="display:inline-flex;align-items:center;gap:8px;white-space:nowrap"><span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;background:${p?(CC[p.cls]||'var(--t3)'):'var(--t3)'}"></span><span style="font-weight:500">${esc(s.first)}</span><span style="color:var(--t3)">${esc(s.last)}</span></span>`;
+  const inner=`<span aria-hidden="true" style="width:8px;height:8px;border-radius:50%;background:${p?(CC[p.cls]||'var(--t3)'):'var(--t3)'}"></span><span class="f" style="font-weight:500">${esc(s.first)}</span><span style="color:var(--t3)">${esc(s.last)}</span>`;
+  // On the roster → clickable, opens their profile. Otherwise a plain label.
+  if(p) return `<button type="button" class="acct-name" onclick="gotoProfile(${jsArg(name)})" title="View ${esc(name)}'s profile">${inner}</button>`;
+  return `<span class="acct-name" style="cursor:default">${inner}</span>`;
 }
 function _requests(){ return Object.entries(_nodeData.requests||{}).map(([uid,r])=>({uid,...r})).sort((a,b)=>(a.at||0)-(b.at||0)); }
 function _accountRows(){
